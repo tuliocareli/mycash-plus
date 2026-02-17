@@ -19,12 +19,15 @@ export function Layout() {
             <main
                 className={`
           flex-1 w-full min-h-screen transition-all duration-300 ease-in-out
-          lg:ml-${isSidebarCollapsed ? '24' : '80'} 
-          /* Mobile: Sem margin (sidebar hidden) */
+          /* Ajustando margens baseado nas novas larguras da sidebar: 280px (w-[280px]) e 88px (w-[88px]) */
+          lg:ml-[280px]
+          ${isSidebarCollapsed ? '!ml-[88px]' : ''}
+          
+          /* Mobile: Sem margin */
           ml-0
         `}
             >
-                <div className="container mx-auto px-4 py-8 lg:px-8 max-w-[1920px]">
+                <div className="container mx-auto px-4 py-8 lg:px-10 max-w-[1600px]">
                     <Outlet />
                 </div>
             </main>
