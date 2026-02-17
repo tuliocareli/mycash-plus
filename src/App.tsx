@@ -1,0 +1,32 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import Transactions from './pages/Transactions';
+import Cards from './pages/Cards';
+import Goals from './pages/Goals';
+import Profile from './pages/Profile';
+
+import { Layout } from './components/layout/Layout';
+
+function App() {
+    return (
+        <BrowserRouter>
+            {/* 
+          Usando Layout Route Wrapper: 
+          Todas as rotas filhas serão renderizadas dentro do <Outlet /> do Layout. 
+      */}
+            <Routes>
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="transactions" element={<Transactions />} />
+                    <Route path="cards" element={<Cards />} />
+                    <Route path="goals" element={<Goals />} />
+                    <Route path="profile" element={<Profile />} />
+                    {/* Default redirect to Dashboard */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    )
+}
+
+export default App
