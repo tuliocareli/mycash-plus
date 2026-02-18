@@ -5,7 +5,7 @@
 - [x] PROMPT 1: Estrutura Base e Configuração
 - [x] PROMPT 2: Sistema de Layout e Navegação Desktop
 - [x] PROMPT 3: Sistema de Layout e Navegação Mobile
-- [ ] PROMPT 4: Context Global e Gerenciamento de Estado
+- [x] PROMPT 4: Context Global e Gerenciamento de Estado
 - [ ] PROMPT 5: Cards de Resumo Financeiro
 - [ ] PROMPT 6: Header do Dashboard com Controles
 - [ ] PROMPT 7: Carrossel de Gastos por Categoria
@@ -29,28 +29,35 @@
 
 ---
 
-## PROMPT 3: Sistema de Layout e Navegação Mobile
+## PROMPT 4: Context Global e Gerenciamento de Estado
 **Status:** ✅ | **Data:** 17/02/2026 | **Build:** Sucesso
 
 ### Implementação
-- **Componentes:** `HeaderMobile`, `MenuDropdown`, `MenuItem`.
+- **Componentes:** `FinanceContext.tsx`
 - **Funcionalidades:**
-  - Header fixo no topo (h-72px) que só aparece em views < 1024px (`lg:hidden`).
-  - Menu Dropdown deslizante com overlay backdrop-blur.
-  - Navegação completa com ícones Lucide.
-  - Mock de dados de usuário (Lucas Marte) consistente com Desktop.
-  - Layout Wrapper ajustado para adicionar padding top apenas no mobile (`mt-[72px]`) e remover margem lateral.
-- **Responsividade:**
-  - Breakpoint `lg` (1024px) define a troca entre Sidebar (Desktop) e Header (Mobile).
-  - Nunca renderizam juntos.
+  - `FinanceProvider` encapsulando a app no `main.tsx`.
+  - Hook `useFinance` para acesso global.
+  - Estado centralizado para: Transações, Metas, Cartões, Contas, Membros.
+  - Filtros globais: Membro selecionado, Data (Range), Tipo, Texto de busca.
+  - Lógica derivada (Memoized):
+    - `totalBalance` (Soma Contas - Faturas).
+    - `totalIncome`, `totalExpenses` (Filtrados por período).
+    - `expensesByCategory` (Para gráficos).
+    - `savingsRate` (% Economizado).
+  - CRUD Completo para todas as entidades.
+- **Dados:**
+  - Mock inicial robusto em `src/contexts/mockData.ts`.
+  - Família Marte (Lucas, Ana, Sofia).
+  - Contas (Nubank, Inter, Itaú) e Cartões reais.
 
-### Arquitetura
-- **Estado Local:** `HeaderMobile` controla a abertura do menu.
-- **Transições:** CSS transitions simples e eficazes para slide-in e fade-in.
+### Decisões Técnicas
+- Uso de `useMemo` extensivo para evitar recálculos pesados de filtros.
+- Remoção de dependência de `localStorage` conforme solicitado (toda refresh reseta dados).
+- `uuid` helper interno para IDs únicos sem dependências externas problemáticas.
 
 ---
 
-## PROMPT 2: Sistema de Layout e Navegação Desktop
+## PROMPT 3: Sistema de Layout e Navegação Mobile
 **Status:** ✅ | **Data:** 17/02/2026 | **Build:** Sucesso
 
 ...(restante do arquivo)...

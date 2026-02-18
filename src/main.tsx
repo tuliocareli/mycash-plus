@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { FinanceProvider } from './contexts/FinanceContext.tsx'
 
 // Check if root exists
 const rootElement = document.getElementById('root');
@@ -11,6 +12,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
     <StrictMode>
-        <App />
+        <FinanceProvider>
+            <App />
+        </FinanceProvider>
     </StrictMode>,
 )
