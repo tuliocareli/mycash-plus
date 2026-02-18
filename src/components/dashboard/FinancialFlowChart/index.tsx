@@ -45,7 +45,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function FinancialFlowChart() {
-    const { transactions } = useFinance();
+    const {
+        transactions,
+        selectedMemberId,
+        categoryIdFilter,
+        accountIdFilter,
+        statusFilter,
+        searchText
+    } = useFinance();
 
     const chartData = useMemo(() => {
         // Define range: Last 6 months including current
@@ -58,9 +65,23 @@ export function FinancialFlowChart() {
             end: endOfMonth(end)
         });
 
+        // Apply filters (except Date) to match Dashboard context
+        const relevantTransactions = transactions.filter(t => {
+            if (selectedMemberId && t.memberId !== selectedMemberId) return false;
+            if (categoryIdFilter && t.categoryId !== categoryIdFilter) return false;
+            if (accountIdFilter && t.accountId !== accountIdFilter) return false;
+            if (statusFilter && t.status !== statusFilter) return false;
+
+            if (searchText) {
+                const text = searchText.toLowerCase();
+                return t.description.toLowerCase().includes(text) || (t.category || '').toLowerCase().includes(text);
+            }
+            return true;
+        });
+
         return monthsInterval.map(monthDate => {
             // Find transactions in this month
-            const monthlyTransactions = transactions.filter(t =>
+            const monthlyTransactions = relevantTransactions.filter(t =>
                 isSameMonth(parseISO(t.date), monthDate)
             );
 
@@ -84,7 +105,7 @@ export function FinancialFlowChart() {
                 fullDate: monthDate // useful if needed for sorting, but map preserves order
             };
         });
-    }, [transactions]);
+    }, [transactions, selectedMemberId, categoryIdFilter, accountIdFilter, statusFilter, searchText]);
 
     return (
         <div className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 w-full h-full flex flex-col shadow-sm">
