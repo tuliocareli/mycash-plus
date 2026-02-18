@@ -208,7 +208,7 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 h-16 bg-white border-2 border-neutral-100 text-neutral-500 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-800 active:scale-95 transition-all"
+                        className="flex-1 min-h-[56px] h-14 bg-white border-2 border-neutral-100 text-neutral-500 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-800 active:scale-95 transition-all flex items-center justify-center"
                     >
                         Cancelar
                     </button>
@@ -216,7 +216,7 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
                         type="submit"
                         form="edit-profile-form"
                         disabled={saving}
-                        className="flex-[1.5] h-16 bg-neutral-1100 text-white rounded-3xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-neutral-1100/20 hover:bg-neutral-900 hover:shadow-neutral-1100/30 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-[1.5] min-h-[56px] h-14 bg-neutral-1100 text-white rounded-3xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-neutral-1100/20 hover:bg-neutral-900 hover:shadow-neutral-1100/30 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {saving ? <Loader2 className="animate-spin" size={24} /> : 'Salvar Alterações'}
                     </button>
