@@ -6,7 +6,8 @@ import {
     Target,      // Icone Objetivos
     User,        // Icone Perfil
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    LayoutGrid
 } from 'lucide-react';
 import clsx from 'clsx';
 import { SidebarItem } from './SidebarItem';
@@ -88,6 +89,12 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     icon={Target}
                     label="Objetivos"
                     path="/goals"
+                    isCollapsed={isCollapsed}
+                />
+                <SidebarItem
+                    icon={LayoutGrid}
+                    label="Categorias"
+                    path="/categories"
                     isCollapsed={isCollapsed}
                 />
                 <SidebarItem

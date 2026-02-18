@@ -1,7 +1,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://kaxslanjocbwkavzzdek.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtheHNsYW5qb2Nid2thdnp6ZGVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MzgwNzEsImV4cCI6MjA4NDIxNDA3MX0.lBmy3Xt4jZ56ueBtmDE86Ydmh7c-rlXlaAL90ZsV1fI';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+    console.error('Supabase credentials missing. Check your .env file or Vercel environment variables.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseKey);

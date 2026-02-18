@@ -11,7 +11,7 @@ import {
 } from '../types';
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
-import { startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths } from 'date-fns';
+import { startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
 import { Database } from '../types/supabase';
 
 // Helper to map DB transaction to Frontend Transaction
@@ -141,6 +141,8 @@ interface FinanceContextData {
     deleteFamilyMember: (id: string) => Promise<void>;
 
     addCategory: (data: Partial<Category>) => Promise<void>;
+    updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
+    deleteCategory: (id: string) => Promise<void>;
     uploadImage: (bucket: 'avatars' | 'account-logos', file: File) => Promise<string | null>;
 
     // Derived
@@ -301,7 +303,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             // Only filter by date if local date string is valid.
             // Supabase returns YYYY-MM-DD.
             const tDate = parseISO(t.date);
-            if (!isWithinInterval(tDate, { start: dateRange.startDate, end: dateRange.endDate })) return false;
+            // Normalize dates to ensure full day coverage
+            if (!isWithinInterval(tDate, {
+                start: startOfDay(dateRange.startDate),
+                end: endOfDay(dateRange.endDate)
+            })) return false;
 
             if (transactionTypeFilter !== 'all' && t.type !== transactionTypeFilter) return false;
 
@@ -648,6 +654,24 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         fetchData(true);
     };
 
+    const updateCategory = async (id: string, data: Partial<Category>) => {
+        const payload: any = {};
+        if (data.name) payload.name = data.name;
+        if (data.icon) payload.icon = data.icon;
+        if (data.type) payload.type = data.type;
+        if (data.color) payload.color = data.color;
+
+        const { error } = await supabase.from('categories').update(payload).eq('id', id);
+        if (error) throw error;
+        fetchData(true);
+    };
+
+    const deleteCategory = async (id: string) => {
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (error) throw error;
+        fetchData(true);
+    };
+
     const uploadImage = async (bucket: 'avatars' | 'account-logos', file: File): Promise<string | null> => {
         if (!user) return null;
         const fileExt = file.name.split('.').pop();
@@ -702,6 +726,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             updateFamilyMember,
             deleteFamilyMember,
             addCategory,
+            updateCategory,
+            deleteCategory,
             uploadImage,
             filteredTransactions,
             totalBalance,

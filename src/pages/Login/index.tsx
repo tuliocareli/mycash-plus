@@ -48,8 +48,14 @@ export default function Login() {
         setSuccess(null);
         try {
             const testUsers = [
-                { email: 'admin@teste.com', password: 'Admin@1234' },
-                { email: 'user@teste.com', password: 'User@1234' }
+                {
+                    email: import.meta.env.VITE_TEST_ADMIN_EMAIL || 'admin@teste.com',
+                    password: import.meta.env.VITE_TEST_ADMIN_PASSWORD || 'Admin@1234'
+                },
+                {
+                    email: import.meta.env.VITE_TEST_USER_EMAIL || 'user@teste.com',
+                    password: import.meta.env.VITE_TEST_USER_PASSWORD || 'User@1234'
+                }
             ];
 
             let count = 0;

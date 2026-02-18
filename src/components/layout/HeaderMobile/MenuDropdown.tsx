@@ -6,7 +6,8 @@ import {
     Target,
     User,
     LogOut,
-    X
+    X,
+    LayoutGrid
 } from 'lucide-react';
 import { MenuItem } from './MenuItem';
 
@@ -85,6 +86,12 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                         icon={Target}
                         label="Objetivos"
                         path="/goals"
+                        onClick={onClose}
+                    />
+                    <MenuItem
+                        icon={LayoutGrid}
+                        label="Categorias"
+                        path="/categories"
                         onClick={onClose}
                     />
                     <MenuItem

@@ -8,16 +8,10 @@ import {
     Tooltip,
     ResponsiveContainer
 } from 'recharts';
-
-const data = [
-    { month: 'Jan', income: 15000, expense: 8000 },
-    { month: 'Fev', income: 18000, expense: 9500 },
-    { month: 'Mar', income: 16500, expense: 11000 },
-    { month: 'Abr', income: 21000, expense: 12000 },
-    { month: 'Mai', income: 19000, expense: 10500 },
-    { month: 'Jun', income: 24000, expense: 13000 },
-    { month: 'Jul', income: 27000, expense: 14500 },
-];
+import { useFinance } from '../../../contexts/FinanceContext';
+import { useMemo } from 'react';
+import { subMonths, format, startOfMonth, endOfMonth, eachMonthOfInterval, isSameMonth, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const formatYAxis = (value: number) => {
     if (value >= 1000) {
@@ -51,6 +45,47 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function FinancialFlowChart() {
+    const { transactions } = useFinance();
+
+    const chartData = useMemo(() => {
+        // Define range: Last 6 months including current
+        const end = new Date();
+        const start = subMonths(end, 5); // 5 months ago + current = 6
+
+        // Generate all months in interval to ensure x-axis continuity
+        const monthsInterval = eachMonthOfInterval({
+            start: startOfMonth(start),
+            end: endOfMonth(end)
+        });
+
+        return monthsInterval.map(monthDate => {
+            // Find transactions in this month
+            const monthlyTransactions = transactions.filter(t =>
+                isSameMonth(parseISO(t.date), monthDate)
+            );
+
+            const income = monthlyTransactions
+                .filter(t => t.type === 'INCOME')
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            const expense = monthlyTransactions
+                .filter(t => t.type === 'EXPENSE')
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            // Format month name (e.g., 'Jan', 'Fev')
+            const monthLabel = format(monthDate, 'MMM', { locale: ptBR });
+            // Capitalize first letter logic if needed, or stick to lowercase/default
+            const formattedLabel = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
+            return {
+                month: formattedLabel,
+                income,
+                expense,
+                fullDate: monthDate // useful if needed for sorting, but map preserves order
+            };
+        });
+    }, [transactions]);
+
     return (
         <div className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 w-full h-full flex flex-col shadow-sm">
             {/* Header */}
@@ -79,7 +114,7 @@ export function FinancialFlowChart() {
             <div className="w-full flex-1 bg-neutral-50/50 rounded-xl p-4 lg:p-6 min-h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
-                        data={data}
+                        data={chartData}
                         margin={{ top: 20, right: 30, left: 10, bottom: 25 }}
                     >
                         <defs>
