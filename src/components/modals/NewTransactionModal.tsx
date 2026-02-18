@@ -367,7 +367,9 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
 
                             {/* Account/Card */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">Conta / cartão</label>
+                                <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+                                    {type === 'INCOME' ? 'Contas' : 'Conta / cartão'}
+                                </label>
                                 <div className={clsx(
                                     "relative flex items-center h-[52px] bg-white border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all",
                                     errors.accountId ? "border-red-500" : "border-neutral-300"
@@ -378,17 +380,28 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                         className="w-full h-full px-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none cursor-pointer z-10"
                                     >
                                         <option value="" disabled>Selecione</option>
-                                        <optgroup label="Contas">
-                                            {bankAccounts.map(acc => (
-                                                <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                            ))}
-                                        </optgroup>
-                                        {type === 'EXPENSE' && (
-                                            <optgroup label="Cartões">
-                                                {creditCards.map(card => (
-                                                    <option key={card.id} value={card.id}>{card.name}</option>
-                                                ))}
-                                            </optgroup>
+
+                                        {type === 'INCOME' ? (
+                                            bankAccounts.length > 0 ? (
+                                                bankAccounts.map(acc => (
+                                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                                ))
+                                            ) : (
+                                                <option disabled>Nenhuma conta bancária cadastrada</option>
+                                            )
+                                        ) : (
+                                            <>
+                                                <optgroup label="Contas">
+                                                    {bankAccounts.map(acc => (
+                                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                                    ))}
+                                                </optgroup>
+                                                <optgroup label="Cartões">
+                                                    {creditCards.map(card => (
+                                                        <option key={card.id} value={card.id}>{card.name}</option>
+                                                    ))}
+                                                </optgroup>
+                                            </>
                                         )}
                                     </select>
                                     <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
