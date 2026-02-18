@@ -174,12 +174,12 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                 {/* Desktop Table View */}
                 <div className="hidden md:block relative rounded-2xl border border-neutral-100 overflow-hidden flex-1">
                     <div className="overflow-x-auto h-full">
-                        <table className="w-full text-left border-collapse table-fixed">
+                        <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-neutral-50/50 border-b border-neutral-100">
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[80px]">Membro</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[80px] whitespace-nowrap">Membro</th>
                                     <th
-                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[120px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[120px] cursor-pointer hover:bg-neutral-100 transition-colors whitespace-nowrap"
                                         onClick={() => handleSort('date')}
                                     >
                                         <div className="flex items-center gap-2">
@@ -187,25 +187,25 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                         </div>
                                     </th>
                                     <th
-                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider min-w-[200px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider min-w-[300px] cursor-pointer hover:bg-neutral-100 transition-colors"
                                         onClick={() => handleSort('description')}
                                     >
                                         <div className="flex items-center gap-2">
                                             Descrição <ArrowUpDown size={12} className={sortField === 'description' ? 'text-brand-500' : ''} />
                                         </div>
                                     </th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[150px]">Categoria</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[160px]">Origem</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[100px]">Parcelas</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[150px] whitespace-nowrap">Categoria</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[160px] whitespace-nowrap">Origem</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[100px] whitespace-nowrap">Parcelas</th>
                                     <th
-                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider text-right w-[150px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider text-right w-[150px] cursor-pointer hover:bg-neutral-100 transition-colors whitespace-nowrap"
                                         onClick={() => handleSort('amount')}
                                     >
                                         <div className="flex items-center justify-end gap-2">
                                             Valor <ArrowUpDown size={12} className={sortField === 'amount' ? 'text-brand-500' : ''} />
                                         </div>
                                     </th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[60px] text-center">Ações</th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[60px] text-center whitespace-nowrap">Ações</th>
                                 </tr>
                             </thead>
                             <tbody key={currentPage} className="divide-y divide-neutral-100 animate-fade-in text-neutral-1100">
