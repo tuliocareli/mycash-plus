@@ -50,12 +50,12 @@ export default function Login() {
         try {
             const testUsers = [
                 {
-                    email: import.meta.env.VITE_TEST_ADMIN_EMAIL || 'admin@teste.com',
-                    password: import.meta.env.VITE_TEST_ADMIN_PASSWORD || 'Admin@1234'
+                    email: import.meta.env.VITE_TEST_ADMIN_EMAIL || '',
+                    password: import.meta.env.VITE_TEST_ADMIN_PASSWORD || ''
                 },
                 {
-                    email: import.meta.env.VITE_TEST_USER_EMAIL || 'user@teste.com',
-                    password: import.meta.env.VITE_TEST_USER_PASSWORD || 'User@1234'
+                    email: import.meta.env.VITE_TEST_USER_EMAIL || '',
+                    password: import.meta.env.VITE_TEST_USER_PASSWORD || ''
                 }
             ];
 
