@@ -67,14 +67,21 @@ export function FinancialFlowChart() {
 
         // Apply filters (except Date) to match Dashboard context
         const relevantTransactions = transactions.filter(t => {
+            if (!t) return false;
+
             if (selectedMemberId && t.memberId !== selectedMemberId) return false;
+            // Handle optional categoryId
             if (categoryIdFilter && t.categoryId !== categoryIdFilter) return false;
+            // Handle optional accountId
             if (accountIdFilter && t.accountId !== accountIdFilter) return false;
             if (statusFilter && t.status !== statusFilter) return false;
 
             if (searchText) {
                 const text = searchText.toLowerCase();
-                return t.description.toLowerCase().includes(text) || (t.category || '').toLowerCase().includes(text);
+                const desc = t.description ? t.description.toLowerCase() : '';
+                // Ensure category exists before processing
+                const cat = t.category ? t.category.toLowerCase() : '';
+                return desc.includes(text) || cat.includes(text);
             }
             return true;
         });
