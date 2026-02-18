@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -50,9 +50,12 @@ export default function Profile() {
         }).format(value);
     };
 
+    const navigate = useNavigate();
+
     const handleLogout = async () => {
         if (confirm('Deseja realmente sair?')) {
             await authSignOut();
+            navigate('/login');
         }
     };
 
