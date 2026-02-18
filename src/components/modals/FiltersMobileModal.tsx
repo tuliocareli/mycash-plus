@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -57,7 +58,7 @@ export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps)
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[60] lg:hidden flex flex-col justify-end bg-neutral-1100/60 backdrop-blur-sm animate-fade-in">
             <div className="bg-white w-full rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] animate-slide-in-up">
 
@@ -164,6 +165,7 @@ export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps)
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

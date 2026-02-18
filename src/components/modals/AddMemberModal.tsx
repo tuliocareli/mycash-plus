@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, Upload, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -82,9 +83,9 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden mx-4 animate-scale-in">
+    return createPortal(
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto pt-10 md:pt-24">
+            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-in my-auto">
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-neutral-100">
@@ -237,6 +238,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

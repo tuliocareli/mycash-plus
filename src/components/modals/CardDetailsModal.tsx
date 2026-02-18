@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -42,9 +43,9 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
 
     if (!isOpen || !card) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-md animate-fade-in p-4">
-            <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
+    return createPortal(
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-neutral-1100/40 backdrop-blur-md animate-fade-in p-4 pt-10 md:pt-24 overflow-y-auto">
+            <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden animate-scale-in max-h-[90vh] flex flex-col my-auto">
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 md:p-8 border-b border-neutral-100 shrink-0">
@@ -198,6 +199,7 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
                 onClose={() => setIsTransactionModalOpen(false)}
                 initialAccountId={card.id}
             />
-        </div>
+        </div>,
+        document.body
     );
 }

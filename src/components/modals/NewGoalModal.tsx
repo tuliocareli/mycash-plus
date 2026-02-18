@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -75,9 +75,9 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden mx-4 animate-scale-in flex flex-col max-h-[90vh]">
+    return createPortal(
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto pt-10 md:pt-24">
+            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-in my-auto flex flex-col max-h-[90vh]">
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-neutral-100 shrink-0">
@@ -199,6 +199,7 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

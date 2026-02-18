@@ -137,11 +137,11 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
 
     return createPortal(
         <div
-            className="fixed inset-0 flex items-center justify-center bg-neutral-1100/60 z-[99999]"
+            className="fixed inset-0 flex items-start justify-center bg-neutral-1100/60 z-[99999] p-4 pt-10 md:pt-24 overflow-y-auto"
             style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}
         >
             {/* Modal Card */}
-            <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-3xl md:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative">
+            <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-3xl md:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative my-auto">
 
                 {/* Header Top - Title & Close */}
                 <div className="flex items-center justify-between px-8 py-6 border-b border-neutral-100 bg-white z-10">
