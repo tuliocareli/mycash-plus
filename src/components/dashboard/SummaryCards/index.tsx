@@ -60,7 +60,7 @@ export function SummaryCards() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mb-8">
 
             {/* 1. Balance Card (Dark Theme) */}
-            <div className="relative overflow-hidden bg-neutral-1100 text-white rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-lg group hover:shadow-xl transition-all duration-300">
+            <div className="relative overflow-hidden bg-neutral-1100 text-white rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[200px] shadow-lg group hover:shadow-xl transition-all duration-300">
 
                 {/* Decorative Blur */}
                 <div className="absolute -right-12 -top-12 w-64 h-64 bg-brand-500/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-brand-500/30 transition-all duration-500" />
