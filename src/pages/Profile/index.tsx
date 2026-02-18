@@ -22,6 +22,7 @@ import {
 import clsx from 'clsx';
 import { EditProfileModal } from '../../components/modals/EditProfileModal';
 import { AddMemberModal } from '../../components/modals/AddMemberModal';
+import { LogoutModal } from '../../components/modals/LogoutModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
@@ -29,6 +30,7 @@ export default function Profile() {
     const { user, signOut: authSignOut } = useAuth();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     // Settings State
     const [currency, setCurrency] = useState('BRL');
@@ -40,6 +42,8 @@ export default function Profile() {
         goals: true
     });
 
+    const navigate = useNavigate();
+
     // The current user's profile is typically the one corresponding to user.id or the first one in familyMembers
     const mainMember = familyMembers[0];
 
@@ -50,13 +54,9 @@ export default function Profile() {
         }).format(value);
     };
 
-    const navigate = useNavigate();
-
-    const handleLogout = async () => {
-        if (confirm('Deseja realmente sair?')) {
-            await authSignOut();
-            navigate('/login');
-        }
+    const confirmLogout = async () => {
+        await authSignOut();
+        navigate('/login');
     };
 
     const incomeCategories = categories.filter(c => c.type === 'INCOME');
@@ -201,8 +201,8 @@ export default function Profile() {
                     {/* Logout */}
                     <div className="flex justify-end pt-4">
                         <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 px-8 py-4 bg-red-50 text-red-600 rounded-full font-black text-sm hover:bg-red-100 transition-all uppercase tracking-widest"
+                            onClick={() => setIsLogoutModalOpen(true)}
+                            className="flex items-center gap-3 px-8 py-4 bg-red-50 text-red-600 rounded-full font-black text-sm hover:bg-red-100 transition-all uppercase tracking-widest active:scale-95"
                         >
                             <LogOut size={20} />
                             Sair do MyCash+
@@ -415,6 +415,12 @@ export default function Profile() {
             <AddMemberModal
                 isOpen={isAddMemberModalOpen}
                 onClose={() => setIsAddMemberModalOpen(false)}
+            />
+
+            <LogoutModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={confirmLogout}
             />
         </div>
     );
