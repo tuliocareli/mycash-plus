@@ -16,7 +16,8 @@ if (!supabaseUrl || !supabaseKey) {
 
 // Fallback to prevent app crash on startup if env vars are missing
 // This allows the UI to render and show actionable errors instead of a white screen
-const safeUrl = supabaseUrl || 'https://placeholder.supabase.co';
-const safeKey = supabaseKey || 'placeholder-key';
+// HARDCODED TEMPORARILY TO FIX VERCEL DEPLOYMENT - REVERT TO ENV VARS LATER
+const safeUrl = supabaseUrl || 'https://kaxslanjocbwkavzzdek.supabase.co';
+const safeKey = supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtheHNsYW5qb2Nid2thdnp6ZGVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MzgwNzEsImV4cCI6MjA4NDIxNDA3MX0.lBmy3Xt4jZ56ueBtmDE86Ydmh7c-rlXlaAL90ZsV1fI';
 
 export const supabase = createClient(safeUrl, safeKey);
