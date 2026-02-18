@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { LogOut, X, AlertTriangle, Loader2 } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface LogoutModalProps {
