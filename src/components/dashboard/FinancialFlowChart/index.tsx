@@ -103,6 +103,7 @@ export function FinancialFlowChart() {
                             axisLine={false}
                             tickLine={false}
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                            padding={{ left: 20, right: 20 }}
                             dy={5}
                         />
                         <YAxis
@@ -110,6 +111,8 @@ export function FinancialFlowChart() {
                             tickLine={false}
                             tickFormatter={formatYAxis}
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                            tickMargin={10}
+                            width={80}
                         />
                         <Tooltip
                             content={<CustomTooltip />}

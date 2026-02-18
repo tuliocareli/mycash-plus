@@ -113,6 +113,28 @@ const generateTransactions = (): Transaction[] => {
         });
     });
 
+    // Despesas não pagas (Próximas despesas)
+    const unpaidExpenses = [
+        { desc: 'Conta de Energia', amount: 342.10, cat: 'Contas', acc: 'acc1', day: 22 },
+        { desc: 'Internet Fibra', amount: 159.90, cat: 'Serviços', acc: 'card1', day: 25 },
+        { desc: 'Seguro Carro', amount: 450.00, cat: 'Transporte', acc: 'card2', day: 28 },
+    ];
+
+    unpaidExpenses.forEach(exp => {
+        transactions.push({
+            id: uuid(),
+            date: `2026-02-${String(exp.day).padStart(2, '0')}`,
+            description: exp.desc,
+            amount: exp.amount,
+            type: 'expense',
+            category: exp.cat,
+            accountId: exp.acc,
+            memberId: null,
+            status: 'pending',
+            isPaid: false
+        });
+    });
+
     return transactions;
 };
 
