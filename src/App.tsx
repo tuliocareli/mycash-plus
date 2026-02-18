@@ -4,18 +4,31 @@ import Transactions from './pages/Transactions';
 import Cards from './pages/Cards';
 import Goals from './pages/Goals';
 import Profile from './pages/Profile';
+import Login from './pages/Login';
 
 import { Layout } from './components/layout/Layout';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
     return (
         <BrowserRouter>
-            {/* 
-          Usando Layout Route Wrapper: 
-          Todas as rotas filhas serão renderizadas dentro do <Outlet /> do Layout. 
+            {/*
+          Usando Layout Route Wrapper:
+          Todas as rotas filhas serão renderizadas dentro do <Outlet /> do Layout.
       */}
             <Routes>
-                <Route path="/" element={<Layout />}>
+                {/* Public Route */}
+                <Route path="/login" element={<Login />} />
+
+                {/* Private Routes Wrapper */}
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <Layout />
+                        </ProtectedRoute>
+                    }
+                >
                     <Route index element={<Dashboard />} />
                     <Route path="transactions" element={<Transactions />} />
                     <Route path="cards" element={<Cards />} />

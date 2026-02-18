@@ -180,7 +180,26 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const fetchData = useCallback(async (background = false) => {
         if (!user) return;
         if (!background) setLoading(true);
+
         try {
+            // 1. Ensure User Profile Exists in public.users
+            const { error: profileError } = await supabase
+                .from('users')
+                .select('id')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError && profileError.code === 'PGRST116') {
+                // Profile not found, create it
+                const { error: insertError } = await supabase.from('users').insert({
+                    id: user.id,
+                    email: user.email!,
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+                });
+                if (insertError) console.error('Error creating user profile:', insertError);
+            }
+
+            // 2. Fetch all data
             const [txRes, goalsRes, accRes, memRes, catRes] = await Promise.all([
                 supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
                 supabase.from('goals').select('*').eq('user_id', user.id),
@@ -189,23 +208,27 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 supabase.from('categories').select('*').eq('user_id', user.id)
             ]);
 
+            // Handling Categories & Seeding if needed
             let cats: Category[] = [];
             if (catRes.data) {
-                if (catRes.data.length === 0 && !background) {
-                    // Seed initial categories
+                if (catRes.data.length === 0) {
+                    // Seed initial categories if none exist
                     const defaultCategories = [
-                        { name: 'Alimentação', icon: '🍔', type: 'EXPENSE', color: '#EF4444' },
-                        { name: 'Lazer', icon: '🎮', type: 'EXPENSE', color: '#3B82F6' },
-                        { name: 'Saúde', icon: '🏥', type: 'EXPENSE', color: '#10B981' },
-                        { name: 'Transporte', icon: '🚗', type: 'EXPENSE', color: '#F59E0B' },
-                        { name: 'Educação', icon: '📚', type: 'EXPENSE', color: '#8B5CF6' },
-                        { name: 'Salário', icon: '💰', type: 'INCOME', color: '#10B981' },
-                        { name: 'Investimento', icon: '📈', type: 'INCOME', color: '#3B82F6' },
-                        { name: 'Outros', icon: '📦', type: 'EXPENSE', color: '#6B7280' },
+                        { name: 'Alimentação', icon: '🍔', type: 'EXPENSE' as const, color: '#EF4444' },
+                        { name: 'Lazer', icon: '🎮', type: 'EXPENSE' as const, color: '#3B82F6' },
+                        { name: 'Saúde', icon: '🏥', type: 'EXPENSE' as const, color: '#10B981' },
+                        { name: 'Transporte', icon: '🚗', type: 'EXPENSE' as const, color: '#F59E0B' },
+                        { name: 'Educação', icon: '📚', type: 'EXPENSE' as const, color: '#8B5CF6' },
+                        { name: 'Salário', icon: '💰', type: 'INCOME' as const, color: '#10B981' },
+                        { name: 'Investimento', icon: '📈', type: 'INCOME' as const, color: '#3B82F6' },
+                        { name: 'Outros', icon: '📦', type: 'EXPENSE' as const, color: '#6B7280' },
                     ];
                     const seedData = defaultCategories.map(c => ({ ...c, user_id: user.id }));
-                    const { data: newCats } = await supabase.from('categories').insert(seedData).select();
-                    if (newCats) {
+                    const { data: newCats, error: seedError } = await supabase.from('categories').insert(seedData).select();
+
+                    if (seedError) {
+                        console.error('Error seeding categories:', seedError);
+                    } else if (newCats) {
                         cats = newCats.map(mapCategory);
                     }
                 } else {
@@ -213,12 +236,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 }
                 setCategories(cats);
             }
+
+            // Update other states
             if (txRes.data) setTransactions(txRes.data.map(t => mapTransaction(t, cats)));
             if (goalsRes.data) setGoals(goalsRes.data.map(mapGoal));
             if (accRes.data) setAccounts(accRes.data.map(mapAccount));
             if (memRes.data) setFamilyMembers(memRes.data.map(mapFamilyMember));
+
+            if (txRes.error) console.error('Error fetching transactions:', txRes.error);
+            if (memRes.error) console.error('Error fetching members:', memRes.error);
+
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error in fetchData:', error);
         } finally {
             if (!background) setLoading(false);
         }
@@ -510,19 +539,46 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
 
     const addFamilyMember = async (member: Partial<FamilyMember>) => {
-        if (!user) return;
-        const payload = {
-            user_id: user.id,
+        if (!user) {
+            console.error('Tentativa de adicionar membro sem estar logado.');
+            throw new Error('Você precisa estar logado para salvar dados no banco de dados.');
+        }
+
+        // Optimistic Update
+        const tempId = crypto.randomUUID();
+        const newMember: FamilyMember = {
+            id: tempId,
+            userId: user.id,
             name: member.name!,
             role: member.role!,
-            monthly_income: member.monthlyIncome || 0,
-            avatar_url: member.avatarUrl,
+            monthlyIncome: member.monthlyIncome || 0,
+            avatarUrl: member.avatarUrl,
             color: member.color || '#3247FF',
-            is_active: true
+            isActive: true
         };
-        const { error } = await supabase.from('family_members').insert(payload);
-        if (error) throw error;
-        await fetchData(true);
+
+        setFamilyMembers(prev => [...prev, newMember]);
+
+        try {
+            const payload = {
+                user_id: user.id,
+                name: member.name!,
+                role: member.role!,
+                monthly_income: member.monthlyIncome || 0,
+                avatar_url: member.avatarUrl,
+                color: member.color || '#3247FF',
+                is_active: true
+            };
+
+            const { error } = await supabase.from('family_members').insert(payload);
+            if (error) throw error;
+
+            await fetchData(true);
+        } catch (error) {
+            // Rollback optimistic update on error
+            setFamilyMembers(prev => prev.filter(m => m.id !== tempId));
+            throw error;
+        }
     };
 
     const updateFamilyMember = async (id: string, data: Partial<FamilyMember>) => {

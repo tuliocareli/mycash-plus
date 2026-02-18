@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, User, Upload, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { MemberRole } from '../../types';
 
 interface AddMemberModalProps {
@@ -13,6 +14,7 @@ interface AddMemberModalProps {
 export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
 
+    const { user } = useAuth();
     const { addFamilyMember, uploadImage } = useFinance();
 
     const [name, setName] = useState('');
@@ -20,6 +22,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
     const [avatarUrl, setAvatarUrl] = useState('');
     const [income, setIncome] = useState('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [avatarTab, setAvatarTab] = useState<'url' | 'upload'>('url');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
@@ -56,7 +59,12 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
     const handleSubmit = async () => {
         if (!validate()) return;
+        if (!user) {
+            setSubmitError('Você precisa estar logado para adicionar membros. Verifique sua conexão ou entre na sua conta.');
+            return;
+        }
         setSaving(true);
+        setSubmitError(null);
         try {
             await addFamilyMember({
                 name,
@@ -74,8 +82,9 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
             console.log("Membro adicionado!");
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            setSubmitError(error.message || 'Erro ao adicionar membro. Tente novamente.');
         } finally {
             setSaving(false);
         }
@@ -216,6 +225,13 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                             </div>
                         )}
                     </div>
+
+                    {/* Global Error */}
+                    {submitError && (
+                        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium animate-shake">
+                            {submitError}
+                        </div>
+                    )}
 
                 </div>
 

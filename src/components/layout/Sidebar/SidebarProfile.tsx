@@ -1,3 +1,4 @@
+import { useAuth } from '../../../contexts/AuthContext';
 import clsx from 'clsx';
 import { User as UserIcon } from 'lucide-react';
 
@@ -6,10 +7,12 @@ interface SidebarProfileProps {
 }
 
 export function SidebarProfile({ isCollapsed }: SidebarProfileProps) {
+    const { user: authUser } = useAuth();
+
     const user = {
-        name: "Lucas Marte",
-        email: "lucasmarte@gmail.com",
-        avatarUrl: "https://i.pravatar.cc/150?u=lucasmarte" // Placeholder realista para simular a foto
+        name: authUser?.user_metadata?.name || authUser?.email?.split('@')[0] || "Visitante",
+        email: authUser?.email || "Entre para salvar dados",
+        avatarUrl: authUser?.user_metadata?.avatar_url || null
     };
 
     return (
