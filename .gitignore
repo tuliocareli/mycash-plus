@@ -11,3 +11,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 package-lock.json
+*.log
+lint*.txt
+tsc_output.txt
