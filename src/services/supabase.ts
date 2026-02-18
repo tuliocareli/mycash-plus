@@ -8,4 +8,9 @@ if (!supabaseUrl || !supabaseKey) {
     console.error('Supabase credentials missing. Check your .env file or Vercel environment variables.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Fallback to prevent app crash on startup if env vars are missing
+// This allows the UI to render and show actionable errors instead of a white screen
+const safeUrl = supabaseUrl || 'https://placeholder.supabase.co';
+const safeKey = supabaseKey || 'placeholder-key';
+
+export const supabase = createClient(safeUrl, safeKey);
