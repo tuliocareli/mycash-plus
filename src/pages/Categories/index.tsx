@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, LayoutGrid, Search, Filter, MoreVertical, Edit2, Trash2, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Plus, LayoutGrid, Search, Edit2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { AddCategoryModal } from '../../components/modals/AddCategoryModal';
 import { Category } from '../../types';
@@ -83,7 +83,7 @@ export default function Categories() {
                 {(typeFilter === 'ALL' || typeFilter === 'INCOME') && incomeCategories.length > 0 && (
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-green-600">
-                            <ArrowDownLeft size={20} className="font-bold" />
+                            <TrendingDown size={20} className="font-bold" />
                             <h2 className="font-black uppercase tracking-widest text-sm">Categorias de Receita</h2>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -98,7 +98,7 @@ export default function Categories() {
                 {(typeFilter === 'ALL' || typeFilter === 'EXPENSE') && expenseCategories.length > 0 && (
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-red-500">
-                            <ArrowUpRight size={20} className="font-bold" />
+                            <TrendingUp size={20} className="font-bold" />
                             <h2 className="font-black uppercase tracking-widest text-sm">Categorias de Despesa</h2>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
