@@ -52,31 +52,31 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function FinancialFlowChart() {
     return (
-        <div className="bg-white border border-neutral-200 rounded-2xl p-6 lg:p-10 w-full">
+        <div className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 w-full h-full flex flex-col shadow-sm">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-neutral-100 rounded-lg">
                         <TrendingUp className="w-5 h-5 text-neutral-1100" />
                     </div>
-                    <h2 className="text-lg font-bold text-neutral-1100">Fluxo financeiro</h2>
+                    <h2 className="text-lg font-medium text-neutral-1100">Fluxo financeiro</h2>
                 </div>
 
                 {/* Legend */}
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#DFFE35]" />
-                        <span className="text-sm font-medium text-neutral-500">Receitas</span>
+                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Receitas</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#080B12]" />
-                        <span className="text-sm font-medium text-neutral-500">Despesas</span>
+                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Despesas</span>
                     </div>
                 </div>
             </div>
 
             {/* Chart Area */}
-            <div className="w-full h-[320px] bg-neutral-50/50 rounded-xl p-4 lg:p-6">
+            <div className="w-full flex-1 bg-neutral-50/50 rounded-xl p-4 lg:p-6 min-h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                         data={data}

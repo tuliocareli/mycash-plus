@@ -57,7 +57,7 @@ export function SummaryCards() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mb-8">
 
             {/* 1. Balance Card (Dark Theme) */}
-            <div className="relative overflow-hidden bg-neutral-1100 text-white rounded-2xl p-6 flex flex-col gap-6 min-h-[160px] shadow-lg group hover:shadow-xl transition-all duration-300">
+            <div className="relative overflow-hidden bg-neutral-1100 text-white rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-lg group hover:shadow-xl transition-all duration-300">
 
                 {/* Decorative Blur */}
                 <div className="absolute -right-12 -top-12 w-64 h-64 bg-brand-500/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-brand-500/30 transition-all duration-500" />
@@ -82,7 +82,7 @@ export function SummaryCards() {
             </div>
 
             {/* 2. Income Card (Light Theme) */}
-            <div className="bg-white border border-neutral-200 rounded-2xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start">
                     <span className="text-neutral-1100 text-base font-bold">Receitas</span>
                     <div className="p-2 rounded-full bg-neutral-100">
@@ -101,7 +101,7 @@ export function SummaryCards() {
             </div>
 
             {/* 3. Expense Card (Light Theme) */}
-            <div className="bg-white border border-neutral-200 rounded-2xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start">
                     <span className="text-neutral-500 text-base font-medium">Despesas</span>
                     <div className="p-2 rounded-full bg-red-50">

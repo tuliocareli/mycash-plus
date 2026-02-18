@@ -66,7 +66,7 @@ export function CategoryCarousel() {
                 {expensesByCategory.slice(0, 6).map((cat) => (
                     <div
                         key={cat.category}
-                        className="bg-white border border-neutral-200 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow duration-300 w-full min-h-[160px]"
+                        className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow duration-300 w-full min-h-[160px]"
                     >
                         <DonutChart
                             percentage={cat.percentage}

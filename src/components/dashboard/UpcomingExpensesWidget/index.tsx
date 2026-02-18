@@ -91,7 +91,7 @@ export function UpcomingExpensesWidget() {
     };
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-[20px] p-8 lg:p-10 flex flex-col h-full bg-white shadow-sm">
+        <section className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 flex flex-col h-full bg-white shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-2">

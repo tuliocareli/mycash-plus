@@ -24,7 +24,7 @@ export function CreditCardsWidget() {
     );
 
     return (
-        <section className="bg-neutral-100 rounded-[32px] p-8 lg:p-10 flex flex-col gap-6 h-full border border-neutral-200/50">
+        <section className="bg-neutral-100 rounded-3xl p-8 lg:p-10 flex flex-col gap-6 h-full border border-neutral-200/50">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
