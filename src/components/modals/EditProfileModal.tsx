@@ -99,126 +99,128 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-neutral-1100/40 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative w-full max-w-[500px] bg-white rounded-[4rem] shadow-2xl border border-neutral-100 overflow-hidden animate-fade-in mx-auto">
+            <div className="relative w-full max-w-[600px] bg-white rounded-[3rem] shadow-2xl border border-neutral-100 overflow-hidden animate-fade-in mx-auto flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="p-8 border-b border-neutral-50 flex items-center justify-between bg-neutral-50/50">
+                <div className="px-10 py-8 border-b border-neutral-50 flex items-center justify-between bg-white shrink-0">
                     <div>
-                        <h2 className="text-xl font-black text-neutral-1100">Editar Perfil</h2>
+                        <h2 className="text-2xl font-black text-neutral-1100">Editar Perfil</h2>
                         <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest mt-1">Atualize suas informações</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="size-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-1100 hover:border-neutral-1100 transition-all shadow-sm"
+                        className="size-12 rounded-full bg-neutral-50 border border-neutral-100 flex items-center justify-center text-neutral-400 hover:text-neutral-1100 hover:bg-white hover:border-neutral-200 transition-all shadow-sm"
                     >
-                        <X size={20} />
+                        <X size={24} />
                     </button>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="p-8 pt-6 space-y-6">
-                    {/* Avatar Upload */}
-                    <div className="flex flex-col items-center gap-4 mb-4">
-                        <div className="relative group">
-                            <div className="size-28 rounded-[2.5rem] bg-neutral-100 border-4 border-white shadow-xl overflow-hidden flex items-center justify-center">
-                                {avatarUrl ? (
-                                    <img src={avatarUrl} alt="Preview" className="size-full object-cover" />
-                                ) : (
-                                    <User size={40} className="text-neutral-300" />
-                                )}
-                                {uploading && (
-                                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                                        <Loader2 className="animate-spin text-brand-600" size={24} />
-                                    </div>
-                                )}
+                {/* Form - Scrollable Area */}
+                <div className="overflow-y-auto flex-1 p-10">
+                    <form id="edit-profile-form" onSubmit={handleSubmit} className="space-y-8">
+                        {/* Avatar Upload */}
+                        <div className="flex flex-col items-center gap-6 mb-8">
+                            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                <div className="size-32 rounded-[2.5rem] bg-neutral-100 border-4 border-white shadow-xl overflow-hidden flex items-center justify-center transition-all group-hover:shadow-2xl group-hover:scale-105">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Preview" className="size-full object-cover" />
+                                    ) : (
+                                        <User size={48} className="text-neutral-300" />
+                                    )}
+                                    {uploading && (
+                                        <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                            <Loader2 className="animate-spin text-brand-600" size={32} />
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="absolute -bottom-2 -right-2 bg-neutral-1100 text-white p-3 rounded-2xl shadow-lg group-hover:scale-110 transition-transform"
+                                    disabled={uploading}
+                                >
+                                    <Camera size={20} />
+                                </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="absolute -bottom-1 -right-1 bg-neutral-1100 text-white p-2.5 rounded-2xl shadow-lg hover:scale-110 transition-transform"
-                                disabled={uploading}
-                            >
-                                <Camera size={16} />
-                            </button>
-                        </div>
-                        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Toque na câmera para mudar a foto</p>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            className="hidden"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-6">
-                        {/* Name */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Nome Completo</label>
-                            <div className={clsx(
-                                "relative flex items-center group transition-all",
-                                errors.name ? "ring-2 ring-red-500/20" : "focus-within:ring-2 focus-within:ring-neutral-1100/10"
-                            )}>
-                                <User className="absolute left-4 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={18} />
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full h-14 pl-12 pr-4 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all"
-                                    placeholder="Seu nome"
-                                />
-                            </div>
-                            {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase ml-1">{errors.name}</p>}
+                            <p className="text-xs font-black text-neutral-400 uppercase tracking-widest">Toque para alterar a foto</p>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
                         </div>
 
-                        {/* Role & Income Row */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Papel</label>
-                                <div className="relative flex items-center group">
-                                    <Briefcase className="absolute left-4 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={18} />
+                        <div className="grid grid-cols-1 gap-8">
+                            {/* Name */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Nome Completo</label>
+                                <div className={clsx(
+                                    "relative flex items-center group transition-all",
+                                    errors.name ? "ring-2 ring-red-500/20" : "focus-within:ring-4 focus-within:ring-neutral-100"
+                                )}>
+                                    <User className="absolute left-5 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={20} />
                                     <input
                                         type="text"
-                                        value={role}
-                                        onChange={(e) => setRole(e.target.value)}
-                                        className="w-full h-14 pl-12 pr-4 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all"
-                                        placeholder="Ex: Mãe"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="w-full h-16 pl-14 pr-6 bg-neutral-50 border-2 border-neutral-50 rounded-3xl outline-none focus:bg-white focus:border-neutral-200 font-bold text-lg text-neutral-1100 transition-all placeholder:text-neutral-300"
+                                        placeholder="Seu nome"
                                     />
                                 </div>
+                                {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase ml-1">{errors.name}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Renda</label>
-                                <div className="relative flex items-center group">
-                                    <DollarSign className="absolute left-4 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={18} />
-                                    <input
-                                        type="number"
-                                        value={monthlyIncome}
-                                        onChange={(e) => setMonthlyIncome(e.target.value)}
-                                        className="w-full h-14 pl-12 pr-4 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all"
-                                        placeholder="3000"
-                                    />
+
+                            {/* Role & Income Row */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Papel</label>
+                                    <div className="relative flex items-center group">
+                                        <Briefcase className="absolute left-5 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={20} />
+                                        <input
+                                            type="text"
+                                            value={role}
+                                            onChange={(e) => setRole(e.target.value)}
+                                            className="w-full h-16 pl-14 pr-6 bg-neutral-50 border-2 border-neutral-50 rounded-3xl outline-none focus:bg-white focus:border-neutral-200 font-bold text-lg text-neutral-1100 transition-all placeholder:text-neutral-300"
+                                            placeholder="Ex: Mãe"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-black text-neutral-500 uppercase tracking-widest ml-1">Renda</label>
+                                    <div className="relative flex items-center group">
+                                        <DollarSign className="absolute left-5 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors" size={20} />
+                                        <input
+                                            type="number"
+                                            value={monthlyIncome}
+                                            onChange={(e) => setMonthlyIncome(e.target.value)}
+                                            className="w-full h-16 pl-14 pr-6 bg-neutral-50 border-2 border-neutral-50 rounded-3xl outline-none focus:bg-white focus:border-neutral-200 font-bold text-lg text-neutral-1100 transition-all placeholder:text-neutral-300"
+                                            placeholder="3000"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
+                </div>
 
-                    {/* Footer / Submit */}
-                    <div className="pt-4 flex flex-col sm:flex-row gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 h-14 bg-neutral-50 text-neutral-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-neutral-100 transition-all"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="flex-[2] h-14 bg-neutral-1100 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-black/10 hover:bg-neutral-900 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                            {saving ? <Loader2 className="animate-spin" size={18} /> : 'Salvar Alterações'}
-                        </button>
-                    </div>
-                </form>
+                {/* Footer Actions */}
+                <div className="p-8 border-t border-neutral-50 bg-neutral-50/30 flex flex-col sm:flex-row gap-4 shrink-0">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 h-16 bg-white border-2 border-neutral-100 text-neutral-500 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-neutral-50 hover:border-neutral-200 hover:text-neutral-800 active:scale-95 transition-all"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="submit"
+                        form="edit-profile-form"
+                        disabled={saving}
+                        className="flex-[1.5] h-16 bg-neutral-1100 text-white rounded-3xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-neutral-1100/20 hover:bg-neutral-900 hover:shadow-neutral-1100/30 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {saving ? <Loader2 className="animate-spin" size={24} /> : 'Salvar Alterações'}
+                    </button>
+                </div>
             </div>
         </div>,
         document.body
