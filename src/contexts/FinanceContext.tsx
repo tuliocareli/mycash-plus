@@ -583,7 +583,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
         if (fetchError || !tx) {
             console.error('Transaction not found for deletion');
-            return;
+            throw new Error('Transação não encontrada para exclusão.');
         }
 
         // 2. Delete
@@ -600,7 +600,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             await updateAccountBalance(tx.account_id, revertDelta);
         }
 
-        fetchData(true);
+        await fetchData(true);
     };
 
     // Goals
