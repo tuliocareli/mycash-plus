@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Loader2, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-    const { signIn, signUp } = useAuth();
+    const { signIn } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(true);
@@ -31,9 +31,9 @@ export default function Login() {
                 if (signInError) throw signInError;
                 navigate(from, { replace: true });
             } else {
-                const { error: signUpError } = await signUp({ email, password });
-                if (signUpError) throw signUpError;
-                setSuccess('Conta criada! Verifique seu email para confirmar (se habilitado no Supabase) ou tente entrar.');
+                // Prevent real account creation
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Fake loading delay
+                setSuccess('Solicitação recebida! Notificamos o admin, entre em contato para liberar seu acesso.');
                 setIsLogin(true);
             }
         } catch (err: any) {
