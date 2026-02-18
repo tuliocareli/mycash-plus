@@ -23,7 +23,7 @@ export function MenuItem({ icon: Icon, label, path, onClick }: MenuItemProps) {
         <button
             onClick={handleClick}
             className={clsx(
-                'w-full flex items-center justify-start px-4 py-3 gap-3 rounded-lg transition-colors',
+                'w-full flex items-center justify-start px-6 py-3 gap-3 rounded-lg transition-colors',
                 isActive
                     ? 'bg-neutral-1100 text-white font-medium shadow-sm'
                     : 'bg-transparent text-neutral-600 font-medium hover:bg-neutral-100'

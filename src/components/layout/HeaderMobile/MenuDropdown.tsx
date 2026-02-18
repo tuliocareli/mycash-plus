@@ -62,7 +62,7 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                 </div>
 
                 {/* Lista de Navegação */}
-                <nav className="flex flex-col p-4 gap-2 border-b border-neutral-200">
+                <nav className="flex flex-col p-2 gap-2 border-b border-neutral-200">
                     <MenuItem
                         icon={Home}
                         label="Home"
