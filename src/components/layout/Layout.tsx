@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 export function Layout() {
     const { loading } = useFinance();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1280);
+    const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1280 : true);
 
     useEffect(() => {
         const handleResize = () => setIsDesktop(window.innerWidth >= 1280);
