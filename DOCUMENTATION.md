@@ -4,7 +4,7 @@
 - [x] PROMPT 0: Análise e Planejamento Inicial
 - [x] PROMPT 1: Estrutura Base e Configuração
 - [x] PROMPT 2: Sistema de Layout e Navegação Desktop
-- [ ] PROMPT 3: Sistema de Layout e Navegação Mobile
+- [x] PROMPT 3: Sistema de Layout e Navegação Mobile
 - [ ] PROMPT 4: Context Global e Gerenciamento de Estado
 - [ ] PROMPT 5: Cards de Resumo Financeiro
 - [ ] PROMPT 6: Header do Dashboard com Controles
@@ -29,26 +29,28 @@
 
 ---
 
-## PROMPT 2: Sistema de Layout e Navegação Desktop
-**Status:** ✅ | **Data:** 17/02/2026 | **Build:** Warning (TS)
+## PROMPT 3: Sistema de Layout e Navegação Mobile
+**Status:** ✅ | **Data:** 17/02/2026 | **Build:** Sucesso
 
 ### Implementação
-- **Componentes:** `Sidebar`, `SidebarItem`, `SidebarProfile`, `Layout`.
+- **Componentes:** `HeaderMobile`, `MenuDropdown`, `MenuItem`.
 - **Funcionalidades:**
-  - Sidebar responsiva (hidden < 1024px).
-  - Estados expandido (w-72) e colapsado (w-20).
-  - Botão de toggle com ícones dinâmicos.
-  - Tooltips apenas no modo colapsado.
-  - Layout wrapper com ajuste dinâmico de margem (`ml-20`/`ml-72`).
-- **Navegação:** Links para todas as rotas principais com estado ativo visual.
+  - Header fixo no topo (h-72px) que só aparece em views < 1024px (`lg:hidden`).
+  - Menu Dropdown deslizante com overlay backdrop-blur.
+  - Navegação completa com ícones Lucide.
+  - Mock de dados de usuário (Lucas Marte) consistente com Desktop.
+  - Layout Wrapper ajustado para adicionar padding top apenas no mobile (`mt-[72px]`) e remover margem lateral.
+- **Responsividade:**
+  - Breakpoint `lg` (1024px) define a troca entre Sidebar (Desktop) e Header (Mobile).
+  - Nunca renderizam juntos.
 
 ### Arquitetura
-- **Estado:** `Layout` controla `isSidebarCollapsed` e passa via props para `Sidebar`.
-- **Estilos:** Uso intensivo de `clsx` para condicional de classes e transições `duration-300`.
+- **Estado Local:** `HeaderMobile` controla a abertura do menu.
+- **Transições:** CSS transitions simples e eficazes para slide-in e fade-in.
 
 ---
 
-## PROMPT 1: Estrutura Base e Configuração
+## PROMPT 2: Sistema de Layout e Navegação Desktop
 **Status:** ✅ | **Data:** 17/02/2026 | **Build:** Sucesso
 
 ...(restante do arquivo)...
