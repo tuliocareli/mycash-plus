@@ -52,7 +52,7 @@ export default function Dashboard() {
                 </div>
                 <div className="lg:col-span-1 h-full">
                     <CreditCardsWidget
-                        onOpenAddCard={() => setIsAccountModalOpen(true)}
+                        onOpenAddCard={() => { setSelectedCard(null); setIsAccountModalOpen(true); }}
                         onOpenCardDetails={handleOpenCardDetails}
                     />
                 </div>
@@ -83,6 +83,8 @@ export default function Dashboard() {
             <AddAccountModal
                 isOpen={isAccountModalOpen}
                 onClose={() => setIsAccountModalOpen(false)}
+                initialAccount={selectedCard}
+                initialType="creditCard"
             />
 
             <FiltersMobileModal
@@ -95,6 +97,10 @@ export default function Dashboard() {
                     isOpen={isCardDetailsModalOpen}
                     onClose={() => setIsCardDetailsModalOpen(false)}
                     card={selectedCard}
+                    onEdit={() => {
+                        setIsCardDetailsModalOpen(false);
+                        setIsAccountModalOpen(true);
+                    }}
                 />
             )}
 

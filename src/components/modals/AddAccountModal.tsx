@@ -1,23 +1,28 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, Upload, Loader2 } from 'lucide-react';
+import { X, Calendar, Upload, Loader2, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 // import { AccountType } from '../../types';
 
+import { Account } from '../../types';
+
 interface AddAccountModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialAccount?: Account | null;
+    initialType?: 'bank' | 'creditCard';
 }
 
-export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
+export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }: AddAccountModalProps) {
 
 
-    const { addBankAccount, addCreditCard, familyMembers, uploadImage } = useFinance();
+    const { addBankAccount, addCreditCard, updateBankAccount, updateCreditCard, deleteBankAccount, deleteCreditCard, familyMembers, uploadImage } = useFinance();
 
     const [type, setType] = useState<'bank' | 'creditCard'>('bank');
     const [name, setName] = useState('');
+    const [bank, setBank] = useState('');
     const [holderId, setHolderId] = useState('');
 
     // Bank specific
@@ -35,6 +40,36 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    useEffect(() => {
+        if (isOpen && initialAccount) {
+            setType(initialAccount.type === 'CREDIT_CARD' ? 'creditCard' : 'bank');
+            setName(initialAccount.name);
+            setBank(initialAccount.bank || '');
+            setHolderId(initialAccount.holderId);
+            setBalance(initialAccount.balance?.toString() || '');
+            setClosingDay(initialAccount.closingDay?.toString() || '');
+            setDueDay(initialAccount.dueDay?.toString() || '');
+            setLimit(initialAccount.creditLimit?.toString() || '');
+            setLastDigits(initialAccount.lastDigits || '');
+            setTheme((initialAccount.theme as 'black' | 'lime' | 'white') || 'black');
+            setLogoUrl(initialAccount.logoUrl || '');
+        } else if (isOpen) {
+            // Reset for new
+            setType(initialType || 'bank');
+            setName('');
+            setBank('');
+            setHolderId('');
+            setBalance('');
+            setClosingDay('');
+            setDueDay('');
+            setLimit('');
+            setLastDigits('');
+            setTheme('black');
+            setLogoUrl('');
+        }
+    }, [isOpen, initialAccount, initialType]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -58,6 +93,7 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!name || name.length < 3) newErrors.name = 'Mínimo 3 caracteres';
+        if (!bank) newErrors.bank = 'Informe o banco (ex: Nubank)';
         if (!holderId) newErrors.holderId = 'Selecione um titular';
 
         if (type === 'bank') {
@@ -77,45 +113,94 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
         setSaving(true);
         try {
 
-            if (type === 'bank') {
-                await addBankAccount({
-                    name,
-                    holderId,
-                    balance: Number(balance),
-                    type: 'CHECKING',
-                    logoUrl: logoUrl || undefined
-                });
+            if (initialAccount) {
+                if (type === 'bank') {
+                    await updateBankAccount(initialAccount.id, {
+                        name,
+                        bank,
+                        holderId,
+                        balance: Number(balance),
+                        logoUrl: logoUrl || undefined
+                    });
+                } else {
+                    await updateCreditCard(initialAccount.id, {
+                        name,
+                        bank,
+                        holderId,
+                        creditLimit: Number(limit),
+                        closingDay: Number(closingDay),
+                        dueDay: Number(dueDay),
+                        theme,
+                        lastDigits: lastDigits.slice(0, 4),
+                        logoUrl: logoUrl || undefined
+                    });
+                }
             } else {
-                await addCreditCard({
-                    name,
-                    holderId,
-                    creditLimit: Number(limit),
-                    closingDay: Number(closingDay),
-                    dueDay: Number(dueDay),
-                    currentBill: 0, // Starts at 0
-                    lastDigits: lastDigits.slice(0, 4),
-                    theme,
-                    type: 'CREDIT_CARD',
-                    logoUrl: logoUrl || undefined
-                });
+                if (type === 'bank') {
+                    await addBankAccount({
+                        name,
+                        bank,
+                        holderId,
+                        balance: Number(balance),
+                        type: 'CHECKING',
+                        logoUrl: logoUrl || undefined
+                    });
+                } else {
+                    await addCreditCard({
+                        name,
+                        bank,
+                        holderId,
+                        creditLimit: Number(limit),
+                        closingDay: Number(closingDay),
+                        dueDay: Number(dueDay),
+                        currentBill: 0,
+                        lastDigits: lastDigits.slice(0, 4),
+                        theme,
+                        type: 'CREDIT_CARD',
+                        logoUrl: logoUrl || undefined
+                    });
+                }
             }
+
+            // Success: Reset and Close
+            setName('');
+            setHolderId('');
+            setBalance('');
+            setClosingDay('');
+            setDueDay('');
+            setLimit('');
+            setLastDigits('');
+            setLogoUrl('');
+            onClose();
         } catch (error) {
             console.error(error);
+            alert('Erro ao salvar. Verifique se todos os campos estão preenchidos corretamente.');
         } finally {
             setSaving(false);
         }
+    };
 
-        // Reset
-        setName('');
-        setHolderId('');
-        setBalance('');
-        setClosingDay('');
-        setDueDay('');
-        setLimit('');
-        setLastDigits('');
-        setLogoUrl('');
+    const handleDelete = async () => {
+        if (!initialAccount) return;
 
-        onClose();
+        if (!confirm(`Deseja realmente excluir ${initialAccount.type === 'CREDIT_CARD' ? 'este cartão' : 'esta conta'}? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        setDeleting(true);
+        try {
+            if (initialAccount.type === 'CREDIT_CARD') {
+                await deleteCreditCard(initialAccount.id);
+            } else {
+                await deleteBankAccount(initialAccount.id);
+            }
+            onClose();
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao excluir. Verifique se existem transações vinculadas.');
+        } finally {
+            setDeleting(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -175,6 +260,25 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
                             />
                         </div>
                         {errors.name && <span className="text-xs text-red-500 font-medium ml-1">{errors.name}</span>}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-neutral-1100 uppercase tracking-wider">
+                            Instituição / Banco
+                        </label>
+                        <div className={clsx(
+                            "bg-white border rounded-2xl h-12 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-transparent",
+                            errors.bank ? "border-red-500" : "border-neutral-200"
+                        )}>
+                            <input
+                                type="text"
+                                value={bank}
+                                onChange={(e) => setBank(e.target.value)}
+                                className="w-full h-full p-4 outline-none text-neutral-1100 placeholder:text-neutral-300"
+                                placeholder="Ex: Nubank, Itaú, Bradesco..."
+                            />
+                        </div>
+                        {errors.bank && <span className="text-xs text-red-500 font-medium ml-1">{errors.bank}</span>}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -333,21 +437,37 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-neutral-100 bg-white flex justify-end gap-3 shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-3 rounded-full border border-neutral-200 text-neutral-600 font-bold hover:bg-neutral-50 transition-colors text-sm"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={saving || uploading}
-                        className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {saving && <Loader2 size={18} className="animate-spin" />}
-                        {saving ? 'Adicionando...' : 'Adicionar'}
-                    </button>
+                <div className="p-6 border-t border-neutral-100 bg-white flex justify-between gap-3 shrink-0">
+                    <div className="flex gap-3">
+                        {initialAccount && (
+                            <button
+                                onClick={handleDelete}
+                                disabled={saving || deleting}
+                                className="px-5 py-3 rounded-full border border-red-100 text-red-500 font-bold hover:bg-red-50 transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
+                                title="Excluir"
+                            >
+                                {deleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                                <span className="hidden sm:inline">Excluir</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-3 rounded-full border border-neutral-200 text-neutral-600 font-bold hover:bg-neutral-50 transition-colors text-sm"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={saving || uploading || deleting}
+                            className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {saving && <Loader2 size={18} className="animate-spin" />}
+                            {saving ? (initialAccount ? 'Salvando...' : 'Adicionando...') : (initialAccount ? 'Salvar Alterações' : 'Adicionar')}
+                        </button>
+                    </div>
                 </div>
 
             </div>

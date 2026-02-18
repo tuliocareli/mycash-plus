@@ -10,6 +10,7 @@ interface AuthContextData {
     signOut: () => Promise<void>;
     signIn: (credentials: SignInWithPasswordCredentials) => Promise<{ error: any }>;
     signUp: (credentials: SignUpWithPasswordCredentials) => Promise<{ error: any }>;
+    updateUser: (attributes: { data?: any }) => Promise<{ error: any }>;
     signInAnonymously: () => Promise<void>;
 }
 
@@ -50,6 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
     };
 
+    const updateUser = async (attributes: { data?: any }) => {
+        return await supabase.auth.updateUser(attributes);
+    };
+
     const signInAnonymously = async () => {
         setLoading(true);
         const { error } = await supabase.auth.signInAnonymously();
@@ -61,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, signInAnonymously }}>
+        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, updateUser, signInAnonymously }}>
             {!loading && children}
         </AuthContext.Provider>
     );

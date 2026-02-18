@@ -237,11 +237,34 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 setCategories(cats);
             }
 
+            // Handling Family Members & Seeding if needed
+            let members: FamilyMember[] = [];
+            if (memRes.data) {
+                if (memRes.data.length === 0) {
+                    const defaultMember = {
+                        user_id: user.id,
+                        name: user.user_metadata?.name || 'Eu',
+                        role: 'Principal',
+                        color: '#6366F1',
+                        monthly_income: 0,
+                        is_active: true
+                    };
+                    const { data: newMem, error: memSeedError } = await supabase.from('family_members').insert(defaultMember).select();
+                    if (memSeedError) {
+                        console.error('Error seeding family member:', memSeedError);
+                    } else if (newMem) {
+                        members = newMem.map(mapFamilyMember);
+                    }
+                } else {
+                    members = memRes.data.map(mapFamilyMember);
+                }
+                setFamilyMembers(members);
+            }
+
             // Update other states
             if (txRes.data) setTransactions(txRes.data.map(t => mapTransaction(t, cats)));
             if (goalsRes.data) setGoals(goalsRes.data.map(mapGoal));
             if (accRes.data) setAccounts(accRes.data.map(mapAccount));
-            if (memRes.data) setFamilyMembers(memRes.data.map(mapFamilyMember));
 
             if (txRes.error) console.error('Error fetching transactions:', txRes.error);
             if (memRes.error) console.error('Error fetching members:', memRes.error);
@@ -483,7 +506,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             closing_day: card.closingDay,
             due_day: card.dueDay,
             color: card.color || '#000000',
-            theme: card.theme
+            theme: card.theme,
+            last_digits: card.lastDigits,
+            logo_url: card.logoUrl
         };
         const { error } = await supabase.from('accounts').insert(payload);
         if (error) throw error;
@@ -491,11 +516,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
 
     const updateCreditCard = async (id: string, data: Partial<Account>) => {
-        // Implementation similar to add
-        const { error } = await supabase.from('accounts').update({
-            name: data.name,
-            current_bill: data.currentBill
-        }).eq('id', id);
+        const payload: any = {};
+        if (data.name) payload.name = data.name;
+        if (data.currentBill !== undefined) payload.current_bill = data.currentBill;
+        if (data.creditLimit !== undefined) payload.credit_limit = data.creditLimit;
+        if (data.dueDay !== undefined) payload.due_day = data.dueDay;
+        if (data.closingDay !== undefined) payload.closing_day = data.closingDay;
+        if (data.theme) payload.theme = data.theme;
+        if (data.lastDigits) payload.last_digits = data.lastDigits;
+        if (data.logoUrl) payload.logo_url = data.logoUrl;
+        if (data.holderId) payload.holder_id = data.holderId;
+
+        const { error } = await supabase.from('accounts').update(payload).eq('id', id);
         if (error) throw error;
         await fetchData(true);
     };
@@ -508,26 +540,30 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     const addBankAccount = async (acc: Partial<Account>) => {
         if (!user) return;
-        const payload = {
+        const { error } = await supabase.from('accounts').insert({
             user_id: user.id,
-            type: 'CHECKING', // Default to checking
+            type: acc.type || 'CHECKING',
             name: acc.name!,
-            bank: acc.bank || 'Bank',
-            holder_id: acc.holderId!,
             balance: acc.balance || 0,
-            color: acc.color,
-            is_active: true
-        };
-        const { error } = await supabase.from('accounts').insert(payload);
+            holder_id: acc.holderId!,
+            logo_url: acc.logoUrl,
+            bank: acc.bank || 'Unknown',
+            color: acc.color, // Retained color
+            is_active: true // Retained is_active
+        });
         if (error) throw error;
         await fetchData(true);
     };
 
     const updateBankAccount = async (id: string, data: Partial<Account>) => {
-        const { error } = await supabase.from('accounts').update({
-            balance: data.balance,
-            name: data.name
-        }).eq('id', id);
+        const payload: any = {};
+        if (data.name) payload.name = data.name;
+        if (data.balance !== undefined) payload.balance = data.balance;
+        if (data.logoUrl) payload.logo_url = data.logoUrl;
+        if (data.holderId) payload.holder_id = data.holderId;
+        if (data.bank) payload.bank = data.bank;
+
+        const { error } = await supabase.from('accounts').update(payload).eq('id', id);
         if (error) throw error;
         await fetchData(true);
     };

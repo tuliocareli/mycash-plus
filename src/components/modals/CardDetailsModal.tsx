@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Calendar, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Calendar, Plus, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { CreditCard } from '../../types';
@@ -10,6 +10,7 @@ interface CardDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
     card: CreditCard | null;
+    onEdit?: () => void;
 }
 
 const formatCurrency = (value: number) => {
@@ -19,7 +20,7 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProps) {
+export function CardDetailsModal({ isOpen, onClose, card, onEdit }: CardDetailsModalProps) {
 
 
     const { transactions } = useFinance();
@@ -62,9 +63,18 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
                             <p className="text-sm text-neutral-500">**** {card.lastDigits || '****'}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-full hover:bg-neutral-50 text-neutral-500 transition-colors">
-                        <X size={24} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={onEdit}
+                            className="p-2 rounded-full hover:bg-neutral-50 text-neutral-500 transition-colors"
+                            title="Editar Cartão"
+                        >
+                            <Edit2 size={20} />
+                        </button>
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-neutral-50 text-neutral-500 transition-colors">
+                            <X size={24} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content */}

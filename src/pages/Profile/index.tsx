@@ -20,11 +20,25 @@ import {
     ArrowRight
 } from 'lucide-react';
 import clsx from 'clsx';
+import { EditProfileModal } from '../../components/modals/EditProfileModal';
+import { AddMemberModal } from '../../components/modals/AddMemberModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
     const { familyMembers, categories } = useFinance();
     const { user, signOut: authSignOut } = useAuth();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+
+    // Settings State
+    const [currency, setCurrency] = useState('BRL');
+    const [dateFormat, setDateFormat] = useState('DD/MM/AAAA');
+    const [notifications, setNotifications] = useState({
+        bills: true,
+        limit: true,
+        summary: false,
+        goals: true
+    });
 
     // The current user's profile is typically the one corresponding to user.id or the first one in familyMembers
     const mainMember = familyMembers[0];
@@ -86,7 +100,10 @@ export default function Profile() {
                                     </div>
                                 )}
                             </div>
-                            <button className="absolute -bottom-2 -right-2 bg-neutral-1100 text-white p-3 rounded-2xl shadow-lg hover:scale-110 transition-transform">
+                            <button
+                                onClick={() => mainMember && setIsEditModalOpen(true)}
+                                className="absolute -bottom-2 -right-2 bg-neutral-1100 text-white p-3 rounded-2xl shadow-lg hover:scale-110 transition-transform"
+                            >
                                 <Edit2 size={16} />
                             </button>
                         </div>
@@ -120,7 +137,10 @@ export default function Profile() {
                         </div>
 
                         <div className="shrink-0">
-                            <button className="px-8 py-4 bg-neutral-50 hover:bg-neutral-100 text-neutral-1100 rounded-full font-black text-sm transition-all uppercase tracking-widest">
+                            <button
+                                onClick={() => mainMember && setIsEditModalOpen(true)}
+                                className="px-8 py-4 bg-neutral-50 hover:bg-neutral-100 text-neutral-1100 rounded-full font-black text-sm transition-all uppercase tracking-widest"
+                            >
                                 Editar Perfil
                             </button>
                         </div>
@@ -130,7 +150,10 @@ export default function Profile() {
                     <div className="bg-white rounded-[2.5rem] p-8 border border-neutral-100 shadow-sm space-y-8">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-black text-neutral-1100">Membros da Família</h3>
-                            <button className="flex items-center gap-2 text-brand-600 font-black text-xs uppercase tracking-widest hover:underline">
+                            <button
+                                onClick={() => setIsAddMemberModalOpen(true)}
+                                className="flex items-center gap-2 text-brand-600 font-black text-xs uppercase tracking-widest hover:underline"
+                            >
                                 <Plus size={16} />
                                 Adicionar Membro
                             </button>
@@ -216,9 +239,13 @@ export default function Profile() {
                                             <p className="font-black text-neutral-1100 text-sm">Moeda Padrão</p>
                                         </div>
                                     </div>
-                                    <select className="bg-transparent font-black text-xs text-brand-600 uppercase outline-none cursor-pointer">
-                                        <option>Real (BRL)</option>
-                                        <option>Dólar (USD)</option>
+                                    <select
+                                        value={currency}
+                                        onChange={(e) => setCurrency(e.target.value)}
+                                        className="bg-transparent font-black text-xs text-brand-600 uppercase outline-none cursor-pointer"
+                                    >
+                                        <option value="BRL">Real (BRL)</option>
+                                        <option value="USD">Dólar (USD)</option>
                                     </select>
                                 </div>
 
@@ -229,9 +256,13 @@ export default function Profile() {
                                             <p className="font-black text-neutral-1100 text-sm">Formato de Data</p>
                                         </div>
                                     </div>
-                                    <select className="bg-transparent font-black text-xs text-brand-600 uppercase outline-none cursor-pointer">
-                                        <option>DD/MM/AAAA</option>
-                                        <option>MM/DD/AAAA</option>
+                                    <select
+                                        value={dateFormat}
+                                        onChange={(e) => setDateFormat(e.target.value)}
+                                        className="bg-transparent font-black text-xs text-brand-600 uppercase outline-none cursor-pointer"
+                                    >
+                                        <option value="DD/MM/AAAA">DD/MM/AAAA</option>
+                                        <option value="MM/DD/AAAA">MM/DD/AAAA</option>
                                     </select>
                                 </div>
                             </div>
@@ -245,17 +276,20 @@ export default function Profile() {
                             </h3>
                             <div className="space-y-4">
                                 {[
-                                    { label: "Vencimento de contas", active: true },
-                                    { label: "Limite de cartão atingido", active: true },
-                                    { label: "Resumo semanal", active: false },
-                                    { label: "Objetivos conquistados", active: true }
-                                ].map((n, i) => (
-                                    <div key={i} className="flex items-center justify-between">
+                                    { id: 'bills', label: "Vencimento de contas", active: notifications.bills },
+                                    { id: 'limit', label: "Limite de cartão atingido", active: notifications.limit },
+                                    { id: 'summary', label: "Resumo semanal", active: notifications.summary },
+                                    { id: 'goals', label: "Objetivos conquistados", active: notifications.goals }
+                                ].map((n) => (
+                                    <div key={n.id} className="flex items-center justify-between">
                                         <span className="text-sm font-bold text-neutral-600 uppercase tracking-wider">{n.label}</span>
-                                        <button className={clsx(
-                                            "w-11 h-6 rounded-full relative transition-all shadow-inner",
-                                            n.active ? "bg-brand-500" : "bg-neutral-200"
-                                        )}>
+                                        <button
+                                            onClick={() => setNotifications(prev => ({ ...prev, [n.id]: !n.active }))}
+                                            className={clsx(
+                                                "w-11 h-6 rounded-full relative transition-all shadow-inner",
+                                                n.active ? "bg-brand-500" : "bg-neutral-200"
+                                            )}
+                                        >
                                             <div className={clsx(
                                                 "absolute top-1 size-4 bg-white rounded-full transition-all shadow-sm",
                                                 n.active ? "right-1" : "left-1"
@@ -366,6 +400,19 @@ export default function Profile() {
                 </div>
             )}
 
+            {/* Modals */}
+            {mainMember && (
+                <EditProfileModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    member={mainMember}
+                />
+            )}
+
+            <AddMemberModal
+                isOpen={isAddMemberModalOpen}
+                onClose={() => setIsAddMemberModalOpen(false)}
+            />
         </div>
     );
 }
