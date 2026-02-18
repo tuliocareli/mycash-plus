@@ -1,16 +1,6 @@
 import { useFinance } from '../../../contexts/FinanceContext';
 
-// Colors rotation for categories chart
-const CATEGORY_COLORS = [
-    '#DFFE35', // Brand Lime
-    '#080B12', // Black (Neutral 1100)
-    '#9CA3AF', // Gray 400
-    '#E5E7EB', // Gray 200 (Neutral 300)
-    '#15BE78', // Success Green
-    '#F59E0B', // Amber
-    '#EF4444', // Red 500
-    '#6366F1', // Indigo
-];
+
 
 function formatCurrency(value: number) {
     return new Intl.NumberFormat('pt-BR', {
@@ -73,14 +63,14 @@ export function CategoryCarousel() {
             <h2 className="text-lg font-bold text-neutral-1100 mb-4 px-1">Gastos por Categoria</h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full pb-4">
-                {expensesByCategory.slice(0, 6).map((cat, index) => (
+                {expensesByCategory.slice(0, 6).map((cat) => (
                     <div
                         key={cat.category}
                         className="bg-white border border-neutral-200 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 hover:shadow-md transition-shadow duration-300 w-full min-h-[160px]"
                     >
                         <DonutChart
                             percentage={cat.percentage}
-                            color={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
+                            color="#DFFE35"
                         />
 
                         <div className="text-center w-full">
