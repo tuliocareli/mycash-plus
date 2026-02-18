@@ -1,4 +1,4 @@
-import { TrendingUp, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useFinance } from '../../../contexts/FinanceContext';
 import { useCountUp } from '../../../hooks/useCountUp';
 import { useMemo } from 'react';
@@ -89,7 +89,7 @@ export function SummaryCards() {
                 <div className="flex justify-between items-start">
                     <span className="text-neutral-1100 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Fluxo Entradas</span>
                     <div className="p-2 rounded-full bg-neutral-100">
-                        <ArrowDownLeft size={20} className="text-neutral-500" />
+                        <TrendingDown size={20} className="text-neutral-500" />
                     </div>
                 </div>
 
@@ -108,7 +108,7 @@ export function SummaryCards() {
                 <div className="flex justify-between items-start">
                     <span className="text-neutral-1100 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Fluxo Saídas</span>
                     <div className="p-2 rounded-full bg-red-50">
-                        <ArrowUpRight size={20} className="text-red-500" />
+                        <TrendingUp size={20} className="text-red-500" />
                     </div>
                 </div>
 

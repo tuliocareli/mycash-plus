@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-export function useCountUp(end: number, duration: number = 2000) {
+export function useCountUp(target: number, duration: number = 2000) {
+    const end = isNaN(target) ? 0 : target;
     const [count, setCount] = useState(0);
 
     useEffect(() => {
