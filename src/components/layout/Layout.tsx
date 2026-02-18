@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import clsx from 'clsx';
 import { Sidebar } from './Sidebar';
 import { HeaderMobile } from './HeaderMobile';
 
@@ -21,18 +22,17 @@ export function Layout() {
 
             {/* Main Content Wrapper */}
             <main
-                className={`
-          flex-1 w-full min-h-screen transition-all duration-300 ease-in-out
-          
-          /* Desktop Margins: Sidebar width */
-          lg:ml-[280px]
-          ${isSidebarCollapsed ? 'lg:!ml-[88px]' : ''}
-          
-          /* Mobile Margins: Header height compensation */
-          ml-0 mt-[72px] lg:mt-0
-        `}
+                className={clsx(
+                    "flex-1 w-full transition-all duration-300 ease-in-out",
+                    "lg:ml-[280px]",
+                    isSidebarCollapsed && "lg:!ml-[88px]",
+                    "ml-0"
+                )}
             >
-                <div className="container mx-auto px-4 py-8 lg:px-10 max-w-[1600px]">
+                <div className={clsx(
+                    "container mx-auto px-4 py-8 lg:px-10 max-w-[1600px]",
+                    "pt-[72px] lg:pt-8 pb-20 lg:pb-8"
+                )}>
                     <Outlet />
                 </div>
             </main>
