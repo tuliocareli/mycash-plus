@@ -4,11 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-console.log('--- Supabase Init Debug ---');
-console.log('VITE_SUPABASE_URL exists:', !!supabaseUrl);
-console.log('VITE_SUPABASE_ANON_KEY exists:', !!supabaseKey);
-if (supabaseUrl) console.log('VITE_SUPABASE_URL value (partial):', supabaseUrl.substring(0, 15) + '...');
-console.log('---------------------------');
+
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Supabase credentials missing. Check your .env file or Vercel environment variables.');
