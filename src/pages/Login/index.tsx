@@ -206,6 +206,14 @@ export default function Login() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="mt-8 lg:hidden">
+                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest leading-relaxed text-center opacity-70">
+                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo (Beta).
+                            A conta de acesso é PÚBLICA e COMPARTILHADA. Todos os dados inseridos serão visíveis por outros usuários.
+                            Não utilize para dados reais ou sensíveis. O banco pode ser resetado a qualquer momento.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
