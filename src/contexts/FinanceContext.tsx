@@ -1,180 +1,304 @@
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode, useCallback } from 'react';
 import {
     Transaction,
     Goal,
-    CreditCard,
-    BankAccount,
+    Account,
     FamilyMember,
     DateRange,
-    TransactionType
+    TransactionType,
+    Category,
+    TransactionStatus
 } from '../types';
-import {
-    mockTransactions,
-    mockGoals,
-    mockCreditCards,
-    mockBankAccounts,
-    mockMembers
-} from './mockData';
-import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
+import { supabase } from '../services/supabase';
+import { useAuth } from './AuthContext';
+import { startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths } from 'date-fns';
+import { Database } from '../types/supabase';
 
-const uuid = () => Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+// Helper to map DB transaction to Frontend Transaction
+const mapTransaction = (
+    dbTx: Database['public']['Tables']['transactions']['Row'],
+    categories: Category[]
+): Transaction => {
+    const category = categories.find(c => c.id === dbTx.category_id);
+    return {
+        id: dbTx.id,
+        userId: dbTx.user_id,
+        type: dbTx.type as TransactionType,
+        amount: Number(dbTx.amount),
+        description: dbTx.description,
+        date: dbTx.date,
+        categoryId: dbTx.category_id || undefined,
+        category: category?.name || 'Outros', // Fallback name
+        accountId: dbTx.account_id || undefined,
+        memberId: dbTx.member_id || undefined,
+        installmentNumber: dbTx.installment_number || undefined,
+        totalInstallments: dbTx.total_installments,
+        parentTransactionId: dbTx.parent_transaction_id || undefined,
+        isRecurring: dbTx.is_recurring,
+        recurringTransactionId: dbTx.recurring_transaction_id || undefined,
+        status: (dbTx.status as string).toUpperCase() as TransactionStatus,
+        notes: dbTx.notes || undefined,
+        createdAt: dbTx.created_at,
+        updatedAt: dbTx.updated_at
+    };
+};
 
-// --- Interfaces ---
+const mapAccount = (dbAcc: Database['public']['Tables']['accounts']['Row']): Account => ({
+    id: dbAcc.id,
+    userId: dbAcc.user_id,
+    type: dbAcc.type as any, // Cast to AccountType
+    name: dbAcc.name,
+    bank: dbAcc.bank,
+    lastDigits: dbAcc.last_digits || undefined,
+    holderId: dbAcc.holder_id,
+    balance: Number(dbAcc.balance),
+    creditLimit: dbAcc.credit_limit ? Number(dbAcc.credit_limit) : undefined,
+    currentBill: Number(dbAcc.current_bill),
+    dueDay: dbAcc.due_day || undefined,
+    closingDay: dbAcc.closing_day || undefined,
+    theme: dbAcc.theme,
+    logoUrl: dbAcc.logo_url || undefined,
+    color: dbAcc.color,
+    isActive: dbAcc.is_active
+});
+
+const mapFamilyMember = (dbMember: Database['public']['Tables']['family_members']['Row']): FamilyMember => ({
+    id: dbMember.id,
+    userId: dbMember.user_id,
+    name: dbMember.name,
+    role: dbMember.role,
+    avatarUrl: dbMember.avatar_url || undefined,
+    monthlyIncome: Number(dbMember.monthly_income),
+    color: dbMember.color,
+    isActive: dbMember.is_active
+});
+
+const mapGoal = (dbGoal: Database['public']['Tables']['goals']['Row']): Goal => ({
+    id: dbGoal.id,
+    name: dbGoal.name,
+    targetAmount: Number(dbGoal.target_amount),
+    currentAmount: Number(dbGoal.current_amount),
+    deadline: dbGoal.deadline || undefined,
+    icon: dbGoal.icon || undefined,
+    color: dbGoal.color || undefined
+});
+
+const mapCategory = (dbCat: Database['public']['Tables']['categories']['Row']): Category => ({
+    id: dbCat.id,
+    userId: dbCat.user_id,
+    name: dbCat.name,
+    icon: dbCat.icon || '',
+    type: dbCat.type as TransactionType,
+    color: dbCat.color || '',
+    isActive: dbCat.is_active
+});
 
 interface FinanceContextData {
-    // State
+    loading: boolean;
     transactions: Transaction[];
     goals: Goal[];
-    creditCards: CreditCard[];
-    bankAccounts: BankAccount[];
+    creditCards: Account[];
+    bankAccounts: Account[];
     familyMembers: FamilyMember[];
+    categories: Category[];
 
     // Filters
-    selectedMemberId: string | null; // Null shows all family
+    selectedMemberId: string | null;
     dateRange: DateRange;
     transactionTypeFilter: 'all' | TransactionType;
     searchText: string;
+    categoryIdFilter: string | null;
+    accountIdFilter: string | null;
+    statusFilter: string | null;
 
-    // Filter Actions
     setSelectedMemberId: (id: string | null) => void;
     setDateRange: (range: DateRange) => void;
     setTransactionTypeFilter: (type: 'all' | TransactionType) => void;
     setSearchText: (text: string) => void;
+    setCategoryIdFilter: (id: string | null) => void;
+    setAccountIdFilter: (id: string | null) => void;
+    setStatusFilter: (status: string | null) => void;
 
-    // CRUD Actions
-    addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
-    updateTransaction: (id: string, transaction: Partial<Transaction>) => void;
-    deleteTransaction: (id: string) => void;
+    // CRUD
+    addTransaction: (data: Partial<Transaction>) => Promise<void>;
+    updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
+    deleteTransaction: (id: string) => Promise<void>;
 
-    addGoal: (goal: Omit<Goal, 'id'>) => void;
-    updateGoal: (id: string, goal: Partial<Goal>) => void;
-    deleteGoal: (id: string) => void;
+    addGoal: (goal: Partial<Goal>) => Promise<void>;
+    updateGoal: (id: string, goal: Partial<Goal>) => Promise<void>;
+    deleteGoal: (id: string) => Promise<void>;
 
-    addCreditCard: (card: Omit<CreditCard, 'id'>) => void;
-    updateCreditCard: (id: string, card: Partial<CreditCard>) => void;
-    deleteCreditCard: (id: string) => void;
+    addCreditCard: (card: Partial<Account>) => Promise<void>;
+    updateCreditCard: (id: string, card: Partial<Account>) => Promise<void>;
+    deleteCreditCard: (id: string) => Promise<void>;
 
-    addBankAccount: (account: Omit<BankAccount, 'id'>) => void;
-    updateBankAccount: (id: string, account: Partial<BankAccount>) => void;
-    deleteBankAccount: (id: string) => void;
+    addBankAccount: (account: Partial<Account>) => Promise<void>;
+    updateBankAccount: (id: string, account: Partial<Account>) => Promise<void>;
+    deleteBankAccount: (id: string) => Promise<void>;
 
-    addFamilyMember: (member: Omit<FamilyMember, 'id'>) => void;
-    updateFamilyMember: (id: string, member: Partial<FamilyMember>) => void;
-    deleteFamilyMember: (id: string) => void;
+    addFamilyMember: (member: Partial<FamilyMember>) => Promise<void>;
+    updateFamilyMember: (id: string, member: Partial<FamilyMember>) => Promise<void>;
+    deleteFamilyMember: (id: string) => Promise<void>;
 
-    // Derived Data (Calculated)
+    addCategory: (data: Partial<Category>) => Promise<void>;
+    uploadImage: (bucket: 'avatars' | 'account-logos', file: File) => Promise<string | null>;
+
+    // Derived
     filteredTransactions: Transaction[];
     totalBalance: number;
-    totalIncome: number; // For the filtered period
-    totalExpenses: number; // For the filtered period
+    totalIncome: number;
+    totalExpenses: number;
     expensesByCategory: { category: string; amount: number; percentage: number }[];
-    savingsRate: number; // Percentual economizado
+    savingsRate: number;
 }
-
-interface FinanceProviderProps {
-    children: ReactNode;
-}
-
-// --- Context ---
 
 const FinanceContext = createContext<FinanceContextData>({} as FinanceContextData);
 
-// --- Provider ---
+export function FinanceProvider({ children }: { children: ReactNode }) {
+    const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
 
-export function FinanceProvider({ children }: FinanceProviderProps) {
-    // 1. Core State
-    const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-    const [goals, setGoals] = useState<Goal[]>(mockGoals);
-    const [creditCards, setCreditCards] = useState<CreditCard[]>(mockCreditCards);
-    const [bankAccounts, setBankAccounts] = useState<BankAccount[]>(mockBankAccounts);
-    const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(mockMembers);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [goals, setGoals] = useState<Goal[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    // 2. Filter State
+    // Filters
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState<DateRange>({
-        startDate: startOfMonth(new Date()), // Default: Current month start
-        endDate: endOfMonth(new Date())      // Default: Current month end
+        startDate: startOfMonth(new Date()),
+        endDate: endOfMonth(new Date())
     });
     const [transactionTypeFilter, setTransactionTypeFilter] = useState<'all' | TransactionType>('all');
     const [searchText, setSearchText] = useState('');
+    const [categoryIdFilter, setCategoryIdFilter] = useState<string | null>(null);
+    const [accountIdFilter, setAccountIdFilter] = useState<string | null>(null);
+    const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-    // 3. Derived Data Implementation (Memoized for performance)
+    // Fetch Data
+    const fetchData = useCallback(async (background = false) => {
+        if (!user) return;
+        if (!background) setLoading(true);
+        try {
+            const [txRes, goalsRes, accRes, memRes, catRes] = await Promise.all([
+                supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+                supabase.from('goals').select('*').eq('user_id', user.id),
+                supabase.from('accounts').select('*').eq('user_id', user.id),
+                supabase.from('family_members').select('*').eq('user_id', user.id),
+                supabase.from('categories').select('*').eq('user_id', user.id)
+            ]);
+
+            let cats: Category[] = [];
+            if (catRes.data) {
+                if (catRes.data.length === 0 && !background) {
+                    // Seed initial categories
+                    const defaultCategories = [
+                        { name: 'Alimentação', icon: '🍔', type: 'EXPENSE', color: '#EF4444' },
+                        { name: 'Lazer', icon: '🎮', type: 'EXPENSE', color: '#3B82F6' },
+                        { name: 'Saúde', icon: '🏥', type: 'EXPENSE', color: '#10B981' },
+                        { name: 'Transporte', icon: '🚗', type: 'EXPENSE', color: '#F59E0B' },
+                        { name: 'Educação', icon: '📚', type: 'EXPENSE', color: '#8B5CF6' },
+                        { name: 'Salário', icon: '💰', type: 'INCOME', color: '#10B981' },
+                        { name: 'Investimento', icon: '📈', type: 'INCOME', color: '#3B82F6' },
+                        { name: 'Outros', icon: '📦', type: 'EXPENSE', color: '#6B7280' },
+                    ];
+                    const seedData = defaultCategories.map(c => ({ ...c, user_id: user.id }));
+                    const { data: newCats } = await supabase.from('categories').insert(seedData).select();
+                    if (newCats) {
+                        cats = newCats.map(mapCategory);
+                    }
+                } else {
+                    cats = catRes.data.map(mapCategory);
+                }
+                setCategories(cats);
+            }
+            if (txRes.data) setTransactions(txRes.data.map(t => mapTransaction(t, cats)));
+            if (goalsRes.data) setGoals(goalsRes.data.map(mapGoal));
+            if (accRes.data) setAccounts(accRes.data.map(mapAccount));
+            if (memRes.data) setFamilyMembers(memRes.data.map(mapFamilyMember));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            if (!background) setLoading(false);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            fetchData();
+        } else {
+            // Clear state on logout
+            setTransactions([]);
+            setGoals([]);
+            setAccounts([]);
+            setFamilyMembers([]);
+            setCategories([]);
+            setLoading(false);
+        }
+    }, [user, fetchData]);
+
+    // Derived Lists
+    const creditCards = useMemo(() => accounts.filter(a => a.type === 'CREDIT_CARD'), [accounts]);
+    const bankAccounts = useMemo(() => accounts.filter(a => a.type === 'CHECKING' || a.type === 'SAVINGS'), [accounts]);
 
     const filteredTransactions = useMemo(() => {
-        return transactions.filter(transaction => {
-            // Filter by Member
-            if (selectedMemberId && transaction.memberId !== selectedMemberId && transaction.memberId !== null) {
-                return false;
-            }
+        return transactions.filter(t => {
+            if (selectedMemberId && t.memberId !== selectedMemberId) return false;
 
-            // Filter by Date Range
-            const tDate = parseISO(transaction.date);
-            if (!isWithinInterval(tDate, { start: dateRange.startDate, end: dateRange.endDate })) {
-                return false;
-            }
+            // Only filter by date if local date string is valid.
+            // Supabase returns YYYY-MM-DD.
+            const tDate = parseISO(t.date);
+            if (!isWithinInterval(tDate, { start: dateRange.startDate, end: dateRange.endDate })) return false;
 
-            // Filter by Type
-            if (transactionTypeFilter !== 'all' && transaction.type !== transactionTypeFilter) {
-                return false;
-            }
+            if (transactionTypeFilter !== 'all' && t.type !== transactionTypeFilter) return false;
 
-            // Filter by Search Text
+            if (categoryIdFilter && t.categoryId !== categoryIdFilter) return false;
+            if (accountIdFilter && t.accountId !== accountIdFilter) return false;
+            if (statusFilter && t.status !== statusFilter) return false;
+
             if (searchText) {
                 const text = searchText.toLowerCase();
-                return (
-                    transaction.description.toLowerCase().includes(text) ||
-                    transaction.category.toLowerCase().includes(text)
-                );
+                // Check category name safely
+                return t.description.toLowerCase().includes(text) || (t.category || '').toLowerCase().includes(text);
             }
-
             return true;
-        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort Descending Date
-    }, [transactions, selectedMemberId, dateRange, transactionTypeFilter, searchText]);
+        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [transactions, selectedMemberId, dateRange, transactionTypeFilter, searchText, categoryIdFilter, accountIdFilter, statusFilter]);
 
-    // Totals based on Filtered Transactions (Dashboard View)
     const { totalIncome, totalExpenses } = useMemo(() => {
-        return filteredTransactions.reduce(
-            (acc, t) => {
-                if (t.type === 'income') acc.totalIncome += t.amount;
-                if (t.type === 'expense') acc.totalExpenses += t.amount;
-                return acc;
-            },
-            { totalIncome: 0, totalExpenses: 0 }
-        );
+        return filteredTransactions.reduce((acc, t) => {
+            // Handle Decimal/Number if needed, but we cast to number in map
+            if (t.type === 'INCOME') acc.totalIncome += t.amount;
+            if (t.type === 'EXPENSE') acc.totalExpenses += t.amount;
+            return acc;
+        }, { totalIncome: 0, totalExpenses: 0 });
     }, [filteredTransactions]);
 
-    // Balance is GLOBAL (Sum of Accounts - Credit Card Bills), not filtered by date, but maybe by member.
     const totalBalance = useMemo(() => {
-        const memberAccounts = selectedMemberId
-            ? bankAccounts.filter(acc => acc.holderId === selectedMemberId)
-            : bankAccounts;
+        const relevantAccounts = selectedMemberId
+            ? accounts.filter(a => a.holderId === selectedMemberId)
+            : accounts;
 
-        const memberCards = selectedMemberId
-            ? creditCards.filter(card => card.holderId === selectedMemberId)
-            : creditCards;
-
-        const assets = memberAccounts.reduce((sum, acc) => sum + acc.balance, 0);
-        const liabilities = memberCards.reduce((sum, card) => sum + card.currentBill, 0);
-
+        const assets = relevantAccounts.filter(a => a.type !== 'CREDIT_CARD').reduce((sum, a) => sum + a.balance, 0);
+        const liabilities = relevantAccounts.filter(a => a.type === 'CREDIT_CARD').reduce((sum, a) => sum + a.currentBill, 0);
         return assets - liabilities;
-    }, [bankAccounts, creditCards, selectedMemberId]);
+    }, [accounts, selectedMemberId]);
 
     const expensesByCategory = useMemo(() => {
-        const categories: Record<string, number> = {};
-
+        const catMap: Record<string, number> = {};
         filteredTransactions.forEach(t => {
-            if (t.type === 'expense') {
-                categories[t.category] = (categories[t.category] || 0) + t.amount;
+            if (t.type === 'EXPENSE') {
+                const catName = t.category || 'Outros';
+                catMap[catName] = (catMap[catName] || 0) + t.amount;
             }
         });
-
-        const totalFilteredExpenses = Object.values(categories).reduce((a, b) => a + b, 0);
-
-        return Object.entries(categories)
+        const total = Object.values(catMap).reduce((a, b) => a + b, 0);
+        return Object.entries(catMap)
             .map(([category, amount]) => ({
                 category,
                 amount,
-                percentage: totalFilteredExpenses > 0 ? (amount / totalFilteredExpenses) * 100 : 0
+                percentage: total > 0 ? (amount / total) * 100 : 0
             }))
             .sort((a, b) => b.amount - a.amount);
     }, [filteredTransactions]);
@@ -184,88 +308,292 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
         return ((totalIncome - totalExpenses) / totalIncome) * 100;
     }, [totalIncome, totalExpenses]);
 
-    // 4. CRUD Actions
+    // Actions
+    const addTransaction = async (data: Partial<Transaction>) => {
+        if (!user) return;
+        // Map frontend back to snake_case
+        // Find categoryId from name if only name provided?
+        // UI provides categoryId generally if available, or just string.
+        // Assuming strict types:
+        let categoryId = data.categoryId;
+        if (!categoryId && data.category) {
+            const match = categories.find(c => c.name === data.category);
+            if (match) categoryId = match.id;
+        }
+        const totalInstallments = data.totalInstallments || 1;
 
-    const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-        const newTransaction = { ...transaction, id: uuid() };
-        setTransactions(prev => [newTransaction, ...prev]);
+        // Base payload
+        const basePayload = {
+            user_id: user.id,
+            type: data.type as TransactionType, // 'INCOME' | 'EXPENSE'
+            amount: data.amount!,
+            description: data.description!,
+            date: data.date!, // YYYY-MM-DD
+            category_id: categoryId || null,
+            account_id: data.accountId || null,
+            member_id: data.memberId || null,
+            is_recurring: data.isRecurring || false,
+            notes: data.notes
+        };
+
+        if (totalInstallments > 1 && data.type === 'EXPENSE') {
+            // Installment 1
+            const { data: firstTx, error: firstError } = await supabase.from('transactions').insert({
+                ...basePayload,
+                installment_number: 1,
+                total_installments: totalInstallments,
+                status: (data.status as string)?.toLowerCase() as any || 'completed'
+            }).select().single();
+
+            if (firstError) throw firstError;
+
+            // Remaining installments
+            const otherInstallments = [];
+            const startDate = parseISO(data.date!);
+
+            for (let i = 1; i < totalInstallments; i++) {
+                const nextDate = addMonths(startDate, i);
+                otherInstallments.push({
+                    ...basePayload,
+                    date: nextDate.toISOString().split('T')[0], // YYYY-MM-DD
+                    installment_number: i + 1,
+                    total_installments: totalInstallments,
+                    parent_transaction_id: firstTx.id,
+                    status: 'pending' // Future installments default to pending
+                });
+            }
+
+            if (otherInstallments.length > 0) {
+                const { error: batchError } = await supabase.from('transactions').insert(otherInstallments);
+                if (batchError) console.error('Error creating installments:', batchError);
+            }
+
+        } else {
+            // Single transaction
+            const payload = {
+                ...basePayload,
+                total_installments: 1,
+                installment_number: undefined,
+                status: (data.status as string)?.toLowerCase() as any || 'completed'
+            };
+
+            const { error } = await supabase.from('transactions').insert(payload);
+            if (error) throw error;
+        }
+
+        await fetchData(true);
     };
 
-    const updateTransaction = (id: string, updatedFields: Partial<Transaction>) => {
-        setTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updatedFields } : t));
+    const updateTransaction = async (id: string, data: Partial<Transaction>) => {
+        const payload: any = {};
+        if (data.amount) payload.amount = data.amount;
+        if (data.description) payload.description = data.description;
+        if (data.date) payload.date = data.date;
+        if (data.categoryId) payload.category_id = data.categoryId;
+        if (data.accountId) payload.account_id = data.accountId;
+        if (data.status) payload.status = (data.status as string).toLowerCase();
+
+        const { error } = await supabase.from('transactions').update(payload).eq('id', id);
+        if (error) throw error;
+        fetchData(true);
     };
 
-    const deleteTransaction = (id: string) => {
-        setTransactions(prev => prev.filter(t => t.id !== id));
+    const deleteTransaction = async (id: string) => {
+        const { error } = await supabase.from('transactions').delete().eq('id', id);
+        if (error) throw error;
+        fetchData(true);
     };
 
-    const addGoal = (goal: Omit<Goal, 'id'>) => {
-        const newGoal = { ...goal, id: uuid() };
-        setGoals(prev => [...prev, newGoal]);
+    // Goals
+    const addGoal = async (data: Partial<Goal>) => {
+        if (!user) return;
+        const payload = {
+            user_id: user.id,
+            name: data.name!,
+            target_amount: data.targetAmount!,
+            current_amount: data.currentAmount || 0,
+            deadline: data.deadline,
+            icon: data.icon,
+            color: data.color
+        };
+        const { error } = await supabase.from('goals').insert(payload);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const updateGoal = (id: string, updatedFields: Partial<Goal>) => {
-        setGoals(prev => prev.map(g => g.id === id ? { ...g, ...updatedFields } : g));
+    const updateGoal = async (id: string, data: Partial<Goal>) => {
+        const payload: any = {};
+        if (data.currentAmount !== undefined) payload.current_amount = data.currentAmount;
+        if (data.name) payload.name = data.name;
+        if (data.targetAmount !== undefined) payload.target_amount = data.targetAmount;
+        if (data.deadline) payload.deadline = data.deadline;
+        if (data.color) payload.color = data.color;
+        if (data.icon) payload.icon = data.icon;
+        const { error } = await supabase.from('goals').update(payload).eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const deleteGoal = (id: string) => {
-        setGoals(prev => prev.filter(g => g.id !== id));
+    const deleteGoal = async (id: string) => {
+        const { error } = await supabase.from('goals').delete().eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const addCreditCard = (card: Omit<CreditCard, 'id'>) => {
-        const newCard = { ...card, id: uuid() };
-        setCreditCards(prev => [...prev, newCard]);
+    // Accounts
+    const addCreditCard = async (card: Partial<Account>) => {
+        if (!user) return;
+        const payload = {
+            user_id: user.id,
+            type: 'CREDIT_CARD',
+            name: card.name!,
+            bank: card.bank || 'Unknown',
+            holder_id: card.holderId!,
+            current_bill: card.currentBill || 0,
+            credit_limit: card.creditLimit,
+            closing_day: card.closingDay,
+            due_day: card.dueDay,
+            color: card.color || '#000000',
+            theme: card.theme
+        };
+        const { error } = await supabase.from('accounts').insert(payload);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const updateCreditCard = (id: string, updatedFields: Partial<CreditCard>) => {
-        setCreditCards(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+    const updateCreditCard = async (id: string, data: Partial<Account>) => {
+        // Implementation similar to add
+        const { error } = await supabase.from('accounts').update({
+            name: data.name,
+            current_bill: data.currentBill
+        }).eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const deleteCreditCard = (id: string) => {
-        setCreditCards(prev => prev.filter(c => c.id !== id));
+    const deleteCreditCard = async (id: string) => {
+        const { error } = await supabase.from('accounts').delete().eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const addBankAccount = (account: Omit<BankAccount, 'id'>) => {
-        const newAccount = { ...account, id: uuid() };
-        setBankAccounts(prev => [...prev, newAccount]);
+    const addBankAccount = async (acc: Partial<Account>) => {
+        if (!user) return;
+        const payload = {
+            user_id: user.id,
+            type: 'CHECKING', // Default to checking
+            name: acc.name!,
+            bank: acc.bank || 'Bank',
+            holder_id: acc.holderId!,
+            balance: acc.balance || 0,
+            color: acc.color,
+            is_active: true
+        };
+        const { error } = await supabase.from('accounts').insert(payload);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const updateBankAccount = (id: string, updatedFields: Partial<BankAccount>) => {
-        setBankAccounts(prev => prev.map(a => a.id === id ? { ...a, ...updatedFields } : a));
+    const updateBankAccount = async (id: string, data: Partial<Account>) => {
+        const { error } = await supabase.from('accounts').update({
+            balance: data.balance,
+            name: data.name
+        }).eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const deleteBankAccount = (id: string) => {
-        setBankAccounts(prev => prev.filter(a => a.id !== id));
+    const deleteBankAccount = async (id: string) => {
+        const { error } = await supabase.from('accounts').delete().eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const addFamilyMember = (member: Omit<FamilyMember, 'id'>) => {
-        const newMember = { ...member, id: uuid() };
-        setFamilyMembers(prev => [...prev, newMember]);
+    const addFamilyMember = async (member: Partial<FamilyMember>) => {
+        if (!user) return;
+        const payload = {
+            user_id: user.id,
+            name: member.name!,
+            role: member.role!,
+            monthly_income: member.monthlyIncome || 0,
+            avatar_url: member.avatarUrl,
+            color: member.color || '#3247FF',
+            is_active: true
+        };
+        const { error } = await supabase.from('family_members').insert(payload);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const updateFamilyMember = (id: string, updatedFields: Partial<FamilyMember>) => {
-        setFamilyMembers(prev => prev.map(m => m.id === id ? { ...m, ...updatedFields } : m));
+    const updateFamilyMember = async (id: string, data: Partial<FamilyMember>) => {
+        const { error } = await supabase.from('family_members').update({
+            name: data.name,
+            role: data.role,
+            monthly_income: data.monthlyIncome,
+            avatar_url: data.avatarUrl
+        }).eq('id', id);
+        if (error) throw error;
+        await fetchData(true);
     };
 
-    const deleteFamilyMember = (id: string) => {
-        setFamilyMembers(prev => prev.filter(m => m.id !== id));
+    const deleteFamilyMember = async (id: string) => {
+        const { error } = await supabase.from('family_members').delete().eq('id', id);
+        if (error) throw error;
+        fetchData(true);
+    };
+
+    const addCategory = async (data: Partial<Category>) => {
+        if (!user) return;
+        const payload = {
+            user_id: user.id,
+            name: data.name!,
+            icon: data.icon || '📦',
+            type: data.type || 'EXPENSE',
+            color: data.color || '#6B7280'
+        };
+        const { error } = await supabase.from('categories').insert(payload);
+        if (error) throw error;
+        fetchData(true);
+    };
+
+    const uploadImage = async (bucket: 'avatars' | 'account-logos', file: File): Promise<string | null> => {
+        if (!user) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+        const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+        if (error) {
+            console.error('Error uploading image:', error);
+            return null;
+        }
+
+        const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
+        return data.publicUrl;
     };
 
     return (
         <FinanceContext.Provider value={{
+            loading,
             transactions,
             goals,
             creditCards,
             bankAccounts,
             familyMembers,
+            categories,
             selectedMemberId,
             dateRange,
             transactionTypeFilter,
             searchText,
+            categoryIdFilter,
+            accountIdFilter,
+            statusFilter,
             setSelectedMemberId,
             setDateRange,
             setTransactionTypeFilter,
             setSearchText,
+            setCategoryIdFilter,
+            setAccountIdFilter,
+            setStatusFilter,
             addTransaction,
             updateTransaction,
             deleteTransaction,
@@ -281,6 +609,8 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
             addFamilyMember,
             updateFamilyMember,
             deleteFamilyMember,
+            addCategory,
+            uploadImage,
             filteredTransactions,
             totalBalance,
             totalIncome,
@@ -292,8 +622,6 @@ export function FinanceProvider({ children }: FinanceProviderProps) {
         </FinanceContext.Provider>
     );
 }
-
-// --- Custom Hook ---
 
 export function useFinance() {
     const context = useContext(FinanceContext);

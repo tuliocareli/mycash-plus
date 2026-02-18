@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus } from 'lucide-react';
+import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { TransactionType } from '../../types';
@@ -12,22 +13,29 @@ interface NewTransactionModalProps {
 }
 
 export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTransactionModalProps) {
-    if (!isOpen) return null;
 
-    const { addTransaction, familyMembers, bankAccounts, creditCards } = useFinance();
 
-    const [type, setType] = useState<TransactionType>('expense');
+    const { addTransaction, familyMembers, bankAccounts, creditCards, categories } = useFinance();
+
+    const [type, setType] = useState<TransactionType>('EXPENSE');
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
+    const [categoryId, setCategoryId] = useState('');
     const [memberId, setMemberId] = useState<string>('');
     const [accountId, setAccountId] = useState(initialAccountId || '');
     const [installments, setInstallments] = useState(1);
     const [isRecurring, setIsRecurring] = useState(false);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
+    // Category addition state
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [isSavingCategory, setIsSavingCategory] = useState(false);
+    const { addCategory } = useFinance();
+
     // Validation Errors
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -36,7 +44,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
     }, [isOpen, initialAccountId]);
 
     useEffect(() => {
-        setCategory('');
+        setCategoryId('');
     }, [type]);
 
     const handleRecurringChange = (checked: boolean) => {
@@ -50,48 +58,71 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
         if (val > 1) setIsRecurring(false);
     };
 
-    // Mock Categories
-    const incomeCategories = ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros'];
-    const expenseCategories = ['Moradia', 'Alimentação', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Compras', 'Outros'];
-    const displayedCategories = type === 'income' ? incomeCategories : expenseCategories;
+    // Filter categories by type
+    const displayedCategories = categories.filter(c => c.type === type);
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
         if (!amount || Number(amount) <= 0) newErrors.amount = 'Valor inválido';
         if (!description || description.length < 3) newErrors.description = 'Min. 3 caracteres';
-        if (!category) newErrors.category = 'Obrigatório';
+        if (!categoryId && !isAddingCategory) newErrors.category = 'Obrigatório';
         if (!accountId) newErrors.accountId = 'Obrigatório';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
-        if (!validate()) return;
+    const handleAddCategory = async () => {
+        if (!newCategoryName || newCategoryName.length < 2) return;
+        setIsSavingCategory(true);
+        try {
+            await addCategory({
+                name: newCategoryName,
+                type,
+                icon: type === 'INCOME' ? '💰' : '📦',
+                color: type === 'INCOME' ? '#10B981' : '#6B7280'
+            });
+            setIsAddingCategory(false);
+            setNewCategoryName('');
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSavingCategory(false);
+        }
+    };
 
-        addTransaction({
-            type,
-            amount: Number(amount),
-            description,
-            category,
-            date,
-            memberId: memberId || null,
-            accountId,
-            installments: type === 'expense' && creditCards.find(c => c.id === accountId) ? installments : 1,
-            isRecurring: type === 'expense' ? isRecurring : false,
-            status: 'completed',
-            isPaid: false,
-        });
+    const handleSubmit = async () => {
+        if (!validate()) return;
+        setSaving(true);
+        try {
+
+            await addTransaction({
+                type,
+                amount: Number(amount),
+                description,
+                categoryId, // Passing ID directly
+                date,
+                memberId: memberId || undefined,
+                accountId,
+                totalInstallments: type === 'EXPENSE' && creditCards.find(c => c.id === accountId) ? installments : 1,
+                isRecurring: type === 'EXPENSE' ? isRecurring : false,
+                status: 'COMPLETED',
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSaving(false);
+        }
 
         handleClose();
     };
 
     const handleClose = () => {
         // Reset State
-        setType('expense');
+        setType('EXPENSE');
         setAmount('');
         setDescription('');
-        setCategory('');
+        setCategoryId('');
         setMemberId('');
         setAccountId('');
         setInstallments(1);
@@ -101,6 +132,8 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
     };
 
     const isCreditCardSelected = creditCards.some(c => c.id === accountId);
+
+    if (!isOpen) return null;
 
     return createPortal(
         <div
@@ -114,7 +147,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                 <div className="flex items-center justify-between px-8 py-6 border-b border-neutral-100 bg-white z-10">
                     <div className="flex items-center gap-4">
                         <div className="size-12 bg-neutral-1100 rounded-full flex items-center justify-center text-white shrink-0">
-                            {type === 'income' ? <ArrowDownLeft size={24} /> : <ArrowUpRight size={24} />}
+                            {type === 'INCOME' ? <ArrowDownLeft size={24} /> : <ArrowUpRight size={24} />}
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-neutral-1100 leading-tight">Nova Transação</h2>
@@ -136,19 +169,19 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                         {/* 1. Toggle Switch (Pill Style) */}
                         <div className="flex p-1 bg-neutral-100 rounded-full border border-neutral-200">
                             <button
-                                onClick={() => setType('income')}
+                                onClick={() => setType('INCOME')}
                                 className={clsx(
                                     "flex-1 py-2.5 rounded-full text-sm font-bold transition-all duration-200 text-center",
-                                    type === 'income' ? "bg-white text-neutral-1100 shadow-sm ring-1 ring-black/5" : "text-neutral-500 hover:text-neutral-700"
+                                    type === 'INCOME' ? "bg-white text-neutral-1100 shadow-sm ring-1 ring-black/5" : "text-neutral-500 hover:text-neutral-700"
                                 )}
                             >
                                 Receita
                             </button>
                             <button
-                                onClick={() => setType('expense')}
+                                onClick={() => setType('EXPENSE')}
                                 className={clsx(
                                     "flex-1 py-2.5 rounded-full text-sm font-bold transition-all duration-200 text-center",
-                                    type === 'expense' ? "bg-neutral-1100 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                                    type === 'EXPENSE' ? "bg-neutral-1100 text-white shadow-sm" : "text-neutral-500 hover:text-neutral-700"
                                 )}
                             >
                                 Despesa
@@ -213,27 +246,56 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between items-center">
                                 <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">Categoria</label>
-                                <button className="text-[10px] font-bold text-brand-700 bg-brand-500/10 px-2 py-1 rounded hover:bg-brand-500/20 transition-colors uppercase flex items-center gap-1">
-                                    <Plus size={12} /> Nova Categoria
+                                <button
+                                    onClick={() => setIsAddingCategory(!isAddingCategory)}
+                                    className="text-[10px] font-bold text-brand-700 bg-brand-500/10 px-2 py-1 rounded hover:bg-brand-500/20 transition-colors uppercase flex items-center gap-1"
+                                >
+                                    {isAddingCategory ? <X size={12} /> : <Plus size={12} />}
+                                    {isAddingCategory ? 'Cancelar' : 'Nova Categoria'}
                                 </button>
                             </div>
-                            <div className={clsx(
-                                "relative flex items-center h-[52px] bg-white border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all",
-                                errors.category ? "border-red-500" : "border-neutral-300"
-                            )}>
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full h-full px-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none cursor-pointer z-10"
-                                >
-                                    <option value="" disabled>Selecione a categoria</option>
-                                    {displayedCategories.map(cat => (
-                                        <option key={cat} value={cat}>{cat}</option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
-                            </div>
-                            {errors.category && <span className="text-xs text-red-500 font-medium">{errors.category}</span>}
+
+                            {isAddingCategory ? (
+                                <div className="flex items-center gap-2 animate-fade-in">
+                                    <div className="flex-1 h-[52px] bg-white border border-neutral-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 transition-all">
+                                        <input
+                                            type="text"
+                                            value={newCategoryName}
+                                            onChange={(e) => setNewCategoryName(e.target.value)}
+                                            className="w-full h-full px-4 outline-none text-neutral-1100 font-medium"
+                                            placeholder="Nome da categoria..."
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleAddCategory}
+                                        disabled={isSavingCategory || newCategoryName.length < 2}
+                                        className="h-[52px] px-4 bg-neutral-1100 text-white rounded-xl font-bold hover:bg-neutral-900 disabled:opacity-50 transition-all flex items-center justify-center min-w-[80px]"
+                                    >
+                                        {isSavingCategory ? <Loader2 size={18} className="animate-spin" /> : 'Salvar'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className={clsx(
+                                        "relative flex items-center h-[52px] bg-white border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all",
+                                        errors.category ? "border-red-500" : "border-neutral-300"
+                                    )}>
+                                        <select
+                                            value={categoryId}
+                                            onChange={(e) => setCategoryId(e.target.value)}
+                                            className="w-full h-full px-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none cursor-pointer z-10"
+                                        >
+                                            <option value="" disabled>Selecione a categoria</option>
+                                            {displayedCategories.map(cat => (
+                                                <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
+                                    </div>
+                                    {errors.category && <span className="text-xs text-red-500 font-medium">{errors.category}</span>}
+                                </>
+                            )}
                         </div>
 
                         {/* 5. User & Account (Grid) */}
@@ -287,7 +349,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                         </div>
 
                         {/* 6. Installments (If Expense & Credit Card) */}
-                        {type === 'expense' && isCreditCardSelected && !isRecurring && (
+                        {type === 'EXPENSE' && isCreditCardSelected && !isRecurring && (
                             <div className="flex flex-col gap-2 animate-fade-in">
                                 <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">Parcelas</label>
                                 <div className="relative flex items-center h-[52px] bg-white border border-neutral-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all">
@@ -307,7 +369,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                         )}
 
                         {/* 7. Recurring Checkbox */}
-                        {type === 'expense' && (
+                        {type === 'EXPENSE' && (
                             <label className={clsx(
                                 "flex items-center gap-3 cursor-pointer group mt-2",
                                 installments > 1 && "opacity-50 pointer-events-none"
@@ -344,9 +406,11 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95"
+                        disabled={saving}
+                        className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Salvar transação
+                        {saving && <Loader2 size={18} className="animate-spin" />}
+                        {saving ? 'Salvando...' : 'Salvar transação'}
                     </button>
                 </div>
             </div>
@@ -354,4 +418,3 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
         document.body
     );
 }
-

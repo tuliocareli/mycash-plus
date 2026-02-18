@@ -1,0 +1,79 @@
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\dashboard\DateSelector.tsx[24m[0m
+[0m  [2m86:17[22m  [31merror[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\AddAccountModal.tsx[24m[0m
+[0m  [2m16:75[22m  [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m18:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m19:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m20:37[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m23:35[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m26:41[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m27:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m28:31[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m29:41[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m30:31[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m33:35[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m34:26[22m  [31merror[39m  React Hook "useRef" is called conditionally. React Hooks must be called in the exact same order in every component render      [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m35:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m54:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\AddMemberModal.tsx[24m[0m
+[0m  [2m15:46[22m  [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m17:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m18:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m19:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m20:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m21:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m22:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m23:26[22m  [31merror[39m  React Hook "useRef" is called conditionally. React Hooks must be called in the exact same order in every component render      [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m24:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\CardDetailsModal.tsx[24m[0m
+[0m  [2m24:30[22m  [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m25:43[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m26:65[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?    [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m32:30[22m  [31merror[39m  React Hook "useMemo" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?     [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\FiltersMobileModal.tsx[24m[0m
+[0m  [2m24:9[22m   [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m27:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m28:43[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m30:37[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m33:5[22m   [31merror[39m  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\NewGoalModal.tsx[24m[0m
+[0m  [2m17:37[22m  [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render                                                               [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m19:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                 [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m20:45[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m21:47[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m22:37[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m25:31[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m28:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\components\modals\NewTransactionModal.tsx[24m[0m
+[0m  [2m18:86[22m  [31merror[39m  React Hook "useFinance" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m20:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m21:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m22:43[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m23:41[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m24:37[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m25:39[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render                                                                  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m26:45[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m27:43[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m28:29[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m31:33[22m  [31merror[39m  React Hook "useState" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?   [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m33:5[22m   [31merror[39m  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m  [2m39:5[22m   [31merror[39m  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  [2mreact-hooks/rules-of-hooks[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\contexts\AuthContext.tsx[24m[0m
+[0m  [2m49:17[22m  [33mwarning[39m  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  [2mreact-refresh/only-export-components[22m[0m
+[0m[0m
+[0m[4mE:\teste antigravity\src\contexts\FinanceContext.tsx[24m[0m
+[0m  [2m211:8[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                    [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m427:9[22m   [31merror[39m    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free             [2m@typescript-eslint/ban-ts-comment[22m[0m
+[0m  [2m461:9[22m   [31merror[39m    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free             [2m@typescript-eslint/ban-ts-comment[22m[0m
+[0m  [2m573:17[22m  [33mwarning[39m  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  [2mreact-refresh/only-export-components[22m[0m
+[0m[0m
+[0m[31m[1m✖ 58 problems (55 errors, 3 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

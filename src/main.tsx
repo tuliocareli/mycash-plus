@@ -10,10 +10,14 @@ if (!rootElement) {
     throw new Error('Failed to find the root element');
 }
 
+import { AuthProvider } from './contexts/AuthContext'
+
 createRoot(rootElement).render(
     <StrictMode>
-        <FinanceProvider>
-            <App />
-        </FinanceProvider>
+        <AuthProvider>
+            <FinanceProvider>
+                <App />
+            </FinanceProvider>
+        </AuthProvider>
     </StrictMode>,
 )

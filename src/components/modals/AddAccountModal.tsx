@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { X, Calendar } from 'lucide-react';
+
+import { useState, useRef } from 'react';
+import { X, Calendar, Upload, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
+// import { AccountType } from '../../types';
 
 interface AddAccountModalProps {
     isOpen: boolean;
@@ -9,9 +11,9 @@ interface AddAccountModalProps {
 }
 
 export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
-    if (!isOpen) return null;
 
-    const { addBankAccount, addCreditCard, familyMembers } = useFinance();
+
+    const { addBankAccount, addCreditCard, familyMembers, uploadImage } = useFinance();
 
     const [type, setType] = useState<'bank' | 'creditCard'>('bank');
     const [name, setName] = useState('');
@@ -26,6 +28,29 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
     const [limit, setLimit] = useState('');
     const [lastDigits, setLastDigits] = useState('');
     const [theme, setTheme] = useState<'black' | 'lime' | 'white'>('black');
+
+    // Logo Upload
+    const [logoUrl, setLogoUrl] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const url = await uploadImage('account-logos', file);
+            if (url) {
+                setLogoUrl(url);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -46,28 +71,37 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validate()) return;
+        setSaving(true);
+        try {
 
-        if (type === 'bank') {
-            addBankAccount({
-                name,
-                holderId,
-                balance: Number(balance),
-                type: 'bank'
-            });
-        } else {
-            addCreditCard({
-                name,
-                holderId,
-                limit: Number(limit),
-                closingDay: Number(closingDay),
-                dueDay: Number(dueDay),
-                currentBill: 0, // Starts at 0
-                lastDigits: lastDigits.slice(0, 4),
-                theme,
-                type: 'creditCard'
-            });
+            if (type === 'bank') {
+                await addBankAccount({
+                    name,
+                    holderId,
+                    balance: Number(balance),
+                    type: 'CHECKING',
+                    logoUrl: logoUrl || undefined
+                });
+            } else {
+                await addCreditCard({
+                    name,
+                    holderId,
+                    creditLimit: Number(limit),
+                    closingDay: Number(closingDay),
+                    dueDay: Number(dueDay),
+                    currentBill: 0, // Starts at 0
+                    lastDigits: lastDigits.slice(0, 4),
+                    theme,
+                    type: 'CREDIT_CARD',
+                    logoUrl: logoUrl || undefined
+                });
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSaving(false);
         }
 
         // Reset
@@ -78,9 +112,12 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
         setDueDay('');
         setLimit('');
         setLastDigits('');
+        setLogoUrl('');
 
         onClose();
     };
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in">
@@ -156,6 +193,48 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">▼</div>
                         </div>
                         {errors.holderId && <span className="text-xs text-red-500 font-medium ml-1">{errors.holderId}</span>}
+                    </div>
+
+                    {/* Logo (Optional) */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-neutral-1100 uppercase tracking-wider flex justify-between">
+                            Logo <span className="text-neutral-400 font-normal normal-case text-xs">(Opcional)</span>
+                        </label>
+                        {logoUrl ? (
+                            <div className="relative w-16 h-16 rounded-2xl bg-white border border-neutral-200 overflow-hidden group">
+                                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                                <button
+                                    onClick={() => setLogoUrl('')}
+                                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <X className="text-white" size={20} />
+                                </button>
+                            </div>
+                        ) : (
+                            <div
+                                className="border-2 border-dashed border-neutral-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center hover:bg-neutral-50 transition-colors cursor-pointer"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
+                                <Upload size={20} className="text-neutral-400 mb-2" />
+                                <span className="text-xs font-bold text-neutral-500">
+                                    {uploading ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loader2 size={16} className="animate-spin text-brand-600" />
+                                            <span className="text-brand-600 font-bold">Enviando...</span>
+                                        </div>
+                                    ) : (
+                                        'Upload Logo'
+                                    )}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Bank Specific */}
@@ -262,9 +341,11 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm"
+                        disabled={saving || uploading}
+                        className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Adicionar
+                        {saving && <Loader2 size={18} className="animate-spin" />}
+                        {saving ? 'Adicionando...' : 'Adicionar'}
                     </button>
                 </div>
 

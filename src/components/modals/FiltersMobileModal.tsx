@@ -11,7 +11,7 @@ interface FiltersMobileModalProps {
 }
 
 export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps) {
-    if (!isOpen) return null;
+
 
     const {
         transactionTypeFilter,
@@ -55,6 +55,8 @@ export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps)
     const nextMonth = () => setViewDate(d => addMonths(d, 1));
     const prevMonth = () => setViewDate(d => subMonths(d, 1));
 
+    if (!isOpen) return null;
+
     return (
         <div className="fixed inset-0 z-[60] lg:hidden flex flex-col justify-end bg-neutral-1100/60 backdrop-blur-sm animate-fade-in">
             <div className="bg-white w-full rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] animate-slide-in-up">
@@ -74,7 +76,7 @@ export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps)
                     <div className="flex flex-col gap-3">
                         <span className="text-sm font-bold text-neutral-1100">Tipo de Transação</span>
                         <div className="grid grid-cols-3 gap-3">
-                            {(['all', 'income', 'expense'] as const).map(t => (
+                            {(['all', 'INCOME', 'EXPENSE'] as const).map(t => (
                                 <button
                                     key={t}
                                     onClick={() => setLocalType(t)}
@@ -85,7 +87,7 @@ export function FiltersMobileModal({ isOpen, onClose }: FiltersMobileModalProps)
                                             : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"
                                     )}
                                 >
-                                    {t === 'all' ? 'Todos' : t === 'income' ? 'Receitas' : 'Despesas'}
+                                    {t === 'all' ? 'Todos' : t === 'INCOME' ? 'Receitas' : 'Despesas'}
                                 </button>
                             ))}
                         </div>

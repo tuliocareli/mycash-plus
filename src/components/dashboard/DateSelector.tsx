@@ -82,10 +82,11 @@ export function DateSelector() {
             case 'thisMonth':
                 newRange = { startDate: startOfMonth(now), endDate: endOfMonth(now) };
                 break;
-            case 'lastMonth':
+            case 'lastMonth': {
                 const last = subMonths(now, 1);
                 newRange = { startDate: startOfMonth(last), endDate: endOfMonth(last) };
                 break;
+            }
             case 'last3Months':
                 newRange = { startDate: subMonths(now, 3), endDate: now }; // A bit loose, usually start of 3 months ago to now
                 break;

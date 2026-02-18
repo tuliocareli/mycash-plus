@@ -27,11 +27,11 @@ export function SummaryCards() {
 
         // Calculate net change in last 30 days
         const incomeChange = recentTransactions
-            .filter(t => t.type === 'income')
+            .filter(t => t.type === 'INCOME')
             .reduce((sum, t) => sum + t.amount, 0);
 
         const expenseChange = recentTransactions
-            .filter(t => t.type === 'expense')
+            .filter(t => t.type === 'EXPENSE')
             .reduce((sum, t) => sum + t.amount, 0);
 
         const netChange = incomeChange - expenseChange;
@@ -62,9 +62,9 @@ export function SummaryCards() {
                 {/* Decorative Blur */}
                 <div className="absolute -right-12 -top-12 w-64 h-64 bg-brand-500/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-brand-500/30 transition-all duration-500" />
 
-                <div className="relative z-10 flex flex-col gap-2">
-                    <span className="text-neutral-400 text-sm font-medium tracking-wide">Saldo Total</span>
-                    <span className="text-3xl lg:text-4xl font-bold tracking-tight">
+                <div className="relative z-10 flex flex-col gap-1">
+                    <span className="text-neutral-400 text-[10px] font-black uppercase tracking-[0.2em]">Saldo Total</span>
+                    <span className="text-4xl lg:text-5xl font-black tracking-tightest">
                         {formatCurrency(animatedBalance)}
                     </span>
                 </div>
@@ -82,39 +82,39 @@ export function SummaryCards() {
             </div>
 
             {/* 2. Income Card (Light Theme) */}
-            <div className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-white border border-neutral-100 rounded-[2.5rem] p-8 flex flex-col gap-6 min-h-[200px] shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start">
-                    <span className="text-neutral-1100 text-base font-bold">Receitas</span>
+                    <span className="text-neutral-1100 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Fluxo Entradas</span>
                     <div className="p-2 rounded-full bg-neutral-100">
                         <ArrowDownLeft size={20} className="text-neutral-500" />
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                    <span className="text-3xl font-bold text-neutral-1100 tracking-tight">
+                <div className="flex-1 flex flex-col justify-end">
+                    <span className="text-3xl font-black text-neutral-1100 tracking-tightest">
                         {formatCurrency(animatedIncome)}
                     </span>
-                    <span className="text-xs text-neutral-500 font-medium">
-                        Total de entradas no período
+                    <span className="text-[10px] text-neutral-400 font-black uppercase tracking-widest mt-1">
+                        Total Receitas
                     </span>
                 </div>
             </div>
 
             {/* 3. Expense Card (Light Theme) */}
-            <div className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col gap-6 min-h-[160px] shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="bg-white border border-neutral-100 rounded-[2.5rem] p-8 flex flex-col gap-6 min-h-[200px] shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex justify-between items-start">
-                    <span className="text-neutral-500 text-base font-medium">Despesas</span>
+                    <span className="text-neutral-1100 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Fluxo Saídas</span>
                     <div className="p-2 rounded-full bg-red-50">
                         <ArrowUpRight size={20} className="text-red-500" />
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                    <span className="text-3xl font-bold text-neutral-1100 tracking-tight">
+                <div className="flex-1 flex flex-col justify-end">
+                    <span className="text-3xl font-black text-neutral-1100 tracking-tightest">
                         {formatCurrency(animatedExpenses)}
                     </span>
-                    <span className="text-xs text-neutral-500 font-medium">
-                        Total de saídas no período
+                    <span className="text-[10px] text-neutral-400 font-black uppercase tracking-widest mt-1">
+                        Total Despesas
                     </span>
                 </div>
             </div>

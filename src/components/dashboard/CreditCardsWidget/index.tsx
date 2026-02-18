@@ -34,7 +34,7 @@ export function CreditCardsWidget({ onOpenAddCard, onOpenCardDetails }: CreditCa
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <CardIcon className="size-5 text-neutral-1100" />
-                    <h2 className="text-lg font-medium text-neutral-1100">Cartões</h2>
+                    <h2 className="text-sm font-black text-neutral-1100 uppercase tracking-widest">Cartões</h2>
                 </div>
                 <button
                     onClick={onOpenAddCard}
@@ -112,7 +112,7 @@ function CreditCardItem({ card, onClick }: { card: CreditCard; onClick?: () => v
         }
     };
 
-    const currentTheme = themeStyles[card.theme];
+    const currentTheme = themeStyles[card.theme || 'black'] || themeStyles.black;
 
     return (
         <button

@@ -1,0 +1,11 @@
+src/components/dashboard/FilterButton.tsx(38,30): error TS2820: Type '"income"' is not assignable to type 'TransactionType | "all"'. Did you mean '"INCOME"'?
+src/components/dashboard/FilterButton.tsx(39,30): error TS2820: Type '"expense"' is not assignable to type 'TransactionType | "all"'. Did you mean '"EXPENSE"'?
+src/components/modals/AddAccountModal.tsx(6,1): error TS6133: 'AccountType' is declared but its value is never read.
+src/components/modals/AddMemberModal.tsx(42,13): error TS2353: Object literal may only specify known properties, and 'income' does not exist in type 'Partial<FamilyMember>'.
+src/components/modals/NewGoalModal.tsx(3,13): error TS6133: 'Target' is declared but its value is never read.
+src/contexts/FinanceContext.tsx(10,5): error TS6133: 'RecurrenceFrequency' is declared but its value is never read.
+src/pages/Cards/index.tsx(94,64): error TS2339: Property 'limit' does not exist on type 'Account'.
+src/pages/Cards/index.tsx(139,119): error TS2339: Property 'limit' does not exist on type 'Account'.
+src/pages/Goals/index.tsx(3,34): error TS6133: 'TrendingUp' is declared but its value is never read.
+src/pages/Goals/index.tsx(3,46): error TS6133: 'MoreVertical' is declared but its value is never read.
+src/pages/Goals/index.tsx(7,1): error TS6133: 'clsx' is declared but its value is never read.

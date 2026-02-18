@@ -91,7 +91,8 @@ export default function Cards() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {sortedCards.map(card => {
-                        const usage = (card.currentBill / card.limit) * 100;
+                        const usage = (card.currentBill / (card.creditLimit || 1)) * 100;
+                        const limit = card.creditLimit || 0;
 
                         return (
                             <div
@@ -136,7 +137,7 @@ export default function Cards() {
                                         </div>
                                         <div className="text-right flex flex-col">
                                             <span className="text-xs font-bold text-neutral-400 uppercase">Limite</span>
-                                            <span className="text-sm font-bold text-neutral-600">{formatCurrency(card.limit)}</span>
+                                            <span className="text-sm font-bold text-neutral-600">{formatCurrency(limit)}</span>
                                         </div>
                                     </div>
 

@@ -21,7 +21,7 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     return (
         <aside
             className={clsx(
-                'hidden lg:flex flex-col h-screen bg-white border-r border-neutral-200 fixed left-0 top-0 z-40 transition-all duration-300 ease-in-out',
+                'flex flex-col h-screen bg-white border-r border-neutral-200 fixed left-0 top-0 z-40 transition-all duration-300 ease-in-out',
                 // Larguras ajustadas para bater com o layout espaçoso da imagem
                 isCollapsed ? 'w-[88px] items-center px-4 py-8' : 'w-[280px] items-start px-6 py-8'
             )}

@@ -19,7 +19,7 @@ const formatCurrency = (value: number) => {
 };
 
 export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProps) {
-    if (!isOpen || !card) return null;
+
 
     const { transactions } = useFinance();
     const [currentPage, setCurrentPage] = useState(1);
@@ -30,14 +30,17 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
 
     // Filter transactions for this card
     const cardTransactions = useMemo(() => {
-        return transactions.filter(t => t.accountId === card.id && t.type === 'expense');
-    }, [transactions, card.id]);
+        if (!card) return [];
+        return transactions.filter(t => t.accountId === card.id && t.type === 'EXPENSE');
+    }, [transactions, card]);
 
     const totalPages = Math.ceil(cardTransactions.length / itemsPerPage);
     const paginatedTransactions = cardTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const availableLimit = card.limit - card.currentBill;
-    const usagePercentage = (card.currentBill / card.limit) * 100;
+    const availableLimit = card ? (card.creditLimit || 0) - card.currentBill : 0;
+    const usagePercentage = card ? (card.currentBill / (card.creditLimit || 1)) * 100 : 0;
+
+    if (!isOpen || !card) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-md animate-fade-in p-4">
@@ -70,7 +73,7 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm">
                             <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Limite Total</span>
-                            <p className="text-2xl font-bold text-neutral-1100 mt-1">{formatCurrency(card.limit)}</p>
+                            <p className="text-2xl font-bold text-neutral-1100 mt-1">{formatCurrency(card.creditLimit || 0)}</p>
                         </div>
                         <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm relative overflow-hidden">
                             <span className="text-xs font-bold text-neutral-400 uppercase tracking-wider">Fatura Atual</span>
@@ -147,9 +150,9 @@ export function CardDetailsModal({ isOpen, onClose, card }: CardDetailsModalProp
                                                 </td>
                                                 <td className="px-6 py-4 text-sm font-bold text-neutral-1100">
                                                     {t.description}
-                                                    {t.installments && t.installments > 1 && (
+                                                    {t.totalInstallments > 1 && (
                                                         <span className="ml-2 px-2 py-0.5 bg-neutral-100 text-[10px] rounded text-neutral-500">
-                                                            Parcelado
+                                                            {t.installmentNumber}/{t.totalInstallments}
                                                         </span>
                                                     )}
                                                 </td>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, User, Upload } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, User, Upload, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { MemberRole } from '../../types';
@@ -10,9 +10,9 @@ interface AddMemberModalProps {
 }
 
 export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
-    if (!isOpen) return null;
 
-    const { addFamilyMember } = useFinance();
+
+    const { addFamilyMember, uploadImage } = useFinance();
 
     const [name, setName] = useState('');
     const [role, setRole] = useState<MemberRole | string>(''); // Allow free text but suggest roles
@@ -20,6 +20,9 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
     const [income, setIncome] = useState('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [avatarTab, setAvatarTab] = useState<'url' | 'upload'>('url');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [saving, setSaving] = useState(false);
 
     const suggestedRoles = ['Pai', 'Mãe', 'Filho', 'Filha', 'Avô', 'Avó', 'Tio', 'Tia'];
 
@@ -32,26 +35,52 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
-        if (!validate()) return;
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        addFamilyMember({
-            name,
-            role: role as MemberRole,
-            avatarUrl: avatarUrl || undefined,
-            income: income ? Number(income) : 0,
-        });
-
-        // Reset
-        setName('');
-        setRole('');
-        setAvatarUrl('');
-        setIncome('');
-        setErrors({});
-
-        console.log("Membro adicionado!");
-        onClose();
+        setUploading(true);
+        try {
+            const url = await uploadImage('avatars', file);
+            if (url) {
+                setAvatarUrl(url);
+                setAvatarTab('url');
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setUploading(false);
+        }
     };
+
+    const handleSubmit = async () => {
+        if (!validate()) return;
+        setSaving(true);
+        try {
+            await addFamilyMember({
+                name,
+                role: role as MemberRole,
+                avatarUrl: avatarUrl || undefined,
+                monthlyIncome: income ? Number(income) : 0,
+            });
+
+            // Reset
+            setName('');
+            setRole('');
+            setAvatarUrl('');
+            setIncome('');
+            setErrors({});
+
+            console.log("Membro adicionado!");
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in">
@@ -159,11 +188,30 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                                 />
                             </div>
                         ) : (
-                            <div className="border-2 border-dashed border-neutral-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:bg-neutral-50 transition-colors cursor-pointer group">
+                            <div
+                                className="border-2 border-dashed border-neutral-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:bg-neutral-50 transition-colors cursor-pointer group"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
                                 <div className="p-3 bg-neutral-100 rounded-full mb-2 group-hover:bg-white group-hover:shadow-sm transition-all">
                                     <Upload size={20} className="text-neutral-400 group-hover:text-brand-600" />
                                 </div>
-                                <span className="text-xs font-bold text-neutral-500 group-hover:text-neutral-800">Clique para selecionar imagem</span>
+                                <span className="text-xs font-bold text-neutral-500 group-hover:text-neutral-800">
+                                    {uploading ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loader2 size={16} className="animate-spin text-brand-600" />
+                                            <span className="text-brand-600">Enviando...</span>
+                                        </div>
+                                    ) : (
+                                        'Clique para selecionar imagem'
+                                    )}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -180,9 +228,11 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm"
+                        disabled={saving || uploading}
+                        className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm flex items-center gap-2 disabled:opacity-50"
                     >
-                        Salvar
+                        {saving && <Loader2 size={16} className="animate-spin" />}
+                        {saving ? 'Salvando...' : 'Salvar'}
                     </button>
                 </div>
 

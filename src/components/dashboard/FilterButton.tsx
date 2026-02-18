@@ -35,8 +35,8 @@ export function FilterButton({ onOpenFilters }: { onOpenFilters?: () => void }) 
 
     const options: Array<{ label: string; value: 'all' | TransactionType }> = [
         { label: 'Todos', value: 'all' },
-        { label: 'Receitas', value: 'income' },
-        { label: 'Despesas', value: 'expense' }
+        { label: 'Receitas', value: 'INCOME' },
+        { label: 'Despesas', value: 'EXPENSE' }
     ];
 
     return (

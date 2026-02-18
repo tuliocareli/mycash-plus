@@ -26,7 +26,7 @@
 
     /* Spacing Base (4px scale) */
     --spacing-base: 4px;
-    
+
     /* Radius Base */
     --radius-pill: 100px;
     --radius-card: 20px;
@@ -35,7 +35,7 @@
   body {
     @apply bg-neutral-200 text-neutral-1100 font-sans antialiased;
     /* Prevent horizontal scroll on mobile */
-    overflow-x: hidden; 
+    overflow-x: hidden;
   }
 }
 
@@ -44,12 +44,63 @@
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   @apply bg-neutral-300 rounded-full;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-neutral-400;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Base transitions */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Interactive elements */
+button,
+a {
+  @apply active:scale-95 transition-all;
+}
+
+.card-hover {
+  @apply hover:shadow-lg hover:-translate-y-1 transition-all duration-300;
 }

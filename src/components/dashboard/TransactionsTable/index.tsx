@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from 'react';
 import {
     Search,
@@ -6,13 +7,20 @@ import {
     ArrowUpRight,
     ArrowDownLeft,
     User,
-    FileSearch
+    FileSearch,
+    ArrowUpDown
 } from 'lucide-react';
 import { useFinance } from '../../../contexts/FinanceContext';
 import { format, parseISO } from 'date-fns';
 import clsx from 'clsx';
+import { TransactionType } from '../../../types';
 
-export function TransactionsTable() {
+interface TransactionsTableProps {
+    mode?: 'dashboard' | 'expanded';
+    hideHeader?: boolean;
+}
+
+export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: TransactionsTableProps) {
     const {
         filteredTransactions,
         bankAccounts,
@@ -22,55 +30,66 @@ export function TransactionsTable() {
 
     // Local Filters
     const [localSearch, setLocalSearch] = useState('');
-    const [localType, setLocalType] = useState<'all' | 'income' | 'expense'>('all');
+    const [localType, setLocalType] = useState<'all' | TransactionType>('all');
+
+    // Sort
+    const [sortField, setSortField] = useState<'date' | 'amount' | 'description'>('date');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = mode === 'expanded' ? 10 : 5;
 
     // Reset page on filter change
     useEffect(() => {
         setCurrentPage(1);
     }, [localSearch, localType, filteredTransactions]);
 
-    // Apply Local Filtering
-    const finalTransactions = useMemo(() => {
-        return filteredTransactions.filter(t => {
-            // Local Search (Description or Category)
+    // Apply Local Filtering and Sorting
+    const sortedTransactions = useMemo(() => {
+        const filtered = filteredTransactions.filter(t => {
             const matchesSearch = localSearch === '' ||
                 t.description.toLowerCase().includes(localSearch.toLowerCase()) ||
-                t.category.toLowerCase().includes(localSearch.toLowerCase());
-
-            // Local Type
+                (t.category || '').toLowerCase().includes(localSearch.toLowerCase());
             const matchesType = localType === 'all' || t.type === localType;
-
             return matchesSearch && matchesType;
         });
-    }, [filteredTransactions, localSearch, localType]);
+
+        return [...filtered].sort((a, b) => {
+            let comparison = 0;
+            if (sortField === 'date') {
+                comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+            } else if (sortField === 'amount') {
+                comparison = a.amount - b.amount;
+            } else if (sortField === 'description') {
+                comparison = a.description.localeCompare(b.description);
+            }
+            return sortDirection === 'desc' ? -comparison : comparison;
+        });
+    }, [filteredTransactions, localSearch, localType, sortField, sortDirection]);
 
     // Paginated Data
-    const totalItems = finalTransactions.length;
+    const totalItems = sortedTransactions.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const paginatedTransactions = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
-        return finalTransactions.slice(start, start + itemsPerPage);
-    }, [finalTransactions, currentPage]);
+        return sortedTransactions.slice(start, start + itemsPerPage);
+    }, [sortedTransactions, currentPage, itemsPerPage]);
 
-    const formatCurrency = (amount: number, type: 'income' | 'expense') => {
+    const formatCurrency = (amount: number, type: TransactionType) => {
         const value = new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL',
         }).format(amount);
-        return type === 'income' ? `+ ${value}` : `- ${value}`;
+        return type === 'INCOME' ? `+ ${value}` : `- ${value}`;
     };
 
-    const getAccountName = (accountId: string) => {
+    const getAccountName = (accountId?: string) => {
+        if (!accountId) return 'Desconhecido';
         const bank = bankAccounts.find(a => a.id === accountId);
         if (bank) return bank.name;
-
         const card = creditCards.find(c => c.id === accountId);
         if (card) return card.name;
-
         return 'Desconhecido';
     };
 
@@ -78,6 +97,15 @@ export function TransactionsTable() {
         if (!memberId) return null;
         const member = familyMembers.find(m => m.id === memberId);
         return member?.avatarUrl || null;
+    };
+
+    const handleSort = (field: 'date' | 'amount' | 'description') => {
+        if (sortField === field) {
+            setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('desc');
+        }
     };
 
     // Pagination numbers logic
@@ -97,45 +125,40 @@ export function TransactionsTable() {
         return pages;
     };
 
-    // Scroll to top on page change
-    useEffect(() => {
-        if (currentPage > 1) {
-            const element = document.getElementById('extrato-detalhado');
-            element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }, [currentPage]);
-
     return (
-        <div id="extrato-detalhado" className="bg-white rounded-3xl border border-neutral-200 p-6 lg:p-10 flex flex-col h-full shadow-sm">
+        <div id="extrato-detalhado" className={clsx(
+            "bg-white rounded-3xl flex flex-col h-full",
+            mode === 'dashboard' ? "border border-neutral-200 p-6 lg:p-10 shadow-sm" : "p-0"
+        )}>
             {/* Header / Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 shrink-0">
-                <h2 className="text-lg font-medium text-neutral-1100">Extrato detalhado</h2>
+            {!hideHeader && (
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 shrink-0">
+                    <h2 className="text-lg font-medium text-neutral-1100">Extrato detalhado</h2>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                    {/* Search Input */}
-                    <div className="relative w-full md:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 size-4" />
-                        <input
-                            type="text"
-                            placeholder="Buscar lançamentos..."
-                            value={localSearch}
-                            onChange={(e) => setLocalSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-neutral-100 border-neutral-100 rounded-xl text-sm text-neutral-1100 placeholder:text-neutral-400 focus:ring-2 focus:ring-brand-500 transition-all outline-none"
-                        />
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                        <div className="relative w-full md:w-72">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 size-4" />
+                            <input
+                                type="text"
+                                placeholder="Buscar lançamentos..."
+                                value={localSearch}
+                                onChange={(e) => setLocalSearch(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 bg-neutral-100 border-neutral-100 rounded-xl text-sm text-neutral-1100 placeholder:text-neutral-400 focus:ring-2 focus:ring-brand-500 transition-all outline-none"
+                            />
+                        </div>
+
+                        <select
+                            value={localType}
+                            onChange={(e) => setLocalType(e.target.value as any)}
+                            className="w-full md:w-[160px] px-4 py-3 bg-neutral-100 border-none rounded-xl text-sm font-medium text-neutral-1100 focus:ring-2 focus:ring-brand-500 transition-all outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_12px_center] bg-no-repeat"
+                        >
+                            <option value="all">Todos os tipos</option>
+                            <option value="INCOME">Apenas Receitas</option>
+                            <option value="EXPENSE">Apenas Despesas</option>
+                        </select>
                     </div>
-
-                    {/* Type Filter */}
-                    <select
-                        value={localType}
-                        onChange={(e) => setLocalType(e.target.value as any)}
-                        className="w-full md:w-[160px] px-4 py-3 bg-neutral-100 border-none rounded-xl text-sm font-medium text-neutral-1100 focus:ring-2 focus:ring-brand-500 transition-all outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_12px_center] bg-no-repeat"
-                    >
-                        <option value="all">Todos os tipos</option>
-                        <option value="income">Apenas Receitas</option>
-                        <option value="expense">Apenas Despesas</option>
-                    </select>
                 </div>
-            </div>
+            )}
 
             {/* Content Area */}
             <div className="flex-1 flex flex-col min-h-0">
@@ -146,15 +169,36 @@ export function TransactionsTable() {
                             <thead>
                                 <tr className="bg-neutral-50/50 border-b border-neutral-100">
                                     <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[80px]">Membro</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[120px]">Data</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider min-w-[200px]">Descrição</th>
+                                    <th
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[120px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        onClick={() => handleSort('date')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Data <ArrowUpDown size={12} className={sortField === 'date' ? 'text-brand-500' : ''} />
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider min-w-[200px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        onClick={() => handleSort('description')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Descrição <ArrowUpDown size={12} className={sortField === 'description' ? 'text-brand-500' : ''} />
+                                        </div>
+                                    </th>
                                     <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[150px]">Categoria</th>
                                     <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[160px]">Origem</th>
                                     <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[100px]">Parcelas</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider text-right w-[150px]">Valor</th>
+                                    <th
+                                        className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider text-right w-[150px] cursor-pointer hover:bg-neutral-100 transition-colors"
+                                        onClick={() => handleSort('amount')}
+                                    >
+                                        <div className="flex items-center justify-end gap-2">
+                                            Valor <ArrowUpDown size={12} className={sortField === 'amount' ? 'text-brand-500' : ''} />
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
-                            <tbody key={currentPage} className="divide-y divide-neutral-100 animate-fade-in">
+                            <tbody key={currentPage} className="divide-y divide-neutral-100 animate-fade-in text-neutral-1100">
                                 {paginatedTransactions.length > 0 ? (
                                     paginatedTransactions.map((t, idx) => (
                                         <tr
@@ -177,52 +221,46 @@ export function TransactionsTable() {
                                                     )}
                                                 </div>
                                             </td>
-
                                             <td className="px-6 py-5">
-                                                <span className="text-sm font-medium text-neutral-500">
+                                                <span className="text-sm font-bold text-neutral-500">
                                                     {format(parseISO(t.date), 'dd/MM/yyyy')}
                                                 </span>
                                             </td>
-
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className={clsx(
                                                         "size-8 rounded-full flex items-center justify-center shrink-0 shadow-sm",
-                                                        t.type === 'income' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                                                        t.type === 'INCOME' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                                                     )}>
-                                                        {t.type === 'income' ? (
+                                                        {t.type === 'INCOME' ? (
                                                             <ArrowDownLeft size={16} strokeWidth={2.5} />
                                                         ) : (
                                                             <ArrowUpRight size={16} strokeWidth={2.5} />
                                                         )}
                                                     </div>
-                                                    <span className="text-sm font-bold text-neutral-1100 truncate">
+                                                    <span className="text-sm font-extrabold truncate">
                                                         {t.description}
                                                     </span>
                                                 </div>
                                             </td>
-
                                             <td className="px-6 py-5">
                                                 <span className="inline-flex px-3 py-1.5 rounded-full bg-neutral-100 text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                                                    {t.category}
+                                                    {t.category || 'Outros'}
                                                 </span>
                                             </td>
-
-                                            <td className="px-6 py-5 text-sm font-medium text-neutral-500 truncate">
+                                            <td className="px-6 py-5 text-sm font-bold text-neutral-500 truncate">
                                                 {getAccountName(t.accountId)}
                                             </td>
-
-                                            <td className="px-6 py-5 text-sm font-medium text-neutral-500">
-                                                {t.installments && t.installments > 1 ? (
+                                            <td className="px-6 py-5 text-sm font-bold text-neutral-500">
+                                                {t.installmentNumber ? (
                                                     <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-bold text-neutral-600">
-                                                        {t.installments}x
+                                                        {t.installmentNumber}/{t.totalInstallments}
                                                     </span>
                                                 ) : '-'}
                                             </td>
-
                                             <td className={clsx(
-                                                "px-6 py-5 text-sm font-bold text-right",
-                                                t.type === 'income' ? "text-green-600" : "text-neutral-1100"
+                                                "px-6 py-5 text-sm font-black text-right",
+                                                t.type === 'INCOME' ? "text-green-600" : ""
                                             )}>
                                                 {formatCurrency(t.amount, t.type)}
                                             </td>
@@ -243,22 +281,22 @@ export function TransactionsTable() {
                                     <div className="flex items-center gap-3">
                                         <div className={clsx(
                                             "size-10 rounded-full flex items-center justify-center shrink-0",
-                                            t.type === 'income' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                                            t.type === 'INCOME' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                                         )}>
-                                            {t.type === 'income' ? (
+                                            {t.type === 'INCOME' ? (
                                                 <ArrowDownLeft size={20} strokeWidth={2.5} />
                                             ) : (
                                                 <ArrowUpRight size={20} strokeWidth={2.5} />
                                             )}
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-neutral-1100">{t.description}</span>
-                                            <span className="text-xs text-neutral-400 font-medium">{format(parseISO(t.date), 'dd MMM yyyy')}</span>
+                                        <div className="flex flex-col text-neutral-1100">
+                                            <span className="text-sm font-extrabold">{t.description}</span>
+                                            <span className="text-xs text-neutral-400 font-bold">{format(parseISO(t.date), 'dd MMM yyyy')}</span>
                                         </div>
                                     </div>
                                     <span className={clsx(
                                         "text-sm font-black",
-                                        t.type === 'income' ? "text-green-600" : "text-neutral-1100"
+                                        t.type === 'INCOME' ? "text-green-600" : "text-neutral-1100"
                                     )}>
                                         {formatCurrency(t.amount, t.type)}
                                     </span>
@@ -271,10 +309,10 @@ export function TransactionsTable() {
                                             ) : <User size={10} className="text-neutral-300" />}
                                         </div>
                                         <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest bg-neutral-50 px-2 py-1 rounded">
-                                            {t.category}
+                                            {t.category || 'Outros'}
                                         </span>
                                     </div>
-                                    <span className="text-[11px] font-medium text-neutral-400">{getAccountName(t.accountId)}</span>
+                                    <span className="text-[11px] font-bold text-neutral-400 uppercase">{getAccountName(t.accountId)}</span>
                                 </div>
                             </div>
                         ))
@@ -287,10 +325,10 @@ export function TransactionsTable() {
                         <div className="p-5 bg-neutral-50 rounded-full mb-4">
                             <FileSearch size={32} strokeWidth={1.5} className="text-neutral-300" />
                         </div>
-                        <p className="text-neutral-400 font-medium">Nenhum lançamento encontrado.</p>
+                        <p className="text-neutral-400 font-bold">Nenhum lançamento encontrado.</p>
                         <button
                             onClick={() => { setLocalSearch(''); setLocalType('all'); }}
-                            className="mt-4 text-xs font-bold text-neutral-1100 underline decoration-neutral-200 underline-offset-4"
+                            className="mt-4 text-xs font-bold text-neutral-1100 underline decoration-neutral-200 underline-offset-4 uppercase tracking-widest"
                         >
                             Limpar filtros
                         </button>
@@ -300,14 +338,13 @@ export function TransactionsTable() {
 
             {/* Pagination / Footer */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 mt-4 pt-6 border-t border-neutral-100 shrink-0">
-                <p className="text-xs font-semibold text-neutral-500 order-2 md:order-1">
-                    Mostrando <span className="text-neutral-1100">{totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> a{' '}
-                    <span className="text-neutral-1100">{Math.min(currentPage * itemsPerPage, totalItems)}</span> de{' '}
-                    <span className="text-neutral-1100">{totalItems} lançamentos</span>
+                <p className="text-xs font-bold text-neutral-500 order-2 md:order-1 uppercase tracking-wider">
+                    Mostrando <span className="text-neutral-1100 font-black">{totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> a{' '}
+                    <span className="text-neutral-1100 font-black">{Math.min(currentPage * itemsPerPage, totalItems)}</span> de{' '}
+                    <span className="text-neutral-1100 font-black">{totalItems} lançamentos</span>
                 </p>
 
                 <div className="flex items-center gap-2 order-1 md:order-2">
-                    {/* Prev */}
                     <button
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
@@ -316,7 +353,6 @@ export function TransactionsTable() {
                         <ChevronLeft size={20} />
                     </button>
 
-                    {/* Page Numbers */}
                     <div className="flex items-center gap-1.5 px-2">
                         {getPageNumbers().map((page, i) => (
                             <button
@@ -324,9 +360,9 @@ export function TransactionsTable() {
                                 onClick={() => typeof page === 'number' && setCurrentPage(page)}
                                 disabled={typeof page !== 'number'}
                                 className={clsx(
-                                    "min-w-[40px] h-10 px-3 flex items-center justify-center rounded-xl text-xs font-bold transition-all",
+                                    "min-w-[40px] h-10 px-3 flex items-center justify-center rounded-xl text-xs font-black transition-all",
                                     currentPage === page
-                                        ? "bg-neutral-1100 text-white shadow-lg shadow-neutral-1100/20"
+                                        ? "bg-neutral-1100 text-white shadow-lg"
                                         : typeof page === 'number'
                                             ? "text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100"
                                             : "text-neutral-300 cursor-default"
@@ -337,7 +373,6 @@ export function TransactionsTable() {
                         ))}
                     </div>
 
-                    {/* Next */}
                     <button
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages || totalPages === 0}
@@ -350,3 +385,5 @@ export function TransactionsTable() {
         </div>
     );
 }
+
+
