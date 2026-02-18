@@ -105,13 +105,21 @@ export default function Login() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-md">
-                            <p className="text-2xl font-black text-white">100%</p>
-                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">Seguro</p>
+                            <p className="text-xl font-black text-white">Intuitivo</p>
+                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">e Fácil</p>
                         </div>
                         <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-md">
                             <p className="text-2xl font-black text-white">Open</p>
                             <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">Colaborativo</p>
                         </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-white/5">
+                        <p className="text-[10px] font-bold text-brand-500 uppercase tracking-widest leading-relaxed opacity-60">
+                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo e testes (Beta).
+                            Não utilize para armazenar dados sensíveis, bancários ou informações pessoais relevantes.
+                            O banco de dados pode ser resetado a qualquer momento.
+                        </p>
                     </div>
                 </div>
             </div>
