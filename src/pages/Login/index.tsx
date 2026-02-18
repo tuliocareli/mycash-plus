@@ -43,38 +43,7 @@ export default function Login() {
         }
     };
 
-    const handleSeedUsers = async () => {
-        setLoading(true);
-        setError(null);
-        setSuccess(null);
-        try {
-            const testUsers = [
-                {
-                    email: import.meta.env.VITE_TEST_ADMIN_EMAIL || '',
-                    password: import.meta.env.VITE_TEST_ADMIN_PASSWORD || ''
-                },
-                {
-                    email: import.meta.env.VITE_TEST_USER_EMAIL || '',
-                    password: import.meta.env.VITE_TEST_USER_PASSWORD || ''
-                }
-            ];
 
-            let count = 0;
-            for (const u of testUsers) {
-                const { error } = await signUp(u);
-                if (!error) count++;
-            }
-            if (count > 0) {
-                setSuccess(`${count} usuário(s) de teste criados com sucesso!`);
-            } else {
-                setError('Usuários de teste já podem existir ou ocorreu um erro.');
-            }
-        } catch (err: any) {
-            setError('Erro ao processar criação de usuários.');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="min-h-screen w-full flex flex-col lg:flex-row bg-neutral-200 overflow-hidden">
@@ -226,16 +195,9 @@ export default function Login() {
 
                             <div className="w-full flex items-center justify-center gap-2">
                                 <div className="h-px flex-1 bg-neutral-100" />
-                                <span className="text-[10px] font-black text-neutral-300 uppercase tracking-widest">Acesso Rápido</span>
+                                <span className="text-[10px] font-black text-neutral-300 uppercase tracking-widest">Opções</span>
                                 <div className="h-px flex-1 bg-neutral-100" />
                             </div>
-
-                            <button
-                                onClick={handleSeedUsers}
-                                className="w-full py-3 border-2 border-neutral-100 rounded-2xl text-[10px] font-black text-neutral-1100 uppercase tracking-widest hover:bg-neutral-50 transition-all"
-                            >
-                                Criar Usuários de Teste
-                            </button>
                         </div>
                     </div>
                 </div>
