@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { TransactionType } from '../../types';
 
-export function FilterButton() {
+export function FilterButton({ onOpenFilters }: { onOpenFilters?: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const { transactionTypeFilter, setTransactionTypeFilter } = useFinance();
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -25,6 +25,14 @@ export function FilterButton() {
         setIsOpen(false);
     };
 
+    const handleClick = () => {
+        if (window.matchMedia('(max-width: 1024px)').matches && onOpenFilters) {
+            onOpenFilters();
+        } else {
+            setIsOpen(!isOpen);
+        }
+    };
+
     const options: Array<{ label: string; value: 'all' | TransactionType }> = [
         { label: 'Todos', value: 'all' },
         { label: 'Receitas', value: 'income' },
@@ -34,7 +42,7 @@ export function FilterButton() {
     return (
         <div className="relative" ref={popoverRef}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={handleClick}
                 className={clsx(
                     "size-11 rounded-full bg-white flex items-center justify-center shadow-sm border border-transparent hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500",
                     isOpen ? "bg-neutral-100" : ""

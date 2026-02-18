@@ -23,7 +23,7 @@ export function Layout() {
             {/* Main Content Wrapper */}
             <main
                 className={clsx(
-                    "flex-1 w-full transition-all duration-300 ease-in-out",
+                    "flex-1 w-full",
                     "lg:ml-[280px]",
                     isSidebarCollapsed && "lg:!ml-[88px]",
                     "ml-0"

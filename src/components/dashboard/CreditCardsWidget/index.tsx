@@ -12,7 +12,12 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-export function CreditCardsWidget() {
+interface CreditCardsWidgetProps {
+    onOpenAddCard?: () => void;
+    onOpenCardDetails?: (card: CreditCard) => void;
+}
+
+export function CreditCardsWidget({ onOpenAddCard, onOpenCardDetails }: CreditCardsWidgetProps) {
     const { creditCards } = useFinance();
     const [currentPage, setCurrentPage] = useState(0);
     const cardsPerPage = 3;
@@ -32,7 +37,7 @@ export function CreditCardsWidget() {
                     <h2 className="text-lg font-medium text-neutral-1100">Cartões</h2>
                 </div>
                 <button
-                    onClick={() => console.log('Open Add Card Modal')}
+                    onClick={onOpenAddCard}
                     className="size-10 rounded-full bg-white flex items-center justify-center text-neutral-1100 shadow-sm border border-neutral-200 hover:bg-neutral-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     title="Novo Cartão"
                 >
@@ -43,7 +48,7 @@ export function CreditCardsWidget() {
             {/* List */}
             <div className="flex flex-col gap-5 flex-1">
                 {paginatedCards.map((card) => (
-                    <CreditCardItem key={card.id} card={card} />
+                    <CreditCardItem key={card.id} card={card} onClick={onOpenCardDetails ? () => onOpenCardDetails(card) : undefined} />
                 ))}
             </div>
 
@@ -83,7 +88,7 @@ export function CreditCardsWidget() {
     );
 }
 
-function CreditCardItem({ card }: { card: CreditCard }) {
+function CreditCardItem({ card, onClick }: { card: CreditCard; onClick?: () => void }) {
     // Theme styles mapping
     const themeStyles: Record<string, { bg: string; iconColor: string; badgeBg: string; badgeText: string; border?: string }> = {
         black: {
@@ -111,7 +116,7 @@ function CreditCardItem({ card }: { card: CreditCard }) {
 
     return (
         <button
-            onClick={() => console.log('Open Card Details Modal', card.id)}
+            onClick={onClick}
             className="group w-full bg-white rounded-2xl p-5 lg:p-6 flex items-center gap-5 shadow-sm border border-neutral-100 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 relative text-left"
         >
             {/* Left: Icon Block */}

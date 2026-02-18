@@ -4,7 +4,13 @@ import { DateSelector } from './DateSelector';
 import { FamilyMembersWidget } from './FamilyMembersWidget';
 import { NewTransactionButton } from './NewTransactionButton';
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+    onOpenTransaction?: () => void;
+    onOpenFilters?: () => void;
+    onOpenAddMember?: () => void;
+}
+
+export function DashboardHeader({ onOpenTransaction, onOpenFilters, onOpenAddMember }: DashboardHeaderProps) {
     return (
         <header className="flex flex-col gap-6 mb-8">
             {/* 
@@ -18,7 +24,7 @@ export function DashboardHeader() {
                 <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-4 flex-1">
                     <div className="flex gap-3 w-full lg:w-auto">
                         <SearchInput />
-                        <FilterButton />
+                        <FilterButton onOpenFilters={onOpenFilters} />
                     </div>
 
                     <div className="h-px lg:h-8 w-full lg:w-px bg-neutral-200 lg:mx-2 hidden lg:block" /> {/** Divider Desktop only */}
@@ -29,8 +35,8 @@ export function DashboardHeader() {
                 {/* Right Section: Members & Action */}
                 {/* Right Section: Members & Action */}
                 <div className="flex flex-col lg:flex-row w-full lg:w-auto items-stretch lg:items-center gap-4 lg:gap-6 mt-2 lg:mt-0">
-                    <FamilyMembersWidget />
-                    <NewTransactionButton />
+                    <FamilyMembersWidget onOpenAddMember={onOpenAddMember} />
+                    <NewTransactionButton onClick={onOpenTransaction} />
                 </div>
             </div>
         </header>

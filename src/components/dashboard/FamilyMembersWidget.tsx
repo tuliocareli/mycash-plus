@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { User, Plus, Check } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 
-export function FamilyMembersWidget() {
+export function FamilyMembersWidget({ onOpenAddMember }: { onOpenAddMember?: () => void }) {
     const { familyMembers, selectedMemberId, setSelectedMemberId } = useFinance();
 
     const handleMemberClick = (id: string) => {
@@ -59,7 +59,7 @@ export function FamilyMembersWidget() {
             <button
                 className="relative size-9 lg:size-11 rounded-full bg-neutral-100 hover:bg-neutral-200 border-2 border-white flex items-center justify-center text-neutral-500 transition-colors z-0"
                 title="Adicionar Membro"
-                onClick={() => alert("Modal de Adicionar Membro (Em Breve)")}
+                onClick={onOpenAddMember}
             >
                 <Plus size={20} />
             </button>
