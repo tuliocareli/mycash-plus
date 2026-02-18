@@ -132,7 +132,7 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
     return (
         <div id="extrato-detalhado" className={clsx(
             "bg-white rounded-3xl flex flex-col h-full",
-            mode === 'dashboard' ? "border border-neutral-200 p-6 lg:p-10 shadow-sm" : "p-0"
+            mode === 'dashboard' ? "border border-neutral-200 py-6 px-6 lg:py-10 lg:px-10 shadow-sm" : "p-0"
         )}>
             {/* Header / Toolbar */}
             {!hideHeader && (
