@@ -73,6 +73,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     useEffect(() => {
         if (!initialData && !isEditing) {
             setCategoryId('');
+            setAccountId('');
         }
     }, [type]);
 
@@ -382,11 +383,13 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                                 <option key={acc.id} value={acc.id}>{acc.name}</option>
                                             ))}
                                         </optgroup>
-                                        <optgroup label="Cartões">
-                                            {creditCards.map(card => (
-                                                <option key={card.id} value={card.id}>{card.name}</option>
-                                            ))}
-                                        </optgroup>
+                                        {type === 'EXPENSE' && (
+                                            <optgroup label="Cartões">
+                                                {creditCards.map(card => (
+                                                    <option key={card.id} value={card.id}>{card.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        )}
                                     </select>
                                     <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
                                 </div>
