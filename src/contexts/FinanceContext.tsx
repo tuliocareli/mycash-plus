@@ -369,24 +369,25 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     // Actions
     const addTransaction = async (data: Partial<Transaction>) => {
         if (!user) return;
-        // Map frontend back to snake_case
-        // Find categoryId from name if only name provided?
-        // UI provides categoryId generally if available, or just string.
-        // Assuming strict types:
+
+        // 1. Prepare Data
         let categoryId = data.categoryId;
         if (!categoryId && data.category) {
             const match = categories.find(c => c.name === data.category);
             if (match) categoryId = match.id;
         }
-        const totalInstallments = data.totalInstallments || 1;
 
-        // Base payload
+        const totalInstallments = data.totalInstallments || 1;
+        const status = (data.status as string)?.toUpperCase() as any || 'COMPLETED';
+        const isExpense = data.type === 'EXPENSE';
+        const amount = data.amount || 0;
+
         const basePayload = {
             user_id: user.id,
-            type: data.type as TransactionType, // 'INCOME' | 'EXPENSE'
-            amount: data.amount!,
+            type: data.type as TransactionType,
+            amount: amount,
             description: data.description!,
-            date: data.date!, // YYYY-MM-DD
+            date: data.date!,
             category_id: categoryId || null,
             account_id: data.accountId || null,
             member_id: data.memberId || null,
@@ -394,71 +395,211 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             notes: data.notes
         };
 
-        if (totalInstallments > 1 && data.type === 'EXPENSE') {
-            // Installment 1
-            const { data: firstTx, error: firstError } = await supabase.from('transactions').insert({
-                ...basePayload,
-                installment_number: 1,
-                total_installments: totalInstallments,
-                status: (data.status as string)?.toLowerCase() as any || 'completed'
-            }).select().single();
+        // 2. Optimistic UI Update (Immediate Reflection)
+        const optimisticTx: Transaction = {
+            id: 'temp-' + Date.now(),
+            userId: user.id,
+            type: basePayload.type as TransactionType,
+            amount: amount,
+            description: basePayload.description,
+            date: basePayload.date,
+            categoryId: categoryId || undefined,
+            accountId: basePayload.account_id || undefined,
+            memberId: basePayload.member_id || undefined,
+            isRecurring: basePayload.is_recurring,
+            notes: basePayload.notes,
+            category: categories.find(c => c.id === categoryId)?.name || 'Outros',
+            category_icon: categories.find(c => c.id === categoryId)?.icon,
+            category_color: categories.find(c => c.id === categoryId)?.color,
+            status: status,
+            totalInstallments,
+            installmentNumber: 1, // Assume 1st for display
+            createdAt: new Date().toISOString()
+        };
 
-            if (firstError) throw firstError;
+        setTransactions(prev => [optimisticTx, ...prev]);
 
-            // Remaining installments
-            const otherInstallments = [];
-            const startDate = parseISO(data.date!);
-
-            for (let i = 1; i < totalInstallments; i++) {
-                const nextDate = addMonths(startDate, i);
-                otherInstallments.push({
+        // 3. Database Interactions
+        try {
+            if (totalInstallments > 1 && isExpense) {
+                // Recurring / Installments Logic
+                const { data: firstTx, error: firstError } = await supabase.from('transactions').insert({
                     ...basePayload,
-                    date: nextDate.toISOString().split('T')[0], // YYYY-MM-DD
-                    installment_number: i + 1,
+                    installment_number: 1,
                     total_installments: totalInstallments,
-                    parent_transaction_id: firstTx.id,
-                    status: 'pending' // Future installments default to pending
-                });
+                    status: status
+                }).select().single();
+
+                if (firstError) throw firstError;
+
+                // Update Account Balance if completed
+                if (status === 'COMPLETED' && basePayload.account_id) {
+                    await updateAccountBalance(basePayload.account_id, -amount);
+                }
+
+                // Generate future installments
+                const otherInstallments = [];
+                const startDate = parseISO(data.date!);
+
+                for (let i = 1; i < totalInstallments; i++) {
+                    const nextDate = addMonths(startDate, i);
+                    otherInstallments.push({
+                        ...basePayload,
+                        date: nextDate.toISOString().split('T')[0],
+                        installment_number: i + 1,
+                        total_installments: totalInstallments,
+                        parent_transaction_id: firstTx.id,
+                        status: 'PENDING'
+                    });
+                }
+
+                if (otherInstallments.length > 0) {
+                    await supabase.from('transactions').insert(otherInstallments);
+                }
+
+            } else {
+                // Single Transaction
+                const payload = {
+                    ...basePayload,
+                    total_installments: 1,
+                    status: status
+                };
+
+                const { error } = await supabase.from('transactions').insert(payload);
+                if (error) throw error;
+
+                // Update Account Balance if completed
+                // Update Account Balance if completed
+                if (status === 'COMPLETED' && basePayload.account_id) {
+                    const balanceDelta = isExpense ? -amount : amount;
+                    await updateAccountBalance(basePayload.account_id, balanceDelta);
+                }
             }
 
-            if (otherInstallments.length > 0) {
-                const { error: batchError } = await supabase.from('transactions').insert(otherInstallments);
-                if (batchError) console.error('Error creating installments:', batchError);
-            }
+            // 4. Persistence & Sync
+            await fetchData(true);
 
-        } else {
-            // Single transaction
-            const payload = {
-                ...basePayload,
-                total_installments: 1,
-                installment_number: undefined,
-                status: (data.status as string)?.toLowerCase() as any || 'completed'
-            };
-
-            const { error } = await supabase.from('transactions').insert(payload);
-            if (error) throw error;
+        } catch (error) {
+            console.error('Error adding transaction:', error);
+            // DO NOT fetch data here, as it might wipe the optimistic update if DB insert failed
+            throw error;
         }
+    };
 
-        await fetchData(true);
+    const updateAccountBalance = async (accountId: string, delta: number) => {
+        const { data: account, error: fetchError } = await supabase
+            .from('accounts')
+            .select('id, type, balance, current_bill')
+            .eq('id', accountId)
+            .single();
+
+        if (fetchError || !account) return;
+
+        const isCreditCard = account.type === 'CREDIT_CARD';
+
+        if (isCreditCard) {
+            // For credit cards:
+            // Expense (negative delta) means LESS available limit / MORE bill.
+            // Income (positive delta) means MORE available limit / LESS bill (payment).
+            // current_bill represents the debt.
+            // If delta is -500 (expense), we ADD 500 to the bill. 
+            // So: newBill = currentBill - delta
+            // Example: 0 - (-500) = 500.
+            // Example Payment: 500 (Income). 500 - 500 = 0.
+            const newBill = (account.current_bill || 0) - delta;
+
+            await supabase
+                .from('accounts')
+                .update({ current_bill: newBill })
+                .eq('id', accountId);
+        } else {
+            // For bank accounts:
+            const newBalance = account.balance + delta;
+            await supabase
+                .from('accounts')
+                .update({ balance: newBalance })
+                .eq('id', accountId);
+        }
     };
 
     const updateTransaction = async (id: string, data: Partial<Transaction>) => {
-        const payload: any = {};
-        if (data.amount) payload.amount = data.amount;
-        if (data.description) payload.description = data.description;
-        if (data.date) payload.date = data.date;
-        if (data.categoryId) payload.category_id = data.categoryId;
-        if (data.accountId) payload.account_id = data.accountId;
-        if (data.status) payload.status = (data.status as string).toLowerCase();
+        // 1. Fetch original transaction to revert balance
+        const { data: originalTx, error: fetchError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('id', id)
+            .single();
 
+        if (fetchError || !originalTx) throw new Error('Transaction not found');
+
+        // 2. Prepare Payload
+        const payload: any = {};
+        if (data.amount !== undefined) payload.amount = data.amount;
+        if (data.description !== undefined) payload.description = data.description;
+        if (data.date !== undefined) payload.date = data.date;
+        if (data.categoryId !== undefined) payload.category_id = data.categoryId;
+        if (data.accountId !== undefined) payload.account_id = data.accountId;
+        if (data.status !== undefined) payload.status = (data.status as string).toUpperCase();
+
+        // 3. Update Transaction
         const { error } = await supabase.from('transactions').update(payload).eq('id', id);
         if (error) throw error;
+
+        // 4. Handle Balance Updates (Revert Old -> Apply New)
+        // Only if status is/was COMPLETED and account is involved
+        const oldStatus = (originalTx.status as string).toUpperCase();
+        const newStatus = data.status ? (data.status as string).toUpperCase() : oldStatus;
+
+        // Revert Old
+        if (oldStatus === 'COMPLETED' && originalTx.account_id) {
+            const oldAmount = Number(originalTx.amount);
+            const oldIsExpense = originalTx.type === 'EXPENSE';
+            // To revert: if it was expense (subtracted), we add it back. If income (added), we subtract.
+            const revertDelta = oldIsExpense ? oldAmount : -oldAmount;
+            await updateAccountBalance(originalTx.account_id, revertDelta);
+        }
+
+        // Apply New
+        const newAccountId = data.accountId !== undefined ? data.accountId : originalTx.account_id;
+        const newAmount = data.amount !== undefined ? Number(data.amount) : Number(originalTx.amount);
+        const newType = data.type ? data.type : originalTx.type; // Assuming type doesn't change often but good to check
+
+        if (newStatus === 'COMPLETED' && newAccountId) {
+            const isExpense = newType === 'EXPENSE';
+            const applyDelta = isExpense ? -newAmount : newAmount;
+            await updateAccountBalance(newAccountId, applyDelta);
+        }
+
         fetchData(true);
     };
 
     const deleteTransaction = async (id: string) => {
+        // 1. Fetch transaction to revert balance
+        const { data: tx, error: fetchError } = await supabase
+            .from('transactions')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !tx) {
+            console.error('Transaction not found for deletion');
+            return;
+        }
+
+        // 2. Delete
         const { error } = await supabase.from('transactions').delete().eq('id', id);
         if (error) throw error;
+
+        // 3. Revert Balance
+        const status = (tx.status as string).toUpperCase();
+        if (status === 'COMPLETED' && tx.account_id) {
+            const amount = Number(tx.amount);
+            const isExpense = tx.type === 'EXPENSE';
+            // Revert: Expense -> Add back, Income -> Subtract
+            const revertDelta = isExpense ? amount : -amount;
+            await updateAccountBalance(tx.account_id, revertDelta);
+        }
+
         fetchData(true);
     };
 

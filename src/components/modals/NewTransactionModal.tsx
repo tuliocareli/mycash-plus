@@ -1,21 +1,20 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2 } from 'lucide-react';
+import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
-import { TransactionType } from '../../types';
+import { Transaction, TransactionType, TransactionStatus } from '../../types';
 
 interface NewTransactionModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialAccountId?: string;
+    initialData?: Transaction;
 }
 
-export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTransactionModalProps) {
-
-
-    const { addTransaction, familyMembers, bankAccounts, creditCards, categories } = useFinance();
+export function NewTransactionModal({ isOpen, onClose, initialAccountId, initialData }: NewTransactionModalProps) {
+    const { addTransaction, updateTransaction, deleteTransaction, familyMembers, bankAccounts, creditCards, categories, addCategory } = useFinance();
 
     const [type, setType] = useState<TransactionType>('EXPENSE');
     const [amount, setAmount] = useState('');
@@ -31,20 +30,50 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [isSavingCategory, setIsSavingCategory] = useState(false);
-    const { addCategory } = useFinance();
 
     // Validation Errors
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const isEditing = !!initialData;
 
     useEffect(() => {
         if (isOpen) {
-            setAccountId(initialAccountId || '');
+            if (initialData) {
+                // Populate form for editing
+                setType(initialData.type);
+                setAmount(String(initialData.amount));
+                setDescription(initialData.description);
+                setCategoryId(initialData.categoryId || '');
+                setMemberId(initialData.memberId || '');
+                setAccountId(initialData.accountId || '');
+                // Safely handle date parsing
+                const rawDate = initialData.date;
+                const safeDate = (rawDate && rawDate.includes('T')) ? rawDate.split('T')[0] : (rawDate || new Date().toISOString().split('T')[0]);
+                setDate(safeDate);
+                setInstallments(initialData.totalInstallments || 1);
+                setIsRecurring(initialData.isRecurring || false);
+            } else {
+                // Reset for new entry
+                setAccountId(initialAccountId || '');
+                setAmount('');
+                setDescription('');
+                setCategoryId('');
+                setMemberId('');
+                setDate(new Date().toISOString().split('T')[0]);
+                setInstallments(1);
+                setIsRecurring(false);
+                setType('EXPENSE');
+            }
         }
-    }, [isOpen, initialAccountId]);
+    }, [isOpen, initialAccountId, initialData]);
 
+    // Reset category when type changes (only if not editing or explicit user change)
     useEffect(() => {
-        setCategoryId('');
+        if (!initialData && !isEditing) {
+            setCategoryId('');
+        }
     }, [type]);
 
     const handleRecurringChange = (checked: boolean) => {
@@ -95,38 +124,51 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
         if (!validate()) return;
         setSaving(true);
         try {
-
-            await addTransaction({
+            const payload = {
                 type,
                 amount: Number(amount),
                 description,
-                categoryId, // Passing ID directly
+                categoryId,
                 date,
                 memberId: memberId || undefined,
                 accountId,
                 totalInstallments: type === 'EXPENSE' && creditCards.find(c => c.id === accountId) ? installments : 1,
                 isRecurring: type === 'EXPENSE' ? isRecurring : false,
-                status: 'COMPLETED',
-            });
-        } catch (error) {
+                status: 'COMPLETED' as TransactionStatus,
+            };
+
+            if (isEditing && initialData) {
+                await updateTransaction(initialData.id, payload);
+            } else {
+                await addTransaction(payload);
+            }
+            handleClose();
+        } catch (error: any) {
             console.error(error);
+            alert('Erro ao salvar transação: ' + (error.message || 'Erro desconhecido'));
         } finally {
             setSaving(false);
         }
+    };
 
-        handleClose();
+    const handleDelete = async () => {
+        if (!initialData) return;
+        if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+
+        setDeleting(true);
+        try {
+            await deleteTransaction(initialData.id);
+            handleClose();
+        } catch (error: any) {
+            console.error(error);
+            alert('Erro ao excluir: ' + error.message);
+        } finally {
+            setDeleting(false);
+        }
     };
 
     const handleClose = () => {
-        // Reset State
-        setType('EXPENSE');
-        setAmount('');
-        setDescription('');
-        setCategoryId('');
-        setMemberId('');
-        setAccountId('');
-        setInstallments(1);
-        setIsRecurring(false);
+        // Reset State logic is handled in useEffect[isOpen], but we can clear some here too
         setErrors({});
         onClose();
     };
@@ -137,11 +179,11 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
 
     return createPortal(
         <div
-            className="fixed inset-0 flex items-start justify-center bg-neutral-1100/60 z-[99999] p-4 pt-10 md:pt-24 overflow-y-auto"
+            className="fixed inset-0 flex items-start justify-center bg-neutral-1100/40 z-[99999] p-4 pt-10 md:pt-24 overflow-y-auto animate-fade-in backdrop-blur-sm"
             style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}
         >
             {/* Modal Card */}
-            <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-3xl md:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative my-auto">
+            <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-3xl md:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative my-auto animate-scale-in">
 
                 {/* Header Top - Title & Close */}
                 <div className="flex items-center justify-between px-8 py-6 border-b border-neutral-100 bg-white z-10">
@@ -150,8 +192,12 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                             {type === 'INCOME' ? <ArrowDownLeft size={24} /> : <ArrowUpRight size={24} />}
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-neutral-1100 leading-tight">Nova Transação</h2>
-                            <p className="text-sm text-neutral-500">Registre suas movimentações</p>
+                            <h2 className="text-xl font-bold text-neutral-1100 leading-tight">
+                                {isEditing ? 'Editar Transação' : 'Nova Transação'}
+                            </h2>
+                            <p className="text-sm text-neutral-500">
+                                {isEditing ? 'Altere os detalhes abaixo' : 'Registre suas movimentações'}
+                            </p>
                         </div>
                     </div>
                     <button
@@ -400,17 +446,29 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId }: NewTr
                 <div className="flex items-center justify-end gap-3 p-6 border-t border-neutral-100 bg-white z-10">
                     <button
                         onClick={handleClose}
-                        className="px-8 py-3.5 rounded-full border border-neutral-300 text-neutral-700 font-bold hover:bg-neutral-50 transition-colors"
+                        className="px-6 py-3.5 rounded-full border border-neutral-300 text-neutral-700 font-bold hover:bg-neutral-50 transition-colors"
                     >
                         Cancelar
                     </button>
+
+                    {isEditing && (
+                        <button
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="size-12 rounded-full border border-red-100 bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-200 transition-colors"
+                            title="Excluir Transação"
+                        >
+                            {deleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
+                        </button>
+                    )}
+
                     <button
                         onClick={handleSubmit}
                         disabled={saving}
                         className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {saving && <Loader2 size={18} className="animate-spin" />}
-                        {saving ? 'Salvando...' : 'Salvar transação'}
+                        {saving ? 'Salvando...' : (isEditing ? 'Atualizar' : 'Salvar')}
                     </button>
                 </div>
             </div>

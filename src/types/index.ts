@@ -79,6 +79,8 @@ export interface Transaction {
     // The previous mocks used category name directly in 'category' field for Transaction.
     // The new schema uses 'categoryId'.
     // To minimize breakage, I'll keep 'category' as the NAME (string) populated by join, and 'categoryId' as the ID.
+    category_icon?: string;
+    category_color?: string;
 }
 
 export interface RecurringTransaction {

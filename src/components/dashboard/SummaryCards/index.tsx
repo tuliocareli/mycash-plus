@@ -47,8 +47,11 @@ export function SummaryCards() {
     }, [totalBalance, balance30DaysAgo]);
 
 
+    // Use derived balance (Income - Expenses) to ensure consistency with the Flow cards
+    const derivedBalance = totalIncome - totalExpenses;
+
     // Animated Values
-    const animatedBalance = useCountUp(totalBalance, 1000);
+    const animatedBalance = useCountUp(derivedBalance, 1000);
     const animatedIncome = useCountUp(totalIncome, 1000);
     const animatedExpenses = useCountUp(totalExpenses, 1000);
 
@@ -63,7 +66,7 @@ export function SummaryCards() {
                 <div className="absolute -right-12 -top-12 w-64 h-64 bg-brand-500/20 blur-[80px] rounded-full pointer-events-none group-hover:bg-brand-500/30 transition-all duration-500" />
 
                 <div className="relative z-10 flex flex-col gap-1">
-                    <span className="text-neutral-400 text-[10px] font-black uppercase tracking-[0.2em]">Saldo Total</span>
+                    <span className="text-neutral-400 text-[10px] font-black uppercase tracking-[0.2em]">Saldo</span>
                     <span className="text-4xl lg:text-5xl font-black tracking-tightest">
                         {formatCurrency(animatedBalance)}
                     </span>

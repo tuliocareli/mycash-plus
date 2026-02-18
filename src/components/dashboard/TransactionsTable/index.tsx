@@ -13,7 +13,9 @@ import {
 import { useFinance } from '../../../contexts/FinanceContext';
 import { format, parseISO } from 'date-fns';
 import clsx from 'clsx';
-import { TransactionType } from '../../../types';
+import { TransactionType, Transaction } from '../../../types';
+import { NewTransactionModal } from '../../modals/NewTransactionModal';
+import { FileText } from 'lucide-react';
 
 interface TransactionsTableProps {
     mode?: 'dashboard' | 'expanded';
@@ -31,6 +33,8 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
     // Local Filters
     const [localSearch, setLocalSearch] = useState('');
     const [localType, setLocalType] = useState<'all' | TransactionType>('all');
+    // State for editing
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
     // Sort
     const [sortField, setSortField] = useState<'date' | 'amount' | 'description'>('date');
@@ -133,10 +137,15 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
             {/* Header / Toolbar */}
             {!hideHeader && (
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 shrink-0">
-                    <h2 className="text-lg font-medium text-neutral-1100">Extrato detalhado</h2>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-neutral-100 rounded-lg">
+                            <FileText className="w-5 h-5 text-neutral-1100" />
+                        </div>
+                        <h2 className="text-lg font-medium text-neutral-1100">Extrato detalhado</h2>
+                    </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                        <div className="relative w-full md:w-72">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <div className="relative flex-1 md:w-72">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 size-4" />
                             <input
                                 type="text"
@@ -150,7 +159,7 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                         <select
                             value={localType}
                             onChange={(e) => setLocalType(e.target.value as any)}
-                            className="w-full md:w-[160px] px-4 py-3 bg-neutral-100 border-none rounded-xl text-sm font-medium text-neutral-1100 focus:ring-2 focus:ring-brand-500 transition-all outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_12px_center] bg-no-repeat"
+                            className="w-[160px] px-4 py-3 bg-neutral-100 border-none rounded-xl text-sm font-medium text-neutral-1100 focus:ring-2 focus:ring-brand-500 transition-all outline-none cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_12px_center] bg-no-repeat"
                         >
                             <option value="all">Todos os tipos</option>
                             <option value="INCOME">Apenas Receitas</option>
@@ -196,6 +205,7 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                             Valor <ArrowUpDown size={12} className={sortField === 'amount' ? 'text-brand-500' : ''} />
                                         </div>
                                     </th>
+                                    <th className="px-6 py-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider w-[60px] text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody key={currentPage} className="divide-y divide-neutral-100 animate-fade-in text-neutral-1100">
@@ -238,7 +248,7 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                                             <ArrowUpRight size={16} strokeWidth={2.5} />
                                                         )}
                                                     </div>
-                                                    <span className="text-sm font-extrabold truncate">
+                                                    <span className="text-sm font-bold whitespace-normal line-clamp-2">
                                                         {t.description}
                                                     </span>
                                                 </div>
@@ -264,6 +274,15 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                             )}>
                                                 {formatCurrency(t.amount, t.type)}
                                             </td>
+                                            <td className="px-6 py-5 text-center">
+                                                <button
+                                                    onClick={() => setEditingTransaction(t)}
+                                                    className="size-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <FileSearch size={16} />
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : null}
@@ -276,7 +295,14 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                 <div className="md:hidden flex flex-col gap-4 flex-1">
                     {paginatedTransactions.length > 0 ? (
                         paginatedTransactions.map((t) => (
-                            <div key={t.id} className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-all">
+                            <div
+                                key={t.id}
+                                onClick={() => setEditingTransaction(t)}
+                                className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-all cursor-pointer relative"
+                            >
+                                <div className="absolute top-4 right-4 text-neutral-300">
+                                    <FileSearch size={16} />
+                                </div>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={clsx(
@@ -382,6 +408,12 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                     </button>
                 </div>
             </div>
+
+            <NewTransactionModal
+                isOpen={!!editingTransaction}
+                onClose={() => setEditingTransaction(null)}
+                initialData={editingTransaction || undefined}
+            />
         </div>
     );
 }
