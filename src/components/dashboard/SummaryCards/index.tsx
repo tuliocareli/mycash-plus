@@ -67,7 +67,7 @@ export function SummaryCards() {
 
                 <div className="relative z-10 flex flex-col gap-1">
                     <span className="text-neutral-400 text-[10px] font-black uppercase tracking-[0.2em]">Saldo</span>
-                    <span className="text-4xl lg:text-5xl font-black tracking-tightest">
+                    <span className="text-3xl lg:text-4xl font-black tracking-tightest mt-2 truncate w-full" title={formatCurrency(derivedBalance)}>
                         {formatCurrency(animatedBalance)}
                     </span>
                 </div>
