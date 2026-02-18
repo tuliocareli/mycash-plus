@@ -170,11 +170,8 @@ export function DateSelector() {
                     <div className="fixed inset-0 bg-neutral-1100/20 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsOpen(false)} />
 
                     <div className={clsx(
-                        "absolute left-0 z-50 bg-white border border-neutral-200 shadow-2xl rounded-2xl p-4 flex flex-col gap-4 animate-fade-in origin-top-left",
-                        // Mobile: Fixed Bottom Sheet
-                        "fixed inset-x-0 bottom-0 top-auto w-full h-[80vh] overflow-y-auto rounded-b-none",
-                        // Desktop: Absolute Popover BELOW button
-                        "lg:h-auto lg:absolute lg:inset-auto lg:top-full lg:mt-4 lg:w-auto lg:rounded-2xl"
+                        "absolute left-0 z-50 bg-white border border-neutral-200 shadow-xl rounded-2xl p-6 flex flex-col gap-5 animate-fade-in origin-top-left",
+                        "top-full mt-2 w-[calc(100vw-32px)] lg:w-auto"
                     )}>
                         {/* Header Mobile */}
                         <div className="flex items-center justify-between pb-4 border-b border-neutral-200 lg:hidden">

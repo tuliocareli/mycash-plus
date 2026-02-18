@@ -27,7 +27,8 @@ export function DashboardHeader() {
                 </div>
 
                 {/* Right Section: Members & Action */}
-                <div className="flex items-center justify-between lg:justify-end gap-4 lg:gap-6 mt-2 lg:mt-0">
+                {/* Right Section: Members & Action */}
+                <div className="flex flex-col lg:flex-row w-full lg:w-auto items-stretch lg:items-center gap-4 lg:gap-6 mt-2 lg:mt-0">
                     <FamilyMembersWidget />
                     <NewTransactionButton />
                 </div>
