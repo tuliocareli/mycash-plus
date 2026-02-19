@@ -29,6 +29,16 @@
 
 ---
 
+## Maintenance: Database Reset
+**Status:** ✅ | **Date:** 19/02/2026 | **Executed:** SQL Cleanup
+
+### Actions
+- **Transactions:** All records deleted from `transactions` table.
+- **Accounts:** Balances and current bills reset to 0 in `accounts` table.
+- **Goals:** Current amounts reset to 0 in `goals` table.
+
+---
+
 ## PROMPT 6: Header do Dashboard com Controles
 **Status:** ✅ | **Data:** 17/02/2026 | **Build:** Sucesso
 
