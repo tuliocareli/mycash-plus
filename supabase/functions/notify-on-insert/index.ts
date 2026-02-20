@@ -5,62 +5,34 @@ import { Resend } from 'npm:resend'
 const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
 serve(async (req) => {
+    console.log("--- NOVA REQUISIÇÃO RECEBIDA ---")
+
     try {
         const payload = await req.json()
-        const { record, table, type, schema } = payload
+        console.log("Tabela:", payload.table)
+        console.log("Operação:", payload.type)
 
-        // Logins autorizados para monitoramento
-        const monitoredEmails = ['admin@teste.com', 'user@teste.com']
+        const subject = `[MyCash+] Nova inserção na tabela ${payload.table}`
 
-        // Tenta identificar o email do usuário que realizou a ação
-        // Note: O payload do webhook do Supabase geralmente contém o 'record' (novo dado)
-        // Se a tabela tiver um campo 'user_id' ou similar, podemos usá-lo.
-        // Para simplificar e garantir que você receba a notificação, 
-        // vamos logar os detalhes do dado inserido.
-
-        const subject = `[MyCash+] Nova inserção na tabela ${table}`
-
-        const html = `
-      <h2>Notificação de Atividade</h2>
-      <p>Um novo registro foi inserido no banco de dados.</p>
-      <hr />
-      <ul>
-        <li><strong>Tabela:</strong> ${table}</li>
-        <li><strong>Operação:</strong> ${type}</li>
-        <li><strong>Schema:</strong> ${schema}</li>
-        <li><strong>Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}</li>
-      </ul>
-      <hr />
-      <h3>Dados do Registro:</h3>
-      <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px;">
-${JSON.stringify(record, null, 2)}
-      </pre>
-      <p style="font-size: 12px; color: #666;">Enviado automaticamente pelo MyCash+ Monitor.</p>
-    `
+        console.log("Tentando enviar e-mail para:", Deno.env.get('NOTIFY_EMAIL'))
 
         const { data, error } = await resend.emails.send({
             from: 'MyCash+ Monitor <onboarding@resend.dev>',
-            to: Deno.env.get('NOTIFY_EMAIL') || 'seu-email@exemplo.com',
+            to: Deno.env.get('NOTIFY_EMAIL'),
             subject: subject,
-            html: html,
+            html: `<h2>Novo registro em ${payload.table}</h2><pre>${JSON.stringify(payload.record, null, 2)}</pre>`
         })
 
         if (error) {
-            return new Response(JSON.stringify({ error: error.message }), {
-                status: 500,
-                headers: { "Content-Type": "application/json" }
-            })
+            console.error("ERRO NO RESEND:", error)
+            return new Response(JSON.stringify(error), { status: 500 })
         }
 
-        return new Response(JSON.stringify({ message: "Email enviado com sucesso", id: data?.id }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-        })
+        console.log("E-MAIL ENVIADO COM SUCESSO! ID:", data?.id)
+        return new Response(JSON.stringify({ message: "OK", id: data?.id }), { status: 200 })
 
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" }
-        })
+        console.error("ERRO GERAL NA FUNÇÃO:", err.message)
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 })
     }
 })
