@@ -20,19 +20,14 @@ export default function Login() {
     const from = location.state?.from?.pathname || "/";
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log('--- LOGIN SUBMIT - VERSION 3 (CLEAN) ---');
         e.preventDefault();
         setLoading(true);
         setError(null);
         setSuccess(null);
 
-        const ALLOWED_EMAILS = ['admin@teste.com', 'user@teste.com'];
-
         try {
             if (isLogin) {
-                if (!ALLOWED_EMAILS.includes(email.toLowerCase().trim())) {
-                    throw new Error('Acesso restrito. Este ambiente é apenas para demonstração com usuários pré-definidos.');
-                }
-
                 const { error: signInError } = await signIn({ email, password });
                 if (signInError) throw signInError;
                 navigate(from, { replace: true });
