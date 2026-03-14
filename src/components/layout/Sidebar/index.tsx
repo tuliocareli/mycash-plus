@@ -22,7 +22,8 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     const { user } = useAuth();
-    const isAdmin = user?.email === 'admin@teste.com' || user?.email === 'tctulio2009@gmail.com';
+    const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
+    const isAdmin = !!user?.email && ADMIN_EMAILS.some(email => email.toLowerCase() === user.email?.toLowerCase());
     return (
         <aside
             className={clsx(

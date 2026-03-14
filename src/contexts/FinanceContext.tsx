@@ -208,17 +208,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                     email: user.email!,
                     name: user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
                 });
+                // New users always show onboarding
+                setHasSeenOnboardingState(false);
+                setShowWelcomeCard(true);
             } else if (profile) {
                 // Check local storage for V1 force-show
                 const forcedKey = `onboarding_v1_seen_${user.id}`;
                 const hasSeenLocally = localStorage.getItem(forcedKey) === 'true';
                 
-                if (!hasSeenLocally) {
-                    // Force false to show the card once even if DB says true
-                    setHasSeenOnboardingState(false);
-                } else {
-                    setHasSeenOnboardingState(!!profile.has_seen_onboarding);
-                }
+                // CRITICAL: We determine if we should show NOW from DB/LocalStorage
+                const shouldShowNow = !hasSeenLocally || !profile.has_seen_onboarding;
+                
+                setHasSeenOnboardingState(!shouldShowNow);
+                setShowWelcomeCard(shouldShowNow);
             }
 
             // 2. Fetch all data
@@ -229,11 +231,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 supabase.from('family_members').select('*').eq('user_id', user.id),
                 supabase.from('categories').select('*').eq('user_id', user.id)
             ]);
-
-            // Handling Onboarding Status (If not seen, determine if we should show the card)
-            if (!hasSeenOnboarding) {
-                setShowWelcomeCard(true);
-            }
 
             // Handling Categories & Seeding if needed
             let cats: Category[] = [];

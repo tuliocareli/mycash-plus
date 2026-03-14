@@ -7,7 +7,8 @@ import {
     User,
     LogOut,
     X,
-    LayoutGrid
+    LayoutGrid,
+    BarChart3
 } from 'lucide-react';
 import { MenuItem } from './MenuItem';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -24,6 +25,9 @@ interface MenuDropdownProps {
 
 export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
     const { signOut } = useAuth();
+    const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
+    const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
     if (!isOpen) return null;
 
     return (
@@ -102,6 +106,14 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                         path="/profile"
                         onClick={onClose}
                     />
+                    {isAdmin && (
+                        <MenuItem
+                            icon={BarChart3}
+                            label="Analytics"
+                            path="/admin"
+                            onClick={onClose}
+                        />
+                    )}
                 </nav>
 
                 {/* Footer / Logout */}

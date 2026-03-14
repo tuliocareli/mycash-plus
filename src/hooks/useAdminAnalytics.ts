@@ -16,7 +16,7 @@ export const useAdminAnalytics = () => {
     const [loading, setLoading] = useState(true);
 
     const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
-    const isAdmin = !!user?.email && ADMIN_EMAILS.includes(user.email);
+    const isAdmin = !!user?.email && ADMIN_EMAILS.some(email => email.toLowerCase() === user.email?.toLowerCase());
 
     const fetchAnalytics = async () => {
         if (!isAdmin) return;
