@@ -20,7 +20,6 @@ export default function Login() {
     const from = location.state?.from?.pathname || "/";
 
     const handleSubmit = async (e: React.FormEvent) => {
-        console.log('--- LOGIN SUBMIT - VERSION 3 (CLEAN) ---');
         e.preventDefault();
         setLoading(true);
         setError(null);

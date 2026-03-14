@@ -156,7 +156,7 @@ export function DateSelector() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={clsx(
-                    "h-11 pl-6 pr-4 bg-white rounded-full flex items-center gap-3 shadow-sm border border-transparent hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 min-w-[240px]",
+                    "h-11 pl-6 pr-4 bg-white rounded-full flex items-center gap-3 shadow-sm border border-transparent hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 w-full",
                     isOpen && "bg-neutral-100 ring-2 ring-brand-500/20"
                 )}
             >

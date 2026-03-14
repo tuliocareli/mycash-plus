@@ -7,11 +7,13 @@ import {
     User,        // Icone Perfil
     ChevronLeft,
     ChevronRight,
-    LayoutGrid
+    LayoutGrid,
+    BarChart3
 } from 'lucide-react';
 import clsx from 'clsx';
 import { SidebarItem } from './SidebarItem';
 import { SidebarProfile } from './SidebarProfile';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -19,6 +21,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
+    const { user } = useAuth();
+    const isAdmin = user?.email === 'admin@teste.com' || user?.email === 'tctulio2009@gmail.com';
     return (
         <aside
             className={clsx(
@@ -103,6 +107,14 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     path="/profile"
                     isCollapsed={isCollapsed}
                 />
+                {isAdmin && (
+                    <SidebarItem
+                        icon={BarChart3}
+                        label="Analytics"
+                        path="/admin"
+                        isCollapsed={isCollapsed}
+                    />
+                )}
             </nav>
 
             {/* SPACER para empurrar perfil para baixo */}

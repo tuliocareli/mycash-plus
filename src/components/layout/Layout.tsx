@@ -52,7 +52,7 @@ export function Layout() {
             >
                 <div className={clsx(
                     "container mx-auto px-4 py-8 lg:px-10 max-w-[1600px]",
-                    "pt-[72px] lg:pt-8 pb-20 lg:pb-8"
+                    "pt-[96px] lg:pt-8 pb-20 lg:pb-8"
                 )}>
                     <Outlet />
                 </div>

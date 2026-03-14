@@ -12,6 +12,7 @@ import {
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
+import { analytics } from '../services/analytics';
 import { Database } from '../types/supabase';
 
 // Helper to map DB transaction to Frontend Transaction
@@ -97,6 +98,7 @@ interface FinanceContextData {
     loading: boolean;
     transactions: Transaction[];
     goals: Goal[];
+    accounts: Account[];
     creditCards: Account[];
     bankAccounts: Account[];
     familyMembers: FamilyMember[];
@@ -152,6 +154,10 @@ interface FinanceContextData {
     totalExpenses: number;
     expensesByCategory: { category: string; amount: number; percentage: number }[];
     savingsRate: number;
+    // Onboarding
+    showWelcomeCard: boolean;
+    hasSeenOnboarding: boolean;
+    setHasSeenOnboarding: (seen: boolean) => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextData>({} as FinanceContextData);
@@ -178,6 +184,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [accountIdFilter, setAccountIdFilter] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
+    // Onboarding state
+    const [hasSeenOnboarding, setHasSeenOnboardingState] = useState(false);
+    const [showWelcomeCard, setShowWelcomeCard] = useState(false);
+
     // Fetch Data
     const fetchData = useCallback(async (background = false) => {
         if (!user) return;
@@ -185,20 +195,30 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
         try {
             // 1. Ensure User Profile Exists in public.users
-            const { error: profileError } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('users')
-                .select('id')
+                .select('id, has_seen_onboarding')
                 .eq('id', user.id)
                 .single();
 
             if (profileError && profileError.code === 'PGRST116') {
                 // Profile not found, create it
-                const { error: insertError } = await supabase.from('users').insert({
+                await supabase.from('users').insert({
                     id: user.id,
                     email: user.email!,
                     name: user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
                 });
-                if (insertError) console.error('Error creating user profile:', insertError);
+            } else if (profile) {
+                // Check local storage for V1 force-show
+                const forcedKey = `onboarding_v1_seen_${user.id}`;
+                const hasSeenLocally = localStorage.getItem(forcedKey) === 'true';
+                
+                if (!hasSeenLocally) {
+                    // Force false to show the card once even if DB says true
+                    setHasSeenOnboardingState(false);
+                } else {
+                    setHasSeenOnboardingState(!!profile.has_seen_onboarding);
+                }
             }
 
             // 2. Fetch all data
@@ -209,6 +229,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 supabase.from('family_members').select('*').eq('user_id', user.id),
                 supabase.from('categories').select('*').eq('user_id', user.id)
             ]);
+
+            // Handling Onboarding Status (If not seen, determine if we should show the card)
+            if (!hasSeenOnboarding) {
+                setShowWelcomeCard(true);
+            }
 
             // Handling Categories & Seeding if needed
             let cats: Category[] = [];
@@ -276,10 +301,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         } finally {
             if (!background) setLoading(false);
         }
-    }, [user]);
+    }, [user, hasSeenOnboarding]);
+
+    const setHasSeenOnboarding = async (seen: boolean) => {
+        if (!user) return;
+        setHasSeenOnboardingState(seen);
+        if (seen) {
+            setShowWelcomeCard(false);
+            localStorage.setItem(`onboarding_v1_seen_${user.id}`, 'true');
+        }
+        await supabase.from('users').update({ has_seen_onboarding: seen }).eq('id', user.id);
+    };
 
     useEffect(() => {
         if (user) {
+            analytics.setUserId(user.id);
             fetchData();
         } else {
             // Clear state on logout
@@ -432,11 +468,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
                 if (firstError) throw firstError;
 
-                // Update Account Balance if completed
-                if (status === 'COMPLETED' && basePayload.account_id) {
-                    await updateAccountBalance(basePayload.account_id, -amount);
-                }
-
                 // Generate future installments
                 const otherInstallments = [];
                 const startDate = parseISO(data.date!);
@@ -467,17 +498,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
                 const { error } = await supabase.from('transactions').insert(payload);
                 if (error) throw error;
-
-                // Update Account Balance if completed
-                // Update Account Balance if completed
-                if (status === 'COMPLETED' && basePayload.account_id) {
-                    const balanceDelta = isExpense ? -amount : amount;
-                    await updateAccountBalance(basePayload.account_id, balanceDelta);
-                }
             }
 
             // 4. Persistence & Sync
+            const startTime = performance.now();
             await fetchData(true);
+            const duration = performance.now() - startTime;
+            
+            analytics.track({
+                category: 'PERFORMANCE',
+                name: 'add_transaction_sync',
+                metadata: { duration_ms: Math.round(duration) }
+            });
 
         } catch (error) {
             console.error('Error adding transaction:', error);
@@ -486,41 +518,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const updateAccountBalance = async (accountId: string, delta: number) => {
-        const { data: account, error: fetchError } = await supabase
-            .from('accounts')
-            .select('id, type, balance, current_bill')
-            .eq('id', accountId)
-            .single();
-
-        if (fetchError || !account) return;
-
-        const isCreditCard = account.type === 'CREDIT_CARD';
-
-        if (isCreditCard) {
-            // For credit cards:
-            // Expense (negative delta) means LESS available limit / MORE bill.
-            // Income (positive delta) means MORE available limit / LESS bill (payment).
-            // current_bill represents the debt.
-            // If delta is -500 (expense), we ADD 500 to the bill. 
-            // So: newBill = currentBill - delta
-            // Example: 0 - (-500) = 500.
-            // Example Payment: 500 (Income). 500 - 500 = 0.
-            const newBill = (account.current_bill || 0) - delta;
-
-            await supabase
-                .from('accounts')
-                .update({ current_bill: newBill })
-                .eq('id', accountId);
-        } else {
-            // For bank accounts:
-            const newBalance = account.balance + delta;
-            await supabase
-                .from('accounts')
-                .update({ balance: newBalance })
-                .eq('id', accountId);
-        }
-    };
 
     const updateTransaction = async (id: string, data: Partial<Transaction>) => {
         // 1. Fetch original transaction to revert balance
@@ -545,31 +542,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.from('transactions').update(payload).eq('id', id);
         if (error) throw error;
 
-        // 4. Handle Balance Updates (Revert Old -> Apply New)
-        // Only if status is/was COMPLETED and account is involved
-        const oldStatus = (originalTx.status as string).toUpperCase();
-        const newStatus = data.status ? (data.status as string).toUpperCase() : oldStatus;
-
-        // Revert Old
-        if (oldStatus === 'COMPLETED' && originalTx.account_id) {
-            const oldAmount = Number(originalTx.amount);
-            const oldIsExpense = originalTx.type === 'EXPENSE';
-            // To revert: if it was expense (subtracted), we add it back. If income (added), we subtract.
-            const revertDelta = oldIsExpense ? oldAmount : -oldAmount;
-            await updateAccountBalance(originalTx.account_id, revertDelta);
-        }
-
-        // Apply New
-        const newAccountId = data.accountId !== undefined ? data.accountId : originalTx.account_id;
-        const newAmount = data.amount !== undefined ? Number(data.amount) : Number(originalTx.amount);
-        const newType = data.type ? data.type : originalTx.type; // Assuming type doesn't change often but good to check
-
-        if (newStatus === 'COMPLETED' && newAccountId) {
-            const isExpense = newType === 'EXPENSE';
-            const applyDelta = isExpense ? -newAmount : newAmount;
-            await updateAccountBalance(newAccountId, applyDelta);
-        }
-
         fetchData(true);
     };
 
@@ -590,16 +562,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.from('transactions').delete().eq('id', id);
         if (error) throw error;
 
-        // 3. Revert Balance
-        const status = (tx.status as string).toUpperCase();
-        if (status === 'COMPLETED' && tx.account_id) {
-            const amount = Number(tx.amount);
-            const isExpense = tx.type === 'EXPENSE';
-            // Revert: Expense -> Add back, Income -> Subtract
-            const revertDelta = isExpense ? amount : -amount;
-            await updateAccountBalance(tx.account_id, revertDelta);
-        }
-
+        // Balance is handled by DB triggers
         await fetchData(true);
     };
 
@@ -833,6 +796,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             loading,
             transactions,
             goals,
+            accounts,
             creditCards,
             bankAccounts,
             familyMembers,
@@ -875,7 +839,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             totalIncome,
             totalExpenses,
             expensesByCategory,
-            savingsRate
+            savingsRate,
+            showWelcomeCard,
+            hasSeenOnboarding,
+            setHasSeenOnboarding
         }}>
             {children}
         </FinanceContext.Provider>

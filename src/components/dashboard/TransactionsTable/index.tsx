@@ -347,17 +347,32 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
 
                 {/* Empty State */}
                 {paginatedTransactions.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 px-6 border-2 border-dashed border-neutral-100 rounded-2xl flex-1 min-h-[300px]">
-                        <div className="p-5 bg-neutral-50 rounded-full mb-4">
-                            <FileSearch size={32} strokeWidth={1.5} className="text-neutral-300" />
+                    <div className="flex flex-col items-center justify-center py-20 px-6 border-2 border-dashed border-neutral-100 rounded-2xl flex-1 min-h-[300px] text-center">
+                        <div className="p-5 bg-neutral-50 rounded-full mb-6">
+                            <FileSearch size={40} strokeWidth={1.5} className="text-neutral-300" />
                         </div>
-                        <p className="text-neutral-400 font-bold">Nenhum lançamento encontrado.</p>
-                        <button
-                            onClick={() => { setLocalSearch(''); setLocalType('all'); }}
-                            className="mt-4 text-xs font-bold text-neutral-1100 underline decoration-neutral-200 underline-offset-4 uppercase tracking-widest"
-                        >
-                            Limpar filtros
-                        </button>
+                        {filteredTransactions.length === 0 ? (
+                            <>
+                                <h3 className="text-lg font-black text-neutral-1100 mb-2">Sua linha do tempo está limpa</h3>
+                                <p className="text-neutral-400 font-medium max-w-[280px]">Que tal começar registrando aquele cafezinho ou uma conta de hoje?</p>
+                                <button
+                                    onClick={() => (window as any).dispatchEvent(new CustomEvent('open-transaction-modal'))}
+                                    className="mt-6 px-8 py-3 bg-brand-500 text-neutral-1100 font-black rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-95 text-sm"
+                                >
+                                    Novo Lançamento
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-neutral-400 font-bold mb-2">Nenhum lançamento encontrado para os filtros aplicados.</p>
+                                <button
+                                    onClick={() => { setLocalSearch(''); setLocalType('all'); }}
+                                    className="text-xs font-bold text-neutral-1100 underline decoration-neutral-200 underline-offset-4 uppercase tracking-widest"
+                                >
+                                    Limpar filtros
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>

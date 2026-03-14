@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { SummaryCards } from '../../components/dashboard/SummaryCards';
 import { CategoryCarousel } from '../../components/dashboard/CategoryCarousel';
@@ -6,6 +6,9 @@ import { FinancialFlowChart } from '../../components/dashboard/FinancialFlowChar
 import { CreditCardsWidget } from '../../components/dashboard/CreditCardsWidget';
 import { UpcomingExpensesWidget } from '../../components/dashboard/UpcomingExpensesWidget';
 import { TransactionsTable } from '../../components/dashboard/TransactionsTable';
+import { WelcomeCard } from '../../components/onboarding/WelcomeCard';
+import { useFinance } from '../../contexts/FinanceContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 import { NewTransactionModal } from '../../components/modals/NewTransactionModal';
 import { AddMemberModal } from '../../components/modals/AddMemberModal';
@@ -15,6 +18,15 @@ import { FiltersMobileModal } from '../../components/modals/FiltersMobileModal';
 import { CreditCard } from '../../types';
 
 export default function Dashboard() {
+    const { user } = useAuth();
+    const { 
+        accounts, 
+        goals, 
+        transactions, 
+        showWelcomeCard, 
+        setHasSeenOnboarding 
+    } = useFinance();
+
     // Modals State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
@@ -30,8 +42,28 @@ export default function Dashboard() {
         setIsCardDetailsModalOpen(true);
     };
 
+    useEffect(() => {
+        const handleOpenTransaction = () => setIsTransactionModalOpen(true);
+        window.addEventListener('open-transaction-modal', handleOpenTransaction);
+        return () => window.removeEventListener('open-transaction-modal', handleOpenTransaction);
+    }, []);
+
+    const onboardingTasks = [
+        { id: 'acc', label: 'Cadastrar minha primeira conta', completed: accounts.length > 0 },
+        { id: 'goal', label: 'Definir um objetivo de economia', completed: goals.length > 0 },
+        { id: 'tx', label: 'Registrar uma despesa de teste', completed: transactions.length > 0 },
+    ];
+
     return (
         <div className="w-full flex flex-col gap-8 pb-20 animate-fade-in">
+            {showWelcomeCard && (
+                <WelcomeCard 
+                    userName={user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário'}
+                    tasks={onboardingTasks}
+                    onClose={() => setHasSeenOnboarding(true)}
+                />
+            )}
+
             {/* Header Component */}
             <DashboardHeader
                 onOpenTransaction={() => setIsTransactionModalOpen(true)}

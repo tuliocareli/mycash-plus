@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { X, Calendar, Upload, Loader2, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
+import { useFormFunnel } from '../../hooks/useAnalytics';
 // import { AccountType } from '../../types';
 
 import { Account } from '../../types';
@@ -19,6 +20,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
 
 
     const { addBankAccount, addCreditCard, updateBankAccount, updateCreditCard, deleteBankAccount, deleteCreditCard, familyMembers, uploadImage } = useFinance();
+    const { startForm, submitForm } = useFormFunnel('add_account_modal');
 
     const [type, setType] = useState<'bank' | 'creditCard'>('bank');
     const [name, setName] = useState('');
@@ -69,7 +71,11 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
             setTheme('black');
             setLogoUrl('');
         }
-    }, [isOpen, initialAccount, initialType]);
+
+        if (isOpen) {
+            startForm();
+        }
+    }, [isOpen, initialAccount, initialType, startForm]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -161,6 +167,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                     });
                 }
             }
+
+            submitForm({ type, isUpdate: !!initialAccount });
 
             // Success: Reset and Close
             setName('');

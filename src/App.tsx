@@ -6,6 +6,7 @@ import Goals from './pages/Goals';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Categories from './pages/Categories';
+import AdminAnalytics from './pages/AdminAnalytics';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -36,6 +37,7 @@ function App() {
                     <Route path="goals" element={<Goals />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="categories" element={<Categories />} />
+                    <Route path="admin" element={<AdminAnalytics />} />
                     {/* Default redirect to Dashboard */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
