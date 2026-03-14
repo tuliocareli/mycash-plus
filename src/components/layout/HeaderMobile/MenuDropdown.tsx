@@ -10,6 +10,7 @@ import {
     LayoutGrid
 } from 'lucide-react';
 import { MenuItem } from './MenuItem';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface MenuDropdownProps {
     isOpen: boolean;
@@ -22,6 +23,7 @@ interface MenuDropdownProps {
 }
 
 export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
+    const { signOut } = useAuth();
     if (!isOpen) return null;
 
     return (
@@ -106,10 +108,10 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                 <div className="p-4 bg-neutral-50">
                     <button
                         className="w-full flex items-center justify-center gap-2 p-3 text-red-600 font-medium hover:bg-white hover:shadow-sm rounded-lg transition-all border border-transparent hover:border-red-100"
-                        onClick={() => {
-                            // Lógica de logout futura
-                            console.log('Logout Clicked');
+                        onClick={async () => {
                             onClose();
+                            await signOut();
+                            window.location.href = '/login';
                         }}
                     >
                         <LogOut size={18} />
