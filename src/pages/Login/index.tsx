@@ -231,6 +231,11 @@ export default function Login() {
                                     <span className="text-xs font-black text-neutral-1100 uppercase tracking-widest">Entrar com Google</span>
                                 </button>
                             </div>
+
+                            <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest text-center mt-6">
+                                Ao entrar, você concorda com nossos <br />
+                                <button onClick={() => navigate('/terms')} className="text-brand-700 underline underline-offset-2">Termos de Uso</button> e <button onClick={() => navigate('/terms')} className="text-brand-700 underline underline-offset-2">Privacidade</button>.
+                            </p>
                         </div>
                     </div>
 

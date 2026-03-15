@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Categories from './pages/Categories';
 import AdminAnalytics from './pages/AdminAnalytics';
 import History from './pages/History';
+import Terms from './pages/Terms';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -20,8 +21,9 @@ function App() {
           Todas as rotas filhas serão renderizadas dentro do <Outlet /> do Layout.
       */}
             <Routes>
-                {/* Public Route */}
+                {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/terms" element={<Terms />} />
 
                 {/* Private Routes Wrapper */}
                 <Route

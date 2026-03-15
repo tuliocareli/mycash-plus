@@ -166,6 +166,7 @@ interface FinanceContextData {
     showWelcomeCard: boolean;
     hasSeenOnboarding: boolean;
     setHasSeenOnboarding: (seen: boolean) => Promise<void>;
+    clearAllData: () => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextData>({} as FinanceContextData);
@@ -801,6 +802,55 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         fetchData(true);
     };
 
+    const clearAllData = async () => {
+        if (!user) return;
+
+        try {
+            setLoading(true);
+
+            // Deletar em ordem para evitar conflitos (embora RLS lide com isso, é boa prática)
+            const tables = [
+                'transactions',
+                'goals',
+                'accounts',
+                'categories',
+                'family_members',
+                'monthly_closings'
+            ];
+
+            for (const table of tables) {
+                const { error } = await supabase
+                    .from(table)
+                    .delete()
+                    .eq('user_id', user.id);
+                
+                if (error) {
+                    console.error(`Erro ao limpar tabela ${table}:`, error);
+                }
+            }
+
+            // Resetar HasSeenOnboarding
+            await supabase.from('users').update({ has_seen_onboarding: false }).eq('id', user.id);
+            setHasSeenOnboardingState(false);
+            setShowWelcomeCard(true);
+
+            // Sincronizar estado local
+            await fetchData();
+
+            analytics.track({
+                category: 'FUNNEL',
+                name: 'clear_all_data',
+                metadata: { status: 'success' }
+            });
+
+        } catch (error) {
+            console.error('Erro geral ao limpar dados:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const uploadImage = async (bucket: 'avatars' | 'account-logos', file: File): Promise<string | null> => {
         if (!user) return null;
         const fileExt = file.name.split('.').pop();
@@ -906,7 +956,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             savingsRate,
             showWelcomeCard,
             hasSeenOnboarding,
-            setHasSeenOnboarding
+            setHasSeenOnboarding,
+            clearAllData
         }}>
             {children}
         </FinanceContext.Provider>

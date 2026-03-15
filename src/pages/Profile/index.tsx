@@ -26,7 +26,7 @@ import { LogoutModal } from '../../components/modals/LogoutModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
-    const { familyMembers, categories } = useFinance();
+    const { familyMembers, categories, clearAllData } = useFinance();
     const { user, signOut: authSignOut } = useAuth();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
@@ -57,6 +57,21 @@ export default function Profile() {
     const confirmLogout = async () => {
         await authSignOut();
         navigate('/login');
+    };
+
+    const handleDeleteAllData = async () => {
+        const confirmed = window.confirm(
+            'ATENÇÃO: Isso apagará permanentemente todas as suas transações, contas e configurações. Esta ação não pode ser desfeita. Deseja continuar?'
+        );
+
+        if (confirmed) {
+            try {
+                await clearAllData();
+                alert('Todos os seus dados foram apagados com sucesso.');
+            } catch (error) {
+                alert('Erro ao apagar dados. Tente novamente mais tarde.');
+            }
+        }
     };
 
     const incomeCategories = categories.filter(c => c.type === 'INCOME');
@@ -368,7 +383,10 @@ export default function Profile() {
                                     </div>
                                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <button className="w-full flex items-center gap-3 p-4 text-red-600 border border-red-100 rounded-2xl hover:bg-red-50 transition-all group">
+                                <button 
+                                    onClick={handleDeleteAllData}
+                                    className="w-full flex items-center gap-3 p-4 text-red-600 border border-red-100 rounded-2xl hover:bg-red-50 transition-all group active:scale-95"
+                                >
                                     <Trash2 size={18} />
                                     <span className="text-xs font-black uppercase tracking-widest">Limpar Todos os Dados</span>
                                 </button>
@@ -394,8 +412,18 @@ export default function Profile() {
                                     Sistema de gestão financeira familiar focado em privacidade e colaboração.
                                 </p>
                                 <div className="flex gap-6 pt-4">
-                                    <a href="#" className="text-[10px] font-black uppercase tracking-widest hover:text-brand-500 transition-colors">Termos de Uso</a>
-                                    <a href="#" className="text-[10px] font-black uppercase tracking-widest hover:text-brand-500 transition-colors">Privacidade</a>
+                                    <button 
+                                        onClick={() => navigate('/terms')}
+                                        className="text-[10px] font-black uppercase tracking-widest hover:text-brand-500 transition-colors"
+                                    >
+                                        Termos de Uso
+                                    </button>
+                                    <button 
+                                        onClick={() => navigate('/terms')}
+                                        className="text-[10px] font-black uppercase tracking-widest hover:text-brand-500 transition-colors"
+                                    >
+                                        Privacidade
+                                    </button>
                                 </div>
                             </div>
                         </div>
