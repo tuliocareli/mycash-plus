@@ -12,6 +12,7 @@ interface AuthContextData {
     signUp: (credentials: SignUpWithPasswordCredentials) => Promise<{ error: any }>;
     updateUser: (attributes: { data?: any }) => Promise<{ error: any }>;
     signInAnonymously: () => Promise<void>;
+    signInWithGoogle: () => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -55,6 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return await supabase.auth.updateUser(attributes);
     };
 
+    const signInWithGoogle = async () => {
+        return await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                queryParams: {
+                    prompt: 'select_account',
+                },
+                redirectTo: window.location.origin,
+            },
+        });
+    };
+
     const signInAnonymously = async () => {
         setLoading(true);
         const { error } = await supabase.auth.signInAnonymously();
@@ -66,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, updateUser, signInAnonymously }}>
+        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, updateUser, signInAnonymously, signInWithGoogle }}>
             {!loading && children}
         </AuthContext.Provider>
     );
