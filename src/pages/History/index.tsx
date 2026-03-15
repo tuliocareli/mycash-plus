@@ -142,49 +142,50 @@ export default function HistoryPage() {
 
             {/* Ciclo Atual */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-gradient-to-br from-brand-600 to-brand-700 rounded-[32px] p-8 text-white shadow-xl shadow-brand-500/20 relative overflow-hidden group">
-                    {/* Background Shapes */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/15 transition-all duration-700" />
+                <div className="lg:col-span-2 bg-neutral-1100 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden group">
+                    {/* Decorative Blurs */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-brand-500/20 transition-all duration-700" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-500/5 rounded-full -ml-10 -mb-10 blur-2xl opacity-50" />
                     
-                    <div className="relative z-10">
+                    <div className="relative z-10 h-full flex flex-col">
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="size-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                            <div className="size-12 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center text-brand-500 border border-white/10">
                                 <Calendar size={24} />
                             </div>
                             <div>
-                                <h2 className="text-lg font-semibold opacity-90">Ciclo Atual</h2>
-                                <p className="text-2xl font-bold">
+                                <h2 className="text-xs font-black uppercase tracking-[0.2em] text-neutral-400">Ciclo Atual</h2>
+                                <p className="text-2xl font-black tracking-tightest mt-1">
                                     {format(startDate, "dd 'de' MMM", { locale: ptBR })} - {format(endDate, "dd 'de' MMM", { locale: ptBR })}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mt-auto">
                             <div>
-                                <p className="text-sm opacity-70 mb-1">Receitas</p>
-                                <p className="text-xl font-bold">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Receitas</p>
+                                <p className="text-2xl font-black text-brand-500">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                             </div>
                             <div>
-                                <p className="text-sm opacity-70 mb-1">Despesas</p>
-                                <p className="text-xl font-bold">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Despesas</p>
+                                <p className="text-2xl font-black text-white">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                             </div>
                             <div className="hidden md:block">
-                                <p className="text-sm opacity-70 mb-1">Saldo Previsto</p>
-                                <p className="text-xl font-bold">R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-2">Saldo Previsto</p>
+                                <p className="text-2xl font-black text-white opacity-90">R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                             </div>
                         </div>
 
-                        <div className="mt-10 flex flex-wrap gap-4">
+                        <div className="mt-10 flex flex-wrap gap-4 items-center">
                             <button 
                                 onClick={handleCloseMonth}
-                                className="px-6 py-3 bg-white text-brand-700 font-bold rounded-2xl hover:bg-neutral-50 transition-all flex items-center gap-2 shadow-lg shadow-black/10 active:scale-95"
+                                className="px-6 py-3 bg-brand-500 text-neutral-1100 font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-brand-700 transition-all flex items-center gap-2 shadow-lg shadow-brand-500/20 active:scale-95"
                             >
                                 <Lock size={18} />
                                 Fechar Ciclo Agora
                             </button>
-                            <div className="flex items-center gap-2 text-sm opacity-80 bg-black/10 px-4 py-3 rounded-2xl backdrop-blur-sm">
-                                <AlertCircle size={16} />
-                                O ciclo fecha automaticamente em {format(endDate, "dd/MM")}
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400 bg-white/5 px-4 py-3 rounded-2xl border border-white/5">
+                                <AlertCircle size={14} className="text-brand-500" />
+                                Fecha automaticamente em {format(endDate, "dd/MM")}
                             </div>
                         </div>
                     </div>
