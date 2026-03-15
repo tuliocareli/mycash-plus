@@ -7,9 +7,23 @@ import { NewTransactionModal } from '../../components/modals/NewTransactionModal
 import { useFinance } from '../../contexts/FinanceContext';
 import clsx from 'clsx';
 
+import { exportToCSV } from '../../utils/export';
+
 export default function Transactions() {
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
     const { filteredTransactions, totalIncome, totalExpenses } = useFinance();
+
+    const handleExport = () => {
+        const headers = {
+            date: 'Data',
+            description: 'Descrição',
+            category: 'Categoria',
+            amount: 'Valor',
+            type: 'Tipo',
+            status: 'Status'
+        };
+        exportToCSV(filteredTransactions, 'transacoes_mycash', headers);
+    };
 
     const difference = totalIncome - totalExpenses;
     const count = filteredTransactions.length;
@@ -19,21 +33,6 @@ export default function Transactions() {
             style: 'currency',
             currency: 'BRL',
         }).format(value);
-    };
-
-    const handleExport = () => {
-        // Mock export
-        const csvContent = "data:text/csv;charset=utf-8,"
-            + ["Data,Descrição,Categoria,Valor,Tipo"].join(",") + "\n"
-            + filteredTransactions.map(t => `${t.date},${t.description},${t.category},${t.amount},${t.type}`).join("\n");
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `transacoes_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     };
 
     return (

@@ -8,7 +8,8 @@ import {
     ChevronLeft,
     ChevronRight,
     LayoutGrid,
-    BarChart3
+    BarChart3,
+    History
 } from 'lucide-react';
 import clsx from 'clsx';
 import { SidebarItem } from './SidebarItem';
@@ -100,6 +101,12 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     icon={LayoutGrid}
                     label="Categorias"
                     path="/categories"
+                    isCollapsed={isCollapsed}
+                />
+                <SidebarItem
+                    icon={History}
+                    label="Histórico"
+                    path="/history"
                     isCollapsed={isCollapsed}
                 />
                 <SidebarItem

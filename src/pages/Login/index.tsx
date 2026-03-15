@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Loader2, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { useFormFunnel } from '../../hooks/useAnalytics';
 
 export default function Login() {
     const { signIn } = useAuth();
@@ -17,6 +18,10 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // Analytics
+    const { startForm: startLogin, submitForm: submitLogin } = useFormFunnel('login');
+    const { startForm: startRegister, submitForm: submitRegister } = useFormFunnel('register');
+
     const from = location.state?.from?.pathname || "/";
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -29,10 +34,12 @@ export default function Login() {
             if (isLogin) {
                 const { error: signInError } = await signIn({ email, password });
                 if (signInError) throw signInError;
+                submitLogin({ email: email }); // Success
                 navigate(from, { replace: true });
             } else {
                 // Prevent real account creation
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Fake loading delay
+                submitRegister({ email: email }); // Success
                 setSuccess('Solicitação recebida! Notificamos o admin, entre em contato para liberar seu acesso.');
                 setIsLogin(true);
             }
@@ -133,7 +140,10 @@ export default function Login() {
                                         type="email"
                                         required
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            isLogin ? startLogin() : startRegister();
+                                        }}
                                         className="w-full h-14 pl-12 pr-4 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all placeholder:text-neutral-300 placeholder:font-medium"
                                         placeholder="seu@email.com"
                                     />

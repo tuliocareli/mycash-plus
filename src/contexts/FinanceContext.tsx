@@ -11,7 +11,9 @@ import {
 } from '../types';
 import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
-import { startOfMonth, endOfMonth, isWithinInterval, parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
+import { isWithinInterval, parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
+import { getFinancialCycleRange } from '../utils/cycles';
+import { MonthlyClosing } from '../types';
 import { analytics } from '../services/analytics';
 import { Database } from '../types/supabase';
 
@@ -103,6 +105,8 @@ interface FinanceContextData {
     bankAccounts: Account[];
     familyMembers: FamilyMember[];
     categories: Category[];
+    closingDay: number;
+    monthlyClosings: MonthlyClosing[];
 
     // Filters
     selectedMemberId: string | null;
@@ -147,6 +151,10 @@ interface FinanceContextData {
     deleteCategory: (id: string) => Promise<void>;
     uploadImage: (bucket: 'avatars' | 'account-logos', file: File) => Promise<string | null>;
 
+    // Cycles & Closings
+    updateClosingDay: (day: number) => Promise<void>;
+    closeCycle: (period: string, data: Partial<MonthlyClosing>) => Promise<void>;
+
     // Derived
     filteredTransactions: Transaction[];
     totalBalance: number;
@@ -171,12 +179,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [monthlyClosings, setMonthlyClosings] = useState<MonthlyClosing[]>([]);
+    const [closingDay, setClosingDay] = useState<number>(1);
 
     // Filters
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-    const [dateRange, setDateRange] = useState<DateRange>({
-        startDate: startOfMonth(new Date()),
-        endDate: endOfMonth(new Date())
+    const [dateRange, setDateRange] = useState<DateRange>(() => {
+        return getFinancialCycleRange(new Date(), 1);
     });
     const [transactionTypeFilter, setTransactionTypeFilter] = useState<'all' | TransactionType>('all');
     const [searchText, setSearchText] = useState('');
@@ -197,7 +206,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             // 1. Ensure User Profile Exists in public.users
             const { data: profile, error: profileError } = await supabase
                 .from('users')
-                .select('id, has_seen_onboarding')
+                .select('id, has_seen_onboarding, closing_day')
                 .eq('id', user.id)
                 .single();
 
@@ -221,15 +230,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 
                 setHasSeenOnboardingState(!shouldShowNow);
                 setShowWelcomeCard(shouldShowNow);
+                if (profile.closing_day) {
+                    setClosingDay(profile.closing_day);
+                }
             }
 
             // 2. Fetch all data
-            const [txRes, goalsRes, accRes, memRes, catRes] = await Promise.all([
+            const [txRes, goalsRes, accRes, memRes, catRes, closingRes] = await Promise.all([
                 supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
                 supabase.from('goals').select('*').eq('user_id', user.id),
                 supabase.from('accounts').select('*').eq('user_id', user.id),
                 supabase.from('family_members').select('*').eq('user_id', user.id),
-                supabase.from('categories').select('*').eq('user_id', user.id)
+                supabase.from('categories').select('*').eq('user_id', user.id),
+                supabase.from('monthly_closings').select('*').eq('user_id', user.id).order('period', { ascending: false })
             ]);
 
             // Handling Categories & Seeding if needed
@@ -289,6 +302,19 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             if (txRes.data) setTransactions(txRes.data.map(t => mapTransaction(t, cats)));
             if (goalsRes.data) setGoals(goalsRes.data.map(mapGoal));
             if (accRes.data) setAccounts(accRes.data.map(mapAccount));
+            if (closingRes.data) {
+                setMonthlyClosings(closingRes.data.map(c => ({
+                    id: c.id,
+                    userId: c.user_id,
+                    period: c.period,
+                    openingBalance: Number(c.opening_balance),
+                    totalIncome: Number(c.total_income),
+                    totalExpense: Number(c.total_expense),
+                    closingBalance: Number(c.closing_balance),
+                    status: c.status as 'OPEN' | 'CLOSED',
+                    createdAt: c.created_at || ''
+                })));
+            }
 
             if (txRes.error) console.error('Error fetching transactions:', txRes.error);
             if (memRes.error) console.error('Error fetching members:', memRes.error);
@@ -321,6 +347,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             setAccounts([]);
             setFamilyMembers([]);
             setCategories([]);
+            setMonthlyClosings([]);
+            setClosingDay(1);
             setLoading(false);
         }
     }, [user, fetchData]);
@@ -788,6 +816,41 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         return data.publicUrl;
     };
 
+    const updateClosingDay = async (day: number) => {
+        if (!user) return;
+        const { error } = await supabase.from('users').update({ closing_day: day }).eq('id', user.id);
+        if (error) throw error;
+        setClosingDay(day);
+        // Update date range immediately for better UX
+        setDateRange(getFinancialCycleRange(new Date(), day));
+        fetchData(true);
+    };
+
+    const closeCycle = async (period: string, data: Partial<MonthlyClosing>) => {
+        if (!user) return;
+        
+        const payload = {
+            user_id: user.id,
+            period,
+            opening_balance: data.openingBalance || 0,
+            total_income: data.totalIncome || 0,
+            total_expense: data.totalExpense || 0,
+            closing_balance: data.closingBalance || 0,
+            status: 'CLOSED'
+        };
+
+        const { error } = await supabase.from('monthly_closings').upsert(payload);
+        if (error) throw error;
+        
+        analytics.track({
+            category: 'FINANCE',
+            name: 'close_cycle',
+            metadata: { period }
+        });
+
+        fetchData(true);
+    };
+
     return (
         <FinanceContext.Provider value={{
             loading,
@@ -798,6 +861,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             bankAccounts,
             familyMembers,
             categories,
+            closingDay,
+            monthlyClosings,
             selectedMemberId,
             dateRange,
             transactionTypeFilter,
@@ -831,6 +896,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             updateCategory,
             deleteCategory,
             uploadImage,
+            updateClosingDay,
+            closeCycle,
             filteredTransactions,
             totalBalance,
             totalIncome,

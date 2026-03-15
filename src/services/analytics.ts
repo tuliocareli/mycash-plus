@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 
 export interface AnalyticsEvent {
-    category: 'CLICK' | 'PERFORMANCE' | 'FUNNEL' | 'DISCOVERY' | 'ERROR';
+    category: 'CLICK' | 'PERFORMANCE' | 'FUNNEL' | 'DISCOVERY' | 'ERROR' | 'FINANCE';
     name: string;
     metadata?: Record<string, any>;
 }

@@ -4,6 +4,7 @@ import { X, Calendar, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { Goal } from '../../types';
+import { useFormFunnel, usePerformanceMarker } from '../../hooks/useAnalytics';
 
 interface NewGoalModalProps {
     isOpen: boolean;
@@ -27,6 +28,10 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
 
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [saving, setSaving] = useState(false);
+
+    // Analytics
+    const { startForm, submitForm } = useFormFunnel(goalToEdit ? 'edit_goal' : 'new_goal');
+    const { measureAction } = usePerformanceMarker();
 
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
@@ -62,6 +67,13 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleSave = async () => {
+        await measureAction(goalToEdit ? 'update_goal' : 'create_goal', async () => {
+            await handleSubmit();
+            submitForm({ name, targetAmount });
+        });
     };
 
     const handleClose = () => {
@@ -102,7 +114,10 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    startForm();
+                                }}
                                 className="w-full h-full p-4 outline-none text-neutral-1100"
                                 placeholder="Ex: Viagem para Europa"
                             />
@@ -189,7 +204,7 @@ export function NewGoalModal({ isOpen, onClose, goalToEdit }: NewGoalModalProps)
                         Cancelar
                     </button>
                     <button
-                        onClick={handleSubmit}
+                        onClick={handleSave}
                         disabled={saving}
                         className="px-8 py-3 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-all shadow-lg hover:shadow-xl active:scale-95 text-sm flex items-center gap-2 disabled:opacity-50"
                     >

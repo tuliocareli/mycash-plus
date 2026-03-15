@@ -10,8 +10,21 @@ export interface User {
     email: string;
     name: string;
     avatarUrl?: string;
+    closingDay?: number;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface MonthlyClosing {
+    id: string;
+    userId: string;
+    period: string; // YYYY-MM
+    openingBalance: number;
+    totalIncome: number;
+    totalExpense: number;
+    closingBalance: number;
+    status: 'OPEN' | 'CLOSED';
+    createdAt: string;
 }
 
 export interface FamilyMember {

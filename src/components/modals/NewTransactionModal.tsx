@@ -5,6 +5,7 @@ import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2, Trash2
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { Transaction, TransactionType, TransactionStatus } from '../../types';
+import { useFormFunnel, usePerformanceMarker } from '../../hooks/useAnalytics';
 
 interface NewTransactionModalProps {
     isOpen: boolean;
@@ -35,6 +36,10 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    // Analytics
+    const { startForm, submitForm } = useFormFunnel(initialData ? 'edit_transaction' : 'new_transaction');
+    const { measureAction } = usePerformanceMarker();
 
     const isEditing = !!initialData;
 
@@ -152,6 +157,13 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
         }
     };
 
+    const handleSave = async () => {
+        await measureAction(isEditing ? 'update_transaction' : 'create_transaction', async () => {
+            await handleSubmit();
+            submitForm({ type, amount: Number(amount), categoryId });
+        });
+    };
+
     // View State
     const [view, setView] = useState<'FORM' | 'CONFIRM_DELETE' | 'SUCCESS_DELETE'>('FORM');
 
@@ -172,7 +184,9 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
         if (!initialData) return;
         setDeleting(true);
         try {
-            await deleteTransaction(initialData.id);
+            await measureAction('delete_transaction', async () => {
+                await deleteTransaction(initialData.id);
+            });
             setView('SUCCESS_DELETE');
         } catch (error: any) {
             console.error(error);
@@ -336,7 +350,10 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                             <input
                                                 type="number"
                                                 value={amount}
-                                                onChange={(e) => setAmount(e.target.value)}
+                                                onChange={(e) => {
+                                                    setAmount(e.target.value);
+                                                    startForm();
+                                                }}
                                                 className="w-full h-full outline-none text-lg font-bold text-neutral-1100 placeholder:text-neutral-300 bg-transparent"
                                                 placeholder="0,00"
                                             />
@@ -567,7 +584,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                             )}
 
                             <button
-                                onClick={handleSubmit}
+                                onClick={handleSave}
                                 disabled={saving}
                                 className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
