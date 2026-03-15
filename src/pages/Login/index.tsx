@@ -94,12 +94,12 @@ export default function Login() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-md">
-                            <p className="text-xl font-black text-white">Intuitivo</p>
-                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">e Fácil</p>
+                            <p className="text-xl font-black text-white">Privado</p>
+                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">e Seguro</p>
                         </div>
                         <div className="p-6 bg-white/5 rounded-[2rem] border border-white/10 backdrop-blur-md">
-                            <p className="text-2xl font-black text-white">Open</p>
-                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">Colaborativo</p>
+                            <p className="text-2xl font-black text-white">100%</p>
+                            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">Individual</p>
                         </div>
                     </div>
 
