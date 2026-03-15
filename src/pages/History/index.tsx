@@ -142,7 +142,7 @@ export default function HistoryPage() {
 
             {/* Ciclo Atual */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-neutral-1100 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden group">
+                <div className="lg:col-span-2 bg-[#080B12] rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden group">
                     {/* Decorative Blurs */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-brand-500/20 transition-all duration-700" />
                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-500/5 rounded-full -ml-10 -mb-10 blur-2xl opacity-50" />
