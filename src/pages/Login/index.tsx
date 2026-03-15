@@ -105,9 +105,9 @@ export default function Login() {
 
                     <div className="pt-8 border-t border-white/5">
                         <p className="text-[10px] font-bold text-brand-500 uppercase tracking-widest leading-relaxed opacity-60">
-                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo (Beta).
-                            A conta de acesso é PÚBLICA e COMPARTILHADA. Todos os dados inseridos serão visíveis por outros usuários.
-                            Não utilize para dados reais ou sensíveis. O banco pode ser resetado a qualquer momento.
+                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo e portfólio (Beta).
+                            O ambiente é destinado apenas para testes de funcionalidades e interface. 
+                            O banco de dados pode ser resetado periodicamente para manutenção.
                         </p>
                     </div>
                 </div>
@@ -236,9 +236,9 @@ export default function Login() {
 
                     <div className="mt-8 lg:hidden">
                         <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest leading-relaxed text-center opacity-70">
-                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo (Beta).
-                            A conta de acesso é PÚBLICA e COMPARTILHADA. Todos os dados inseridos serão visíveis por outros usuários.
-                            Não utilize para dados reais ou sensíveis. O banco pode ser resetado a qualquer momento.
+                            ⚠️ Aviso Legal: Esta aplicação é uma versão de estudo e portfólio (Beta).
+                            O ambiente é destinado apenas para testes de funcionalidades e interface. 
+                            O banco de dados pode ser resetado periodicamente para manutenção.
                         </p>
                     </div>
                 </div>
