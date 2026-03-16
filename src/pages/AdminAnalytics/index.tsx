@@ -1,9 +1,11 @@
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics';
 import { BarChart3, MousePointer2, Timer, Zap, Loader2, RefreshCcw, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
+import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 export default function AdminAnalytics() {
     const { summary, loading, isAdmin, refresh } = useAdminAnalytics();
+    const { trackClick } = useInteractionTracker('admin_refresh');
 
     if (!isAdmin) {
         return (
@@ -32,7 +34,10 @@ export default function AdminAnalytics() {
                     <p className="text-neutral-500 font-medium">Monitoramento de UX, performance e funis de conversão.</p>
                 </div>
                 <button 
-                    onClick={refresh}
+                    onClick={() => {
+                        refresh();
+                        trackClick();
+                    }}
                     className="flex items-center gap-2 px-6 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-1100 font-bold rounded-2xl transition-all active:scale-95 text-sm self-start"
                 >
                     <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />

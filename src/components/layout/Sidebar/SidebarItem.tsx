@@ -10,9 +10,10 @@ interface SidebarItemProps {
     label: string;
     path: string;
     isCollapsed: boolean;
+    onClick?: () => void;
 }
 
-export function SidebarItem({ icon: Icon, label, path, isCollapsed }: SidebarItemProps) {
+export function SidebarItem({ icon: Icon, label, path, isCollapsed, onClick }: SidebarItemProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const isActive = location.pathname === path;
@@ -20,7 +21,10 @@ export function SidebarItem({ icon: Icon, label, path, isCollapsed }: SidebarIte
     return (
         <div className="relative group w-full">
             <button
-                onClick={() => navigate(path)}
+                onClick={() => {
+                    navigate(path);
+                    onClick?.();
+                }}
                 className={clsx(
                     'flex items-center transition-all duration-200 w-full',
                     'rounded-full', // Pill shape da imagem

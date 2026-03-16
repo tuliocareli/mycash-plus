@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { MemberRole } from '../../types';
+import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 interface AddMemberModalProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
 
     const { user } = useAuth();
     const { addFamilyMember, uploadImage } = useFinance();
+    const { trackClick } = useInteractionTracker('add_member_submit');
 
     const [name, setName] = useState('');
     const [role, setRole] = useState<MemberRole | string>(''); // Allow free text but suggest roles
@@ -66,6 +68,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         setSaving(true);
         setSubmitError(null);
         try {
+            trackClick({ name, role });
             await addFamilyMember({
                 name,
                 role: role as MemberRole,

@@ -18,6 +18,7 @@ import { SidebarProfile } from './SidebarProfile';
 import { useAuth } from '../../../contexts/AuthContext';
 import { SupportModal } from '../../modals/SupportModal';
 import { useState } from 'react';
+import { useInteractionTracker } from '../../../hooks/useAnalytics';
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -27,6 +28,8 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     const { user } = useAuth();
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const { trackClick: trackNavClick } = useInteractionTracker('sidebar_nav');
+    const { trackClick: trackHelpClick } = useInteractionTracker('sidebar_help');
     
     const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
     const isAdmin = !!user?.email && ADMIN_EMAILS.some(email => email.toLowerCase() === user.email?.toLowerCase());
@@ -82,12 +85,14 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     label="Home"
                     path="/"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'home' })}
                 />
                 <SidebarItem
                     icon={CreditCard}
                     label="Cartões"
                     path="/cards"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'cards' })}
                 />
                 {/* Adicionando outros itens implicitamente necessários ou removendo se a imagem só mostra 2?
             A imagem mostra "Home" e "Cartões". Vou manter os outros mas focando no estilo.
@@ -97,30 +102,35 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     label="Transações"
                     path="/transactions"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'transactions' })}
                 />
                 <SidebarItem
                     icon={Target}
                     label="Objetivos"
                     path="/goals"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'goals' })}
                 />
                 <SidebarItem
                     icon={LayoutGrid}
                     label="Categorias"
                     path="/categories"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'categories' })}
                 />
                 <SidebarItem
                     icon={History}
                     label="Histórico"
                     path="/history"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'history' })}
                 />
                 <SidebarItem
                     icon={User}
                     label="Perfil"
                     path="/profile"
                     isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'profile' })}
                 />
                 {isAdmin && (
                     <SidebarItem
@@ -128,12 +138,16 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                         label="Analytics"
                         path="/admin"
                         isCollapsed={isCollapsed}
+                        onClick={() => trackNavClick({ target: 'admin' })}
                     />
                 )}
                 
                 {/* Fixed Help Button */}
                 <button
-                    onClick={() => setIsSupportModalOpen(true)}
+                    onClick={() => {
+                        setIsSupportModalOpen(true);
+                        trackHelpClick();
+                    }}
                     className={clsx(
                         "flex items-center gap-3 w-full p-4 rounded-2xl transition-all duration-200 group mt-auto hover:bg-brand-50 hover:text-brand-700 text-neutral-500",
                         isCollapsed ? "justify-center" : "px-4"

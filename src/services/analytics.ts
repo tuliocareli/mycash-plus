@@ -31,11 +31,10 @@ class AnalyticsService {
     }
 
     async track(event: AnalyticsEvent) {
-        if (!this.userId || import.meta.env.DEV) {
-            if (import.meta.env.DEV) {
-                console.log('[Analytics Skip - DEV]', event);
-            }
-            return;
+        if (!this.userId) return;
+
+        if (import.meta.env.DEV) {
+            console.log('[Analytics - DEV Mode]', event);
         }
 
         const payload = {
