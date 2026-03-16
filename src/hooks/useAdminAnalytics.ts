@@ -59,7 +59,23 @@ export const useAdminAnalytics = () => {
                 }));
 
                 // Funnels
+                const REQUIRED_FUNNELS = [
+                    'add_account_modal',
+                    'new_transaction',
+                    'login',
+                    'support_message_sent',
+                    'new_goal',
+                    'update_profile',
+                    'export_data'
+                ];
+
                 const funnelMap: Record<string, { starts: number; submits: number }> = {};
+                
+                // Initialize required funnels with 0
+                REQUIRED_FUNNELS.forEach(name => {
+                    funnelMap[name] = { starts: 0, submits: 0 };
+                });
+
                 data.filter(e => e.event_category === 'FUNNEL').forEach(e => {
                     const baseName = e.event_name.replace('_start', '').replace('_submit', '').replace('_abandon', '');
                     if (!funnelMap[baseName]) funnelMap[baseName] = { starts: 0, submits: 0 };
