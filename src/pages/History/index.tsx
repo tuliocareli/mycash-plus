@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFinance } from '../../contexts/FinanceContext';
+import { useAnalytics, useFormFunnel } from '../../hooks/useAnalytics';
 import { 
     Calendar, 
     ChevronRight, 
@@ -31,8 +32,15 @@ export default function HistoryPage() {
         totalBalance
     } = useFinance();
     
+    const { trackEvent } = useAnalytics();
+    const { startForm: startExport, submitForm: submitExport } = useFormFunnel('export_data');
+
     const [isEditingClosingDay, setIsEditingClosingDay] = useState(false);
     const [tempClosingDay, setTempClosingDay] = useState(closingDay);
+
+    useEffect(() => {
+        trackEvent({ category: 'FUNNEL', name: 'view_history' });
+    }, [trackEvent]);
 
     const currentPeriod = useMemo(() => getCyclePeriod(new Date(), closingDay), [closingDay]);
     const { startDate, endDate } = useMemo(() => getFinancialCycleRange(new Date(), closingDay), [closingDay]);
@@ -54,6 +62,7 @@ export default function HistoryPage() {
     };
 
     const handleExportCSV = () => {
+        startExport();
         const headers = {
             period: 'Período',
             totalIncome: 'Renda Total',
@@ -62,6 +71,7 @@ export default function HistoryPage() {
             status: 'Status'
         };
         exportToCSV(monthlyClosings, 'relatorio-financeiro-mycash', headers);
+        submitExport({ type: 'csv' });
     };
 
     return (
@@ -92,7 +102,11 @@ export default function HistoryPage() {
                         </button>
                         <div className="w-px h-6 bg-neutral-100" />
                         <button 
-                            onClick={exportToPDF}
+                            onClick={() => {
+                                startExport();
+                                exportToPDF();
+                                submitExport({ type: 'pdf' });
+                            }}
                             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-neutral-600 hover:bg-neutral-50 hover:text-brand-600 transition-all"
                             title="Imprimir / Salvar PDF"
                         >

@@ -4,6 +4,7 @@ import { X, User, Briefcase, DollarSign, Loader2, Camera } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { FamilyMember } from '../../types';
+import { useFormFunnel, usePerformanceMarker, useAnalytics } from '../../hooks/useAnalytics';
 import clsx from 'clsx';
 
 interface EditProfileModalProps {
@@ -15,6 +16,9 @@ interface EditProfileModalProps {
 export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalProps) {
     const { updateFamilyMember, uploadImage } = useFinance();
     const { updateUser } = useAuth();
+    const { startForm, submitForm } = useFormFunnel('update_profile');
+    const { measureAction } = usePerformanceMarker();
+    const { trackEvent } = useAnalytics();
     const [name, setName] = useState(member.name);
     const [role, setRole] = useState(member.role);
     const [monthlyIncome, setMonthlyIncome] = useState(member.monthlyIncome.toString());
@@ -42,12 +46,17 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
 
         setUploading(true);
         try {
-            const url = await uploadImage('avatars', file);
+            const url = await measureAction('upload_avatar', async () => {
+                const result = await uploadImage('avatars', file);
+                return result;
+            });
             if (url) {
                 setAvatarUrl(url);
+                trackEvent({ category: 'FUNNEL', name: 'upload_avatar_success' });
             }
         } catch (error) {
             console.error('Error uploading image:', error);
+            trackEvent({ category: 'FUNNEL', name: 'upload_avatar_error' });
             alert('Erro ao enviar imagem.');
         } finally {
             setUploading(false);
@@ -86,6 +95,7 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
                 }
             });
 
+            submitForm({ has_avatar: !!avatarUrl });
             onClose();
         } catch (error) {
             console.error('Error updating profile:', error);
@@ -162,7 +172,10 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
                                     <input
                                         type="text"
                                         value={name}
-                                        onChange={(e) => setName(e.target.value)}
+                                        onChange={(e) => {
+                                            setName(e.target.value);
+                                            startForm();
+                                        }}
                                         className="w-full h-16 pl-14 pr-6 bg-neutral-50 border-2 border-neutral-50 rounded-3xl outline-none focus:bg-white focus:border-neutral-200 font-bold text-lg text-neutral-1100 transition-all placeholder:text-neutral-300"
                                         placeholder="Seu nome"
                                     />

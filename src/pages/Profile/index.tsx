@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAnalytics } from '../../hooks/useAnalytics';
 import {
     User as UserIcon,
     Mail,
@@ -30,10 +31,15 @@ export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
     const { familyMembers, categories, clearAllData } = useFinance();
     const { user, signOut: authSignOut } = useAuth();
+    const { trackEvent } = useAnalytics();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+
+    useEffect(() => {
+        trackEvent({ category: 'FUNNEL', name: 'view_profile' });
+    }, [trackEvent]);
 
     // Settings State
     const [currency, setCurrency] = useState('BRL');

@@ -1,9 +1,9 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Target, Calendar, Edit2, Trash2 } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { NewGoalModal } from '../../components/modals/NewGoalModal';
 import { Goal } from '../../types';
+import { useAnalytics } from '../../hooks/useAnalytics';
 // import clsx from 'clsx';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -12,6 +12,11 @@ export default function Goals() {
     const { goals, deleteGoal } = useFinance();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [goalToEdit, setGoalToEdit] = useState<Goal | undefined>(undefined);
+    const { trackEvent } = useAnalytics();
+
+    useEffect(() => {
+        trackEvent({ category: 'FUNNEL', name: 'view_goals' });
+    }, [trackEvent]);
 
     const handleEdit = (goal: Goal) => {
         setGoalToEdit(goal);
