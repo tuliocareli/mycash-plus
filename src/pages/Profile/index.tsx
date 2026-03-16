@@ -17,12 +17,14 @@ import {
     Trash2,
     Info,
     Smartphone,
-    ArrowRight
+    ArrowRight,
+    MessageSquare
 } from 'lucide-react';
 import clsx from 'clsx';
 import { EditProfileModal } from '../../components/modals/EditProfileModal';
 import { AddMemberModal } from '../../components/modals/AddMemberModal';
 import { LogoutModal } from '../../components/modals/LogoutModal';
+import { SupportModal } from '../../components/modals/SupportModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
@@ -31,6 +33,7 @@ export default function Profile() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
     // Settings State
     const [currency, setCurrency] = useState('BRL');
@@ -213,11 +216,18 @@ export default function Profile() {
                         )}
                     </div>
 
-                    {/* Logout */}
-                    <div className="flex justify-end pt-4">
+                    {/* Support & Logout Section */}
+                    <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4">
+                        <button
+                            onClick={() => setIsSupportModalOpen(true)}
+                            className="flex items-center justify-center gap-3 px-8 py-4 bg-brand-50 text-brand-700 rounded-full font-black text-sm hover:bg-brand-100 transition-all uppercase tracking-widest active:scale-95"
+                        >
+                            <MessageSquare size={20} />
+                            Suporte & Feedback
+                        </button>
                         <button
                             onClick={() => setIsLogoutModalOpen(true)}
-                            className="flex items-center gap-3 px-8 py-4 bg-red-50 text-red-600 rounded-full font-black text-sm hover:bg-red-100 transition-all uppercase tracking-widest active:scale-95"
+                            className="flex items-center justify-center gap-3 px-8 py-4 bg-red-50 text-red-600 rounded-full font-black text-sm hover:bg-red-100 transition-all uppercase tracking-widest active:scale-95"
                         >
                             <LogOut size={20} />
                             Sair do MyCash+
@@ -424,6 +434,12 @@ export default function Profile() {
                                     >
                                         Privacidade
                                     </button>
+                                    <button 
+                                        onClick={() => setIsSupportModalOpen(true)}
+                                        className="text-[10px] font-black uppercase tracking-widest hover:text-brand-500 transition-colors"
+                                    >
+                                        Contato
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -449,6 +465,11 @@ export default function Profile() {
                 isOpen={isLogoutModalOpen}
                 onClose={() => setIsLogoutModalOpen(false)}
                 onConfirm={confirmLogout}
+            />
+
+            <SupportModal 
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
             />
         </div>
     );

@@ -9,12 +9,15 @@ import {
     ChevronRight,
     LayoutGrid,
     BarChart3,
-    History
+    History,
+    LifeBuoy
 } from 'lucide-react';
 import clsx from 'clsx';
 import { SidebarItem } from './SidebarItem';
 import { SidebarProfile } from './SidebarProfile';
 import { useAuth } from '../../../contexts/AuthContext';
+import { SupportModal } from '../../modals/SupportModal';
+import { useState } from 'react';
 
 interface SidebarProps {
     isCollapsed: boolean;
@@ -23,9 +26,13 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     const { user } = useAuth();
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    
     const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
     const isAdmin = !!user?.email && ADMIN_EMAILS.some(email => email.toLowerCase() === user.email?.toLowerCase());
+
     return (
+        <>
         <aside
             className={clsx(
                 'flex flex-col h-screen bg-white border-r border-neutral-200 fixed left-0 top-0 z-40 transition-all duration-300 ease-in-out',
@@ -123,6 +130,20 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                         isCollapsed={isCollapsed}
                     />
                 )}
+                
+                {/* Fixed Help Button */}
+                <button
+                    onClick={() => setIsSupportModalOpen(true)}
+                    className={clsx(
+                        "flex items-center gap-3 w-full p-4 rounded-2xl transition-all duration-200 group mt-auto hover:bg-brand-50 hover:text-brand-700 text-neutral-500",
+                        isCollapsed ? "justify-center" : "px-4"
+                    )}
+                >
+                    <LifeBuoy size={20} className="group-hover:scale-110 transition-transform" />
+                    {!isCollapsed && (
+                        <span className="text-sm font-bold uppercase tracking-widest">Ajuda</span>
+                    )}
+                </button>
             </nav>
 
             {/* SPACER para empurrar perfil para baixo */}
@@ -152,5 +173,11 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
             </button>
 
         </aside>
+
+        <SupportModal 
+            isOpen={isSupportModalOpen} 
+            onClose={() => setIsSupportModalOpen(false)} 
+        />
+        </>
     );
 }

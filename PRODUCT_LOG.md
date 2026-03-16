@@ -37,6 +37,14 @@ Este documento registra a jornada de melhoria contínua do MyCash+. Cada entrada
     - ✅ Conformidade com requisitos de lojas de aplicativos.
 - **Status:** ✅ Implementado.
 
+### 5. Sistema de Suporte e Feedback Loop
+- **Mudança:** Implementação de modal de suporte com salvamento em banco e infraestrutura para Edge Functions.
+- **Racional (Dor):** Falta de canal direto para o usuário reportar erros ou sugerir melhorias.
+- **Melhora Esperada:** 
+    - ↑ Velocidade de correção de bugs (informação direta).
+    - ↑ Satisfação do usuário ao ser ouvido.
+- **Status:** ✅ Frontend e Banco implementados.
+
 ---
 
 ## 🗓️ 14 de Março de 2026 (Ontem)
