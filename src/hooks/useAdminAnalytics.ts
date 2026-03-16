@@ -10,6 +10,16 @@ export interface EventSummary {
     avg_performance: { name: string; avg_duration: number; count: number }[];
 }
 
+const REQUIRED_FUNNELS = [
+    'add_account_modal',
+    'new_transaction',
+    'login',
+    'support_message_sent',
+    'new_goal',
+    'update_profile',
+    'export_data'
+];
+
 export const useAdminAnalytics = () => {
     const { user } = useAuth();
     const [summary, setSummary] = useState<EventSummary | null>(null);
@@ -31,7 +41,7 @@ export const useAdminAnalytics = () => {
             if (error) throw error;
 
             if (data) {
-                // Processamento Básico (Poderia ser feito via RPC no Supabase para escala, mas faremos local para o MVP)
+                // Processamento Básico
                 const sessions = new Set(data.map(e => e.session_id)).size;
                 
                 // Top Clicks
@@ -59,19 +69,9 @@ export const useAdminAnalytics = () => {
                 }));
 
                 // Funnels
-                const REQUIRED_FUNNELS = [
-                    'add_account_modal',
-                    'new_transaction',
-                    'login',
-                    'support_message_sent',
-                    'new_goal',
-                    'update_profile',
-                    'export_data'
-                ];
-
                 const funnelMap: Record<string, { starts: number; submits: number }> = {};
                 
-                // Initialize required funnels with 0
+                // Initialize required funnels
                 REQUIRED_FUNNELS.forEach(name => {
                     funnelMap[name] = { starts: 0, submits: 0 };
                 });
@@ -84,20 +84,19 @@ export const useAdminAnalytics = () => {
                         funnelMap[baseName].starts++;
                     } else if (e.event_name.endsWith('_submit')) {
                         funnelMap[baseName].submits++;
-                        // If we have a submit but no start recorded yet, assume 1 start for valid rate
                         if (funnelMap[baseName].starts === 0) funnelMap[baseName].starts = 1;
                     } else if (!e.event_name.endsWith('_abandon')) {
-                        // Direct funnel events (like page views or single clicks)
                         funnelMap[baseName].starts++;
                         funnelMap[baseName].submits++;
                     }
                 });
+
                 const funnel_stats = Object.entries(funnelMap).map(([name, stats]) => ({
                     name,
                     starts: stats.starts,
                     submits: stats.submits,
                     rate: stats.starts > 0 ? Math.round((stats.submits / stats.starts) * 100) : 0
-                }));
+                })).sort((a, b) => b.starts - a.starts); // Show funnels with data first
 
                 setSummary({
                     total_events: data.length,
