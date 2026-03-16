@@ -80,11 +80,11 @@ export default function AdminAnalytics() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Performance Table */}
                 <Section title="Performance de Ações" icon={Timer}>
-                    <div className="max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
+                    <div className="max-h-[480px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="text-xs uppercase text-neutral-400 font-bold border-b border-neutral-100 sticky top-0 bg-white z-10">
+                                    <tr className="text-xs uppercase text-neutral-400 font-bold border-b border-neutral-100 sticky top-0 bg-white z-20">
                                         <th className="py-4 font-bold">Ação</th>
                                         <th className="py-4 font-bold">Latency (Média)</th>
                                         <th className="py-4 font-bold">Amostras</th>
@@ -113,47 +113,57 @@ export default function AdminAnalytics() {
 
                 {/* Funnel Table */}
                 <Section title="Funis de Conversão" icon={BarChart3}>
-                    <div className="max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
-                        <div className="flex flex-col gap-6">
-                            {summary?.funnel_stats.map((funnel, i) => (
-                                <div key={i} className="flex flex-col gap-2">
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <h4 className="font-bold text-neutral-1100 leading-none">{funnel.name}</h4>
-                                            <span className="text-xs text-neutral-400">{funnel.submits} de {funnel.starts} concluídos</span>
+                    <div className="max-h-[480px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
+                        <div className="flex flex-col gap-6 pt-1">
+                            {summary?.funnel_stats.length === 0 ? (
+                                <p className="text-neutral-400 text-sm font-medium italic py-8 text-center uppercase tracking-widest bg-neutral-50 rounded-3xl">Nenhum funil ativo</p>
+                            ) : (
+                                summary?.funnel_stats.map((funnel, i) => (
+                                    <div key={i} className="flex flex-col gap-2">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <h4 className="font-bold text-neutral-1100 leading-none">{funnel.name}</h4>
+                                                <span className="text-xs text-neutral-400">{funnel.submits} de {funnel.starts} concluídos</span>
+                                            </div>
+                                            <span className="text-lg font-black text-brand-600">{funnel.rate}%</span>
                                         </div>
-                                        <span className="text-lg font-black text-brand-600">{funnel.rate}%</span>
+                                        <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-brand-600 rounded-full transition-all duration-1000"
+                                                style={{ width: `${funnel.rate}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-brand-600 rounded-full transition-all duration-1000"
-                                            style={{ width: `${funnel.rate}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
                 </Section>
 
                 {/* Top Clicks */}
                 <Section title="Interações (Top Clicks)" icon={MousePointer2} className="lg:col-span-2">
-                    <div className="flex flex-wrap gap-4">
-                        {summary?.top_clicks.map((click, i) => (
-                            <div key={i} className="flex items-center gap-3 bg-white border border-neutral-200 px-5 py-4 rounded-3xl shadow-sm hover:shadow-md transition-all">
-                                <div className="size-10 rounded-2xl bg-neutral-900 flex items-center justify-center text-white font-black">
-                                    #{i + 1}
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-neutral-400 uppercase tracking-tighter">Event Name</p>
-                                    <p className="text-sm font-bold text-neutral-1100">{click.name}</p>
-                                </div>
-                                <div className="ml-4 pl-4 border-l border-neutral-100">
-                                    <p className="text-xs font-bold text-neutral-400 uppercase tracking-tighter">Cliques</p>
-                                    <p className="text-xl font-black text-brand-600">{click.count}</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="max-h-[320px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
+                        <div className="flex flex-wrap gap-4 pt-1 pb-4">
+                            {summary?.top_clicks.length === 0 ? (
+                                <p className="text-neutral-400 text-sm font-medium italic w-full py-8 text-center uppercase tracking-widest bg-neutral-50 rounded-3xl">Nenhuma interação registrada</p>
+                            ) : (
+                                summary?.top_clicks.map((click, i) => (
+                                    <div key={i} className="flex items-center gap-3 bg-white border border-neutral-200 px-5 py-4 rounded-3xl shadow-sm hover:shadow-md transition-all">
+                                        <div className="size-10 rounded-2xl bg-neutral-900 flex items-center justify-center text-white font-black">
+                                            #{i + 1}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-neutral-400 uppercase tracking-tighter">Event Name</p>
+                                            <p className="text-sm font-bold text-neutral-1100">{click.name}</p>
+                                        </div>
+                                        <div className="ml-4 pl-4 border-l border-neutral-100">
+                                            <p className="text-xs font-bold text-neutral-400 uppercase tracking-tighter">Cliques</p>
+                                            <p className="text-xl font-black text-brand-600">{click.count}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </Section>
             </div>
