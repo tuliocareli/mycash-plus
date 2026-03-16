@@ -63,8 +63,18 @@ export const useAdminAnalytics = () => {
                 data.filter(e => e.event_category === 'FUNNEL').forEach(e => {
                     const baseName = e.event_name.replace('_start', '').replace('_submit', '').replace('_abandon', '');
                     if (!funnelMap[baseName]) funnelMap[baseName] = { starts: 0, submits: 0 };
-                    if (e.event_name.endsWith('_start')) funnelMap[baseName].starts++;
-                    if (e.event_name.endsWith('_submit')) funnelMap[baseName].submits++;
+                    
+                    if (e.event_name.endsWith('_start')) {
+                        funnelMap[baseName].starts++;
+                    } else if (e.event_name.endsWith('_submit')) {
+                        funnelMap[baseName].submits++;
+                        // If we have a submit but no start recorded yet, assume 1 start for valid rate
+                        if (funnelMap[baseName].starts === 0) funnelMap[baseName].starts = 1;
+                    } else if (!e.event_name.endsWith('_abandon')) {
+                        // Direct funnel events (like page views or single clicks)
+                        funnelMap[baseName].starts++;
+                        funnelMap[baseName].submits++;
+                    }
                 });
                 const funnel_stats = Object.entries(funnelMap).map(([name, stats]) => ({
                     name,
