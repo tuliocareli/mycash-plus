@@ -80,55 +80,59 @@ export default function AdminAnalytics() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Performance Table */}
                 <Section title="Performance de Ações" icon={Timer}>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="text-xs uppercase text-neutral-400 font-bold border-b border-neutral-100">
-                                    <th className="py-4 font-bold">Ação</th>
-                                    <th className="py-4 font-bold">Latency (Média)</th>
-                                    <th className="py-4 font-bold">Amostras</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-sm">
-                                {summary?.avg_performance.map((perf, i) => (
-                                    <tr key={i} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
-                                        <td className="py-4 font-bold text-neutral-1100">{perf.name}</td>
-                                        <td className="py-4">
-                                            <span className={clsx(
-                                                "font-mono font-bold px-2 py-1 rounded-lg",
-                                                perf.avg_duration > 500 ? "text-red-600 bg-red-50" : "text-emerald-600 bg-emerald-50"
-                                            )}>
-                                                {perf.avg_duration}ms
-                                            </span>
-                                        </td>
-                                        <td className="py-4 text-neutral-500">{perf.count}</td>
+                    <div className="max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="text-xs uppercase text-neutral-400 font-bold border-b border-neutral-100 sticky top-0 bg-white z-10">
+                                        <th className="py-4 font-bold">Ação</th>
+                                        <th className="py-4 font-bold">Latency (Média)</th>
+                                        <th className="py-4 font-bold">Amostras</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="text-sm">
+                                    {summary?.avg_performance.map((perf, i) => (
+                                        <tr key={i} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
+                                            <td className="py-4 font-bold text-neutral-1100">{perf.name}</td>
+                                            <td className="py-4">
+                                                <span className={clsx(
+                                                    "font-mono font-bold px-2 py-1 rounded-lg",
+                                                    perf.avg_duration > 500 ? "text-red-600 bg-red-50" : "text-emerald-600 bg-emerald-50"
+                                                )}>
+                                                    {perf.avg_duration}ms
+                                                </span>
+                                            </td>
+                                            <td className="py-4 text-neutral-500">{perf.count}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </Section>
 
                 {/* Funnel Table */}
                 <Section title="Funis de Conversão" icon={BarChart3}>
-                    <div className="flex flex-col gap-6">
-                        {summary?.funnel_stats.map((funnel, i) => (
-                            <div key={i} className="flex flex-col gap-2">
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <h4 className="font-bold text-neutral-1100 leading-none">{funnel.name}</h4>
-                                        <span className="text-xs text-neutral-400">{funnel.submits} de {funnel.starts} concluídos</span>
+                    <div className="max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-200">
+                        <div className="flex flex-col gap-6">
+                            {summary?.funnel_stats.map((funnel, i) => (
+                                <div key={i} className="flex flex-col gap-2">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <h4 className="font-bold text-neutral-1100 leading-none">{funnel.name}</h4>
+                                            <span className="text-xs text-neutral-400">{funnel.submits} de {funnel.starts} concluídos</span>
+                                        </div>
+                                        <span className="text-lg font-black text-brand-600">{funnel.rate}%</span>
                                     </div>
-                                    <span className="text-lg font-black text-brand-600">{funnel.rate}%</span>
+                                    <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-brand-600 rounded-full transition-all duration-1000"
+                                            style={{ width: `${funnel.rate}%` }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
-                                    <div 
-                                        className="h-full bg-brand-600 rounded-full transition-all duration-1000"
-                                        style={{ width: `${funnel.rate}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </Section>
 
