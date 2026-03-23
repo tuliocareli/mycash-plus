@@ -35,7 +35,7 @@ export function LogoutModal({ isOpen, onClose, onConfirm }: LogoutModalProps) {
                     </div>
 
                     <div className="space-y-2">
-                        <h2 className="text-2xl font-black text-neutral-1100">Sair do MyCash+?</h2>
+                        <h2 className="text-2xl font-black text-neutral-1100">Sair do Purso?</h2>
                         <p className="text-sm font-bold text-neutral-400">
                             Você precisará fazer login novamente para acessar seus dados.
                         </p>

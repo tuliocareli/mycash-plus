@@ -70,7 +70,7 @@ export default function HistoryPage() {
             closingBalance: 'Saldo Final',
             status: 'Status'
         };
-        exportToCSV(monthlyClosings, 'relatorio-financeiro-mycash', headers);
+        exportToCSV(monthlyClosings, 'relatorio-financeiro-purso', headers);
         submitExport({ type: 'csv' });
     };
 

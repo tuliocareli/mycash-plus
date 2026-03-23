@@ -22,7 +22,7 @@ export default function Transactions() {
             type: 'Tipo',
             status: 'Status'
         };
-        exportToCSV(filteredTransactions, 'transacoes_mycash', headers);
+        exportToCSV(filteredTransactions, 'transacoes_purso', headers);
     };
 
     const difference = totalIncome - totalExpenses;

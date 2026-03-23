@@ -28,19 +28,24 @@ export function HeaderMobile() {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        {/* SVG Logo Gráfico simplificado */}
-                        <div className="relative shrink-0 flex items-center justify-center">
-                            <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-neutral-1100">
-                                <path d="M10 20C10 14.4772 14.4772 10 20 10H30V20H10Z" fill="black" />
-                                <path d="M30 20C30 25.5228 25.5228 30 20 30H10V20H30Z" fill="black" />
-                                <path d="M12 22L18 22" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                                <path d="M22 18L28 18" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                            </svg>
-                        </div>
-                        <span className="font-extrabold text-xl tracking-tight text-neutral-1100 leading-none">
-                            Mycash+
-                        </span>
-                    </div>
+                         {/* Logo Gráfico: Porquinho Neo-Brutalist */}
+                         <div className="relative shrink-0 flex items-center justify-center">
+                            <div className="size-8 bg-[#D4FF33] rounded-lg flex items-center justify-center border-2 border-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] scale-90">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="black" fillOpacity="0.05" />
+                                    <path d="M19 5c-1.5 0-2.8 1.4-3 3.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                                    <path d="M7 11c0-2.5 2-4.5 4.5-4.5S16 8.5 16 11c0 2.2-1.3 4-3.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                                    <rect x="9" y="14" width="6" height="4" rx="2" stroke="black" strokeWidth="2" />
+                                    <circle cx="11" cy="16" r="0.5" fill="black" />
+                                    <circle cx="13" cy="16" r="0.5" fill="black" />
+                                    <path d="M5 5c1.5 0 2.8 1.4 3 3.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </div>
+                         </div>
+                          <span className="font-['Bebas_Neue'] text-3xl tracking-normal text-neutral-1100 leading-none pt-1">
+                              Purso
+                          </span>
+                     </div>
                 </div>
 
                 {/* Right: Avatar Trigger */}

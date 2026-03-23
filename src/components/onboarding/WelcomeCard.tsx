@@ -56,7 +56,7 @@ export function WelcomeCard({ userName, tasks, onClose }: WelcomeCardProps) {
                         <span className="text-neutral-400 text-2xl md:text-3xl">Vamos organizar suas finanças?</span>
                     </h2>
                     <p className="text-neutral-400 font-medium max-w-md">
-                        Siga os passos abaixo para começar sua jornada rumo à liberdade financeira com o Mycash+.
+                        Siga os passos abaixo para começar sua jornada rumo à liberdade financeira com o Purso.
                     </p>
                 </div>
 

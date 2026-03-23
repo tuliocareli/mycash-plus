@@ -309,7 +309,7 @@ export default function Profile() {
                             className="flex items-center justify-center gap-3 px-8 py-4 bg-red-50 text-red-600 rounded-full font-black text-sm hover:bg-red-100 transition-all uppercase tracking-widest active:scale-95"
                         >
                             <LogOut size={20} />
-                            Sair do MyCash+
+                            Sair do Purso
                         </button>
                     </div>
                 </div>
@@ -521,7 +521,7 @@ export default function Profile() {
                             </div>
                             <h3 className="text-lg font-black flex items-center gap-2">
                                 <Info size={20} />
-                                Sobre o MyCash+
+                                Sobre o Purso
                             </h3>
                             <div className="space-y-4 relative z-10">
                                 <div className="flex items-center justify-between border-b border-white/10 pb-4">

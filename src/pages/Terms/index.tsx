@@ -24,9 +24,9 @@ export default function Terms() {
 
                 <div className="prose prose-neutral max-w-none space-y-8 text-neutral-800">
                     <section className="space-y-4">
-                        <h2 className="text-2xl font-black text-neutral-1100">1. Sobre o MyCash+</h2>
+                        <h2 className="text-2xl font-black text-neutral-1100">1. Sobre o Purso</h2>
                         <p className="leading-relaxed">
-                            O MyCash+ é uma aplicação de portfólio e estudo em ambiente Beta. O objetivo principal é demonstrar competências técnicas em desenvolvimento Full Stack, UX/UI e Segurança de Dados. Ao utilizar este sistema, você entende que ele não é um produto financeiro comercial finalizado.
+                            O Purso é uma aplicação de portfólio e estudo em ambiente Beta. O objetivo principal é demonstrar competências técnicas em desenvolvimento Full Stack, UX/UI e Segurança de Dados. Ao utilizar este sistema, você entende que ele não é um produto financeiro comercial finalizado.
                         </p>
                     </section>
 
@@ -60,7 +60,7 @@ export default function Terms() {
 
                     <section className="space-y-4 border-t border-neutral-100 pt-8">
                         <p className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
-                            Ao continuar utilizando o MyCash+, você concorda com estes termos de transparência e uso ético de dados.
+                            Ao continuar utilizando o Purso, você concorda com estes termos de transparência e uso ético de dados.
                         </p>
                     </section>
                 </div>

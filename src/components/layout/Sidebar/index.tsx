@@ -45,31 +45,34 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
         >
             {/* 
          LOGO SECTION 
-         Conforme imagem: Logo "Mycash+" no topo esquerdo.
-         Ícone gráfico abstrato + Texto Bold.
+         Conforme imagem: Logo "Purso" no topo esquerdo.
+         Ícone gráfico de porquinho minimalista + Texto Bold.
       */}
             <div className={clsx(
                 'flex items-center mb-12 shrink-0 transition-all duration-300 min-h-[40px]',
                 isCollapsed ? 'justify-center w-full pl-0' : 'w-full gap-3'
             )}>
-                {/* Simulação do Logo Gráfico da Imagem (S seta dupla) */}
+                {/* Logo Gráfico: Porquinho Neo-Brutalist (mesma vibe do favicon) */}
                 <div className="relative shrink-0 flex items-center justify-center">
-                    {/* Usando SVG inline para simular o logo da imagem com precisão */}
-                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-neutral-1100">
-                        <path d="M10 20C10 14.4772 14.4772 10 20 10H30V20H10Z" fill="black" />
-                        <path d="M30 20C30 25.5228 25.5228 30 20 30H10V20H30Z" fill="black" />
-                        {/* Abstração simplificada do logo Mycash+ */}
-                        <path d="M12 22L18 22" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                        <path d="M22 18L28 18" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                    </svg>
+                    <div className="size-10 bg-[#D4FF33] rounded-xl flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" fill="black" fillOpacity="0.05" />
+                            <path d="M19 5c-1.5 0-2.8 1.4-3 3.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                            <path d="M7 11c0-2.5 2-4.5 4.5-4.5S16 8.5 16 11c0 2.2-1.3 4-3.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                            <rect x="9" y="14" width="6" height="4" rx="2" stroke="black" strokeWidth="2" />
+                            <circle cx="11" cy="16" r="0.5" fill="black" />
+                            <circle cx="13" cy="16" r="0.5" fill="black" />
+                            <path d="M5 5c1.5 0 2.8 1.4 3 3.5" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                    </div>
                 </div>
 
                 <div className={clsx(
                     'overflow-hidden whitespace-nowrap transition-all duration-300',
                     isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
                 )}>
-                    <span className="font-extrabold text-[22px] tracking-tight text-neutral-1100 leading-none">
-                        Mycash+
+                    <span className="font-['Bebas_Neue'] text-[28px] tracking-normal text-neutral-1100 leading-none pt-1">
+                        Purso
                     </span>
                 </div>
             </div>
