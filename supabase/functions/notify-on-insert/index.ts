@@ -12,12 +12,12 @@ serve(async (req) => {
         console.log("Tabela:", payload.table)
         console.log("Operação:", payload.type)
 
-        const subject = `[MyCash+] Nova inserção na tabela ${payload.table}`
+        const subject = `[Purso] Nova inserção na tabela ${payload.table}`
 
         console.log("Tentando enviar e-mail para:", Deno.env.get('NOTIFY_EMAIL'))
 
         const { data, error } = await resend.emails.send({
-            from: 'MyCash+ Monitor <onboarding@resend.dev>',
+            from: 'Purso Monitor <onboarding@resend.dev>',
             to: Deno.env.get('NOTIFY_EMAIL'),
             subject: subject,
             html: `<h2>Novo registro em ${payload.table}</h2><pre>${JSON.stringify(payload.record, null, 2)}</pre>`

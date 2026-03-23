@@ -4,7 +4,7 @@ self.addEventListener('push', function(event) {
     try {
       data = event.data.json();
     } catch (e) {
-      data = { title: 'MyCash+ Alerta', body: event.data.text() };
+      data = { title: 'Purso Alerta', body: event.data.text() };
     }
 
     const options = {

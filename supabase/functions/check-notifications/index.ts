@@ -77,15 +77,15 @@ serve(async (req) => {
 
       if (htmlBody) {
         await resend.emails.send({
-          from: 'MyCash+ Alertas <onboarding@resend.dev>',
+          from: 'Purso Alertas <onboarding@resend.dev>',
           to: notifyEmail,
-          subject: '[MyCash+] Seus Alertas do Dia',
+          subject: '[Purso] Seus Alertas do Dia',
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #111;">Olá ${pref.users.name || 'Usuário'},</h2>
               ${htmlBody}
               <hr style="margin-top:30px; border:none; border-top:1px solid #eee;" />
-              <p style="font-size: 12px; color: #999;">Para gerenciar esses alertas, acesse a aba Meu Perfil no MyCash+.</p>
+              <p style="font-size: 12px; color: #999;">Para gerenciar esses alertas, acesse a aba Meu Perfil no Purso.</p>
             </div>
           `
         })
