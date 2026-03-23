@@ -15,6 +15,14 @@ export interface User {
     updatedAt?: string;
 }
 
+export interface NotificationPreferences {
+    userId: string;
+    billsDue: boolean;
+    creditLimit: boolean;
+    weeklySummary: boolean;
+    goalsAchieved: boolean;
+}
+
 export interface MonthlyClosing {
     id: string;
     userId: string;

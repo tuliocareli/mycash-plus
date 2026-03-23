@@ -13,7 +13,7 @@ import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
 import { isWithinInterval, parseISO, addMonths, startOfDay, endOfDay } from 'date-fns';
 import { getFinancialCycleRange } from '../utils/cycles';
-import { MonthlyClosing } from '../types';
+import { MonthlyClosing, NotificationPreferences } from '../types';
 import { analytics } from '../services/analytics';
 import { Database } from '../types/supabase';
 
@@ -107,6 +107,7 @@ interface FinanceContextData {
     categories: Category[];
     closingDay: number;
     monthlyClosings: MonthlyClosing[];
+    notificationPreferences: NotificationPreferences;
 
     // Filters
     selectedMemberId: string | null;
@@ -167,6 +168,7 @@ interface FinanceContextData {
     hasSeenOnboarding: boolean;
     setHasSeenOnboarding: (seen: boolean) => Promise<void>;
     clearAllData: () => Promise<void>;
+    updateNotificationPreferences: (prefs: Partial<NotificationPreferences>) => Promise<void>;
 }
 
 const FinanceContext = createContext<FinanceContextData>({} as FinanceContextData);
@@ -182,6 +184,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const [categories, setCategories] = useState<Category[]>([]);
     const [monthlyClosings, setMonthlyClosings] = useState<MonthlyClosing[]>([]);
     const [closingDay, setClosingDay] = useState<number>(1);
+    const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>({
+        userId: '',
+        billsDue: true,
+        creditLimit: true,
+        weeklySummary: false,
+        goalsAchieved: true
+    });
 
     // Filters
     const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -237,13 +246,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             }
 
             // 2. Fetch all data
-            const [txRes, goalsRes, accRes, memRes, catRes, closingRes] = await Promise.all([
+            const [txRes, goalsRes, accRes, memRes, catRes, closingRes, prefRes] = await Promise.all([
                 supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
                 supabase.from('goals').select('*').eq('user_id', user.id),
                 supabase.from('accounts').select('*').eq('user_id', user.id),
                 supabase.from('family_members').select('*').eq('user_id', user.id),
                 supabase.from('categories').select('*').eq('user_id', user.id),
-                supabase.from('monthly_closings').select('*').eq('user_id', user.id).order('period', { ascending: false })
+                supabase.from('monthly_closings').select('*').eq('user_id', user.id).order('period', { ascending: false }),
+                supabase.from('notification_preferences').select('*').eq('user_id', user.id).maybeSingle()
             ]);
 
             // Handling Categories & Seeding if needed
@@ -317,6 +327,28 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 })));
             }
 
+            if (prefRes.data) {
+                setNotificationPreferences({
+                    userId: prefRes.data.user_id,
+                    billsDue: prefRes.data.bills_due,
+                    creditLimit: prefRes.data.credit_limit,
+                    weeklySummary: prefRes.data.weekly_summary,
+                    goalsAchieved: prefRes.data.goals_achieved
+                });
+            } else {
+                // Seed default preferences
+                const { data: newPref } = await supabase.from('notification_preferences').insert({ user_id: user.id }).select().single();
+                if (newPref) {
+                    setNotificationPreferences({
+                        userId: newPref.user_id,
+                        billsDue: newPref.bills_due,
+                        creditLimit: newPref.credit_limit,
+                        weeklySummary: newPref.weekly_summary,
+                        goalsAchieved: newPref.goals_achieved
+                    });
+                }
+            }
+
             if (txRes.error) console.error('Error fetching transactions:', txRes.error);
             if (memRes.error) console.error('Error fetching members:', memRes.error);
 
@@ -335,6 +367,20 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             localStorage.setItem(`onboarding_v1_seen_${user.id}`, 'true');
         }
         await supabase.from('users').update({ has_seen_onboarding: seen }).eq('id', user.id);
+    };
+
+    const updateNotificationPreferences = async (data: Partial<NotificationPreferences>) => {
+        if (!user) return;
+        const payload: any = {};
+        if (data.billsDue !== undefined) payload.bills_due = data.billsDue;
+        if (data.creditLimit !== undefined) payload.credit_limit = data.creditLimit;
+        if (data.weeklySummary !== undefined) payload.weekly_summary = data.weeklySummary;
+        if (data.goalsAchieved !== undefined) payload.goals_achieved = data.goalsAchieved;
+        
+        // optimistic
+        setNotificationPreferences(prev => ({ ...prev, ...data, userId: user.id }));
+        
+        await supabase.from('notification_preferences').update(payload).eq('user_id', user.id);
     };
 
     useEffect(() => {
@@ -563,6 +609,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         if (data.categoryId !== undefined) payload.category_id = data.categoryId;
         if (data.accountId !== undefined) payload.account_id = data.accountId;
         if (data.status !== undefined) payload.status = (data.status as string).toUpperCase();
+        if (data.type !== undefined) payload.type = data.type;
+        if (data.memberId !== undefined) payload.member_id = data.memberId;
+        if (data.totalInstallments !== undefined) payload.total_installments = data.totalInstallments;
+        if (data.isRecurring !== undefined) payload.is_recurring = data.isRecurring;
 
         // 3. Update Transaction
         const { error } = await supabase.from('transactions').update(payload).eq('id', id);
@@ -957,7 +1007,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             showWelcomeCard,
             hasSeenOnboarding,
             setHasSeenOnboarding,
-            clearAllData
+            clearAllData,
+            notificationPreferences,
+            updateNotificationPreferences
         }}>
             {children}
         </FinanceContext.Provider>

@@ -29,7 +29,7 @@ import { SupportModal } from '../../components/modals/SupportModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
-    const { familyMembers, categories, clearAllData } = useFinance();
+    const { familyMembers, categories, clearAllData, notificationPreferences, updateNotificationPreferences } = useFinance();
     const { user, signOut: authSignOut } = useAuth();
     const { trackEvent } = useAnalytics();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -44,12 +44,18 @@ export default function Profile() {
     // Settings State
     const [currency, setCurrency] = useState('BRL');
     const [dateFormat, setDateFormat] = useState('DD/MM/AAAA');
-    const [notifications, setNotifications] = useState({
-        bills: true,
-        limit: true,
-        summary: false,
-        goals: true
-    });
+
+    const handleNotificationToggle = async (key: 'billsDue' | 'creditLimit' | 'weeklySummary' | 'goalsAchieved') => {
+        if (!notificationPreferences) return;
+        await updateNotificationPreferences({
+            [key]: !notificationPreferences[key]
+        });
+        trackEvent({
+            category: 'CLICK',
+            name: 'toggle_notification',
+            metadata: { key, active: !notificationPreferences[key] }
+        });
+    };
 
     const navigate = useNavigate();
 
@@ -310,15 +316,15 @@ export default function Profile() {
                             </h3>
                             <div className="space-y-4">
                                 {[
-                                    { id: 'bills', label: "Vencimento de contas", active: notifications.bills },
-                                    { id: 'limit', label: "Limite de cartão atingido", active: notifications.limit },
-                                    { id: 'summary', label: "Resumo semanal", active: notifications.summary },
-                                    { id: 'goals', label: "Objetivos conquistados", active: notifications.goals }
+                                    { id: 'billsDue', label: "Vencimento de contas", active: notificationPreferences?.billsDue ?? true },
+                                    { id: 'creditLimit', label: "Limite de cartão atingido", active: notificationPreferences?.creditLimit ?? true },
+                                    { id: 'weeklySummary', label: "Resumo semanal", active: notificationPreferences?.weeklySummary ?? false },
+                                    { id: 'goalsAchieved', label: "Objetivos conquistados", active: notificationPreferences?.goalsAchieved ?? true }
                                 ].map((n) => (
                                     <div key={n.id} className="flex items-center justify-between">
                                         <span className="text-sm font-bold text-neutral-600 uppercase tracking-wider">{n.label}</span>
                                         <button
-                                            onClick={() => setNotifications(prev => ({ ...prev, [n.id]: !n.active }))}
+                                            onClick={() => handleNotificationToggle(n.id as any)}
                                             className={clsx(
                                                 "w-11 h-6 rounded-full relative transition-all shadow-inner",
                                                 n.active ? "bg-brand-500" : "bg-neutral-200"
