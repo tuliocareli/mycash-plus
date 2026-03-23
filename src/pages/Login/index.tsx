@@ -119,11 +119,14 @@ export default function Login() {
                     <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-black/5 border border-neutral-100 p-8 lg:p-12">
 
                          <div className="mb-10">
-                            <h3 className="text-2xl font-black text-neutral-1100">
-                                {isSignUpMode 
-                                    ? 'Criar sua conta' 
-                                    : (useMagicLink ? 'Entrar sem senha' : 'Bem-vindo de volta')}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-2xl font-black text-neutral-1100">
+                                    {isSignUpMode 
+                                        ? 'Criar sua conta' 
+                                        : (useMagicLink ? 'Entrar sem senha' : 'Bem-vindo de volta')}
+                                </h3>
+                                <span className="px-2 py-0.5 bg-neutral-100 text-[10px] font-bold text-neutral-400 rounded-full">v1.1.2</span>
+                            </div>
                             <p className="text-neutral-500 text-sm font-medium mt-2">
                                 {isSignUpMode 
                                     ? 'Enviaremos um link para você começar agora.' 
