@@ -20,7 +20,8 @@ import {
     Smartphone,
     ArrowRight,
     MessageSquare,
-    Radio
+    Radio,
+    UserX
 } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 import clsx from 'clsx';
@@ -28,6 +29,7 @@ import { EditProfileModal } from '../../components/modals/EditProfileModal';
 import { AddMemberModal } from '../../components/modals/AddMemberModal';
 import { LogoutModal } from '../../components/modals/LogoutModal';
 import { SupportModal } from '../../components/modals/SupportModal';
+import { DeleteAccountModal } from '../../components/modals/DeleteAccountModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
@@ -38,6 +40,7 @@ export default function Profile() {
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     useEffect(() => {
         trackEvent({ category: 'FUNNEL', name: 'view_profile' });
@@ -500,7 +503,14 @@ export default function Profile() {
                                     <Trash2 size={18} />
                                     <span className="text-xs font-black uppercase tracking-widest">Limpar Todos os Dados</span>
                                 </button>
-                                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider text-center">Ações irreversíveis • Proceda com cautela</p>
+                                <button 
+                                    onClick={() => setIsDeleteModalOpen(true)}
+                                    className="w-full flex items-center justify-center gap-2 p-4 mt-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                                >
+                                    <UserX size={18} />
+                                    <span className="text-xs font-black uppercase tracking-widest">Excluir Minha Conta Permanentemente</span>
+                                </button>
+                                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider text-center mt-6">Ações irreversíveis • Proceda com cautela</p>
                             </div>
                         </div>
 
@@ -570,6 +580,12 @@ export default function Profile() {
             <SupportModal 
                 isOpen={isSupportModalOpen}
                 onClose={() => setIsSupportModalOpen(false)}
+            />
+
+            <DeleteAccountModal 
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onSuccess={confirmLogout}
             />
         </div>
     );
