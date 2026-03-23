@@ -77,8 +77,8 @@ export default function Login() {
 
                 <div className="relative z-10 max-w-md w-full space-y-12">
                     <div className="flex items-center gap-3">
-                        <img src="/purso-icon.svg" alt="Purso Icon" className="h-14 w-auto" />
-                        <img src="/purso-text.svg" alt="Purso" className="h-10 w-auto brightness-0 invert" />
+                        <img src="/purso-icon.svg?v=2" alt="Purso Icon" className="h-14 w-auto" />
+                        <img src="/purso-text.svg?v=2" alt="Purso" className="h-10 w-auto brightness-0 invert" />
                     </div>
 
                     <div className="space-y-6">

@@ -45,27 +45,33 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                     isOpen ? "translate-y-0" : "-translate-y-full"
                 )}
             >
-                {/* Header do Menu */}
+                {/* Header do Menu (Logo + Fechar) */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-neutral-200 overflow-hidden border border-neutral-100 flex items-center justify-center">
-                            {user.avatarUrl ? (
-                                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <User size={20} className="text-neutral-500" />
-                            )}
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-bold text-neutral-1100">{user.name}</span>
-                            <span className="text-xs text-neutral-500">{user.email}</span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <img src="/purso-icon.svg?v=2" alt="Icon" className="h-8 w-auto" />
+                        <img src="/purso-text.svg?v=2" alt="Purso" className="h-5 w-auto" />
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-neutral-500 hover:text-neutral-1100 hover:bg-neutral-100 rounded-full transition-colors"
+                        className="p-2 -mr-2 text-neutral-500 hover:text-neutral-1100 hover:bg-neutral-100 rounded-full transition-colors"
                     >
                         <X size={24} />
                     </button>
+                </div>
+
+                {/* Perfil do Usuário */}
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-neutral-200">
+                    <div className="size-10 rounded-full bg-neutral-200 overflow-hidden border border-neutral-100 flex items-center justify-center">
+                        {user.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <User size={20} className="text-neutral-500" />
+                        )}
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-sm font-bold text-neutral-1100">{user.name}</span>
+                        <span className="text-xs text-neutral-500">{user.email}</span>
+                    </div>
                 </div>
 
                 {/* Lista de Navegação */}
