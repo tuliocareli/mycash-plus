@@ -28,7 +28,7 @@ export function HeaderMobile() {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        <img src="/purso-icon.svg?v=2" alt="Icon" className="h-8 w-auto" />
+                        <img src="/purso-icon.svg?v=3" alt="Icon" className="h-8 w-auto" />
                     </div>
                 </div>
 

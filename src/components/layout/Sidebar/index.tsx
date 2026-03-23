@@ -52,9 +52,9 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                 'flex items-center mb-12 shrink-0 transition-all duration-300 min-h-[40px]',
                 isCollapsed ? 'justify-center w-full' : 'w-full gap-3 px-2'
             )}>
-                 <img src="/purso-icon.svg?v=2" alt="Icon" className="size-10 shrink-0" />
+                 <img src="/purso-icon.svg?v=3" alt="Icon" className="h-10 w-10 shrink-0" />
                  {!isCollapsed && (
-                     <img src="/purso-text.svg?v=2" alt="Purso" className="h-6 w-auto" />
+                     <img src="/purso-text.svg?v=3" alt="Purso" className="h-6 w-auto" />
                  )}
             </div>
 

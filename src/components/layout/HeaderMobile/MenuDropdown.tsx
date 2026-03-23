@@ -48,8 +48,8 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                 {/* Header do Menu (Logo + Fechar) */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
                     <div className="flex items-center gap-2">
-                        <img src="/purso-icon.svg?v=2" alt="Icon" className="h-8 w-auto" />
-                        <img src="/purso-text.svg?v=2" alt="Purso" className="h-5 w-auto" />
+                        <img src="/purso-icon.svg?v=3" alt="Icon" className="h-8 w-auto" />
+                        <img src="/purso-text.svg?v=3" alt="Purso" className="h-5 w-auto" />
                     </div>
                     <button
                         onClick={onClose}
