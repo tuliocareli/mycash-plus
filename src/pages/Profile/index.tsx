@@ -19,8 +19,10 @@ import {
     Info,
     Smartphone,
     ArrowRight,
-    MessageSquare
+    MessageSquare,
+    Radio
 } from 'lucide-react';
+import { supabase } from '../../services/supabase';
 import clsx from 'clsx';
 import { EditProfileModal } from '../../components/modals/EditProfileModal';
 import { AddMemberModal } from '../../components/modals/AddMemberModal';
@@ -55,6 +57,68 @@ export default function Profile() {
             name: 'toggle_notification',
             metadata: { key, active: !notificationPreferences[key] }
         });
+    };
+
+    const [pushEnabled, setPushEnabled] = useState(false);
+
+    useEffect(() => {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready.then(reg => {
+                reg.pushManager.getSubscription().then(sub => {
+                    setPushEnabled(!!sub);
+                });
+            });
+        }
+    }, []);
+
+    const urlBase64ToUint8Array = (base64String: string) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    const handlePushToggle = async () => {
+        if (!user) return;
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert('Notificações nativas não suportadas (apenas PWA ou navegadores modernos).');
+            return;
+        }
+
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            if (pushEnabled) {
+                const sub = await reg.pushManager.getSubscription();
+                if (sub) await sub.unsubscribe();
+                
+                await supabase.from('push_subscriptions').delete().match({ user_id: user.id });
+                setPushEnabled(false);
+            } else {
+                const sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY)
+                });
+                
+                const subJSON = sub.toJSON();
+                await supabase.from('push_subscriptions').upsert({
+                    user_id: user.id,
+                    endpoint: subJSON.endpoint,
+                    auth: subJSON.keys?.auth,
+                    p256dh: subJSON.keys?.p256dh
+                }, { onConflict: 'user_id, endpoint' });
+                
+                setPushEnabled(true);
+            }
+        } catch (error) {
+            console.error('Push error:', error);
+            alert('Falha ao configurar notificações.');
+        }
     };
 
     const navigate = useNavigate();
@@ -337,6 +401,30 @@ export default function Profile() {
                                         </button>
                                     </div>
                                 ))}
+
+                                <div className="pt-4 mt-4 border-t border-neutral-100">
+                                    <div className="flex items-center justify-between p-4 bg-brand-50 rounded-2xl border border-brand-100">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-xl shadow-sm"><Radio size={18} className="text-brand-500" /></div>
+                                            <div>
+                                                <p className="font-black text-brand-900 text-sm">Notificações no Dispositivo</p>
+                                                <p className="text-[10px] font-bold text-brand-600 uppercase">Receber direto no celular/PC</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={handlePushToggle}
+                                            className={clsx(
+                                                "w-11 h-6 rounded-full relative transition-all shadow-inner",
+                                                pushEnabled ? "bg-brand-500" : "bg-neutral-200"
+                                            )}
+                                        >
+                                            <div className={clsx(
+                                                "absolute top-1 size-4 bg-white rounded-full transition-all shadow-sm",
+                                                pushEnabled ? "right-1" : "left-1"
+                                            )} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
