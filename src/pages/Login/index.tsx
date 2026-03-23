@@ -6,7 +6,7 @@ import { Mail, Lock, Loader2, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff
 import { useFormFunnel } from '../../hooks/useAnalytics';
 
 export default function Login() {
-    const { signIn, signInWithGoogle } = useAuth();
+    const { signIn, signInWithGoogle, signInWithMagicLink } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(true);
@@ -14,6 +14,7 @@ export default function Login() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [useMagicLink, setUseMagicLink] = useState(false);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -44,10 +45,17 @@ export default function Login() {
 
         try {
             if (isLogin) {
-                const { error: signInError } = await signIn({ email, password });
-                if (signInError) throw signInError;
-                submitLogin({ email: email }); // Success
-                navigate(from, { replace: true });
+                if (useMagicLink) {
+                    const { error: magicError } = await signInWithMagicLink(email);
+                    if (magicError) throw magicError;
+                    setSuccess('Link de acesso enviado! Verifique seu e-mail.');
+                    submitLogin({ email: email });
+                } else {
+                    const { error: signInError } = await signIn({ email, password });
+                    if (signInError) throw signInError;
+                    submitLogin({ email: email }); // Success
+                    navigate(from, { replace: true });
+                }
             } else {
                 // Prevent real account creation
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Fake loading delay
@@ -116,9 +124,15 @@ export default function Login() {
                     <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-black/5 border border-neutral-100 p-8 lg:p-12">
 
                         <div className="mb-10">
-                            <h3 className="text-2xl font-black text-neutral-1100">{isLogin ? 'Bem-vindo de volta' : 'Criar conta'}</h3>
+                            <h3 className="text-2xl font-black text-neutral-1100">
+                                {isLogin 
+                                    ? (useMagicLink ? 'Acesso via Link' : 'Bem-vindo de volta') 
+                                    : 'Criar conta'}
+                            </h3>
                             <p className="text-neutral-500 text-sm font-medium mt-2">
-                                {isLogin ? 'Acesse sua conta para gerenciar seu patrimônio.' : 'Comece sua jornada financeira hoje mesmo.'}
+                                {isLogin 
+                                    ? (useMagicLink ? 'Enviaremos um link de acesso ao seu e-mail.' : 'Acesse sua conta para gerenciar seu patrimônio.') 
+                                    : 'Comece sua jornada financeira hoje mesmo.'}
                             </p>
                         </div>
 
@@ -157,29 +171,54 @@ export default function Login() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] ml-1">Senha de Acesso</label>
-                                <div className="relative flex items-center group">
-                                    <div className="absolute left-4 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors">
-                                        <Lock size={18} />
+                            {!useMagicLink && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between ml-1">
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Senha de Acesso</label>
+                                        {isLogin && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setUseMagicLink(true)}
+                                                className="text-[10px] font-black text-brand-700 uppercase tracking-widest hover:underline"
+                                            >
+                                                Entrar sem senha
+                                            </button>
+                                        )}
                                     </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full h-14 pl-12 pr-12 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all placeholder:text-neutral-300 placeholder:font-medium"
-                                        placeholder="••••••••"
-                                    />
+                                    <div className="relative flex items-center group">
+                                        <div className="absolute left-4 text-neutral-400 group-focus-within:text-neutral-1100 transition-colors">
+                                            <Lock size={18} />
+                                        </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required={!useMagicLink}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full h-14 pl-12 pr-12 bg-neutral-50 border-2 border-neutral-50 rounded-2xl outline-none focus:bg-white focus:border-neutral-1100 font-bold text-neutral-1100 transition-all placeholder:text-neutral-300 placeholder:font-medium"
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {useMagicLink && isLogin && (
+                                <div className="flex justify-end pr-1">
                                     <button
                                         type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 text-neutral-400 hover:text-neutral-600 transition-colors"
+                                        onClick={() => setUseMagicLink(false)}
+                                        className="text-[10px] font-black text-neutral-400 uppercase tracking-widest hover:text-neutral-1100 transition-colors"
                                     >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        Prefiro usar minha senha
                                     </button>
                                 </div>
-                            </div>
+                            )}
 
                             <button
                                 type="submit"
@@ -190,7 +229,9 @@ export default function Login() {
                                     <Loader2 className="animate-spin" size={20} />
                                 ) : (
                                     <>
-                                        {isLogin ? 'Entrar no Sistema' : 'Finalizar Cadastro'}
+                                        {isLogin 
+                                            ? (useMagicLink ? 'Receber Link por E-mail' : 'Entrar no Sistema') 
+                                            : 'Finalizar Cadastro'}
                                         <ArrowRight size={18} />
                                     </>
                                 )}
@@ -201,6 +242,7 @@ export default function Login() {
                             <button
                                 onClick={() => {
                                     setIsLogin(!isLogin);
+                                    setUseMagicLink(false);
                                     setError(null);
                                     setSuccess(null);
                                 }}

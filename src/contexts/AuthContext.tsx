@@ -13,6 +13,7 @@ interface AuthContextData {
     updateUser: (attributes: { data?: any }) => Promise<{ error: any }>;
     signInAnonymously: () => Promise<void>;
     signInWithGoogle: () => Promise<{ error: any }>;
+    signInWithMagicLink: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -78,8 +79,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
     };
 
+    const signInWithMagicLink = async (email: string) => {
+        return await supabase.auth.signInWithOtp({
+            email,
+            options: {
+                emailRedirectTo: window.location.origin,
+            },
+        });
+    };
+
     return (
-        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, updateUser, signInAnonymously, signInWithGoogle }}>
+        <AuthContext.Provider value={{ user, session, loading, signOut, signIn, signUp, updateUser, signInAnonymously, signInWithGoogle, signInWithMagicLink }}>
             {!loading && children}
         </AuthContext.Provider>
     );
