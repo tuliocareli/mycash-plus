@@ -9,12 +9,13 @@ export default function Login() {
     const { signIn, signInWithGoogle, signInWithMagicLink } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isLogin, setIsLogin] = useState(true);
+    const isLogin = true; // Forced login mode, signup is handled via Magic Link or Google
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [useMagicLink, setUseMagicLink] = useState(false);
+    const [isSignUpMode, setIsSignUpMode] = useState(false);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -56,12 +57,6 @@ export default function Login() {
                     submitLogin({ email: email }); // Success
                     navigate(from, { replace: true });
                 }
-            } else {
-                // Prevent real account creation
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Fake loading delay
-                submitRegister({ email: email }); // Success
-                setSuccess('Solicitação recebida! Notificamos o admin, entre em contato para liberar seu acesso.');
-                setIsLogin(true);
             }
         } catch (err: any) {
             setError(err.message || 'Ocorreu um erro. Tente novamente.');
@@ -123,16 +118,16 @@ export default function Login() {
                 <div className="w-full max-w-[440px] animate-fade-in">
                     <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-black/5 border border-neutral-100 p-8 lg:p-12">
 
-                        <div className="mb-10">
+                         <div className="mb-10">
                             <h3 className="text-2xl font-black text-neutral-1100">
-                                {isLogin 
-                                    ? (useMagicLink ? 'Acesso via Link' : 'Bem-vindo de volta') 
-                                    : 'Criar conta'}
+                                {isSignUpMode 
+                                    ? 'Criar sua conta' 
+                                    : (useMagicLink ? 'Entrar sem senha' : 'Bem-vindo de volta')}
                             </h3>
                             <p className="text-neutral-500 text-sm font-medium mt-2">
-                                {isLogin 
-                                    ? (useMagicLink ? 'Enviaremos um link de acesso ao seu e-mail.' : 'Acesse sua conta para gerenciar seu patrimônio.') 
-                                    : 'Comece sua jornada financeira hoje mesmo.'}
+                                {isSignUpMode 
+                                    ? 'Enviaremos um link para você começar agora.' 
+                                    : (useMagicLink ? 'Enviaremos um link de acesso ao seu e-mail.' : 'Acesse sua conta para gerenciar seu patrimônio.')}
                             </p>
                         </div>
 
@@ -208,11 +203,14 @@ export default function Login() {
                                 </div>
                             )}
 
-                            {useMagicLink && isLogin && (
+                             {useMagicLink && (
                                 <div className="flex justify-end pr-1">
                                     <button
                                         type="button"
-                                        onClick={() => setUseMagicLink(false)}
+                                        onClick={() => {
+                                            setUseMagicLink(false);
+                                            setIsSignUpMode(false);
+                                        }}
                                         className="text-[10px] font-black text-neutral-400 uppercase tracking-widest hover:text-neutral-1100 transition-colors"
                                     >
                                         Prefiro usar minha senha
@@ -229,9 +227,9 @@ export default function Login() {
                                     <Loader2 className="animate-spin" size={20} />
                                 ) : (
                                     <>
-                                        {isLogin 
-                                            ? (useMagicLink ? 'Receber Link por E-mail' : 'Entrar no Sistema') 
-                                            : 'Finalizar Cadastro'}
+                                        {useMagicLink 
+                                            ? (isSignUpMode ? 'Criar minha conta' : 'Receber Link por E-mail')
+                                            : 'Entrar no Sistema'}
                                         <ArrowRight size={18} />
                                     </>
                                 )}
@@ -241,14 +239,14 @@ export default function Login() {
                         <div className="mt-8 pt-8 border-t border-neutral-50 flex flex-col items-center gap-6">
                             <button
                                 onClick={() => {
-                                    setIsLogin(!isLogin);
-                                    setUseMagicLink(false);
+                                    setUseMagicLink(true);
+                                    setIsSignUpMode(true);
                                     setError(null);
                                     setSuccess(null);
                                 }}
                                 className="text-xs font-bold text-neutral-400 uppercase tracking-widest hover:text-neutral-1100 transition-colors"
                             >
-                                {isLogin ? 'Não possui uma conta? ' : 'Já possui uma conta? '}
+                                Não possui uma conta? 
                                 <span className="text-brand-700 ml-1">Clique aqui</span>
                             </button>
 
