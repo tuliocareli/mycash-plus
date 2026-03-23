@@ -12,10 +12,12 @@ import Terms from './pages/Terms';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { SplashScreen } from './components/layout/SplashScreen';
 
 function App() {
     return (
         <BrowserRouter>
+            <SplashScreen />
             {/*
           Usando Layout Route Wrapper:
           Todas as rotas filhas serão renderizadas dentro do <Outlet /> do Layout.
