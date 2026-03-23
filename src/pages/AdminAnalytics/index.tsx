@@ -1,10 +1,10 @@
 import { useAdminAnalytics } from '../../hooks/useAdminAnalytics';
-import { BarChart3, MousePointer2, Timer, Zap, Loader2, RefreshCcw, TrendingUp } from 'lucide-react';
+import { BarChart3, MousePointer2, Timer, Zap, Loader2, RefreshCcw, TrendingUp, Users, Target, Activity } from 'lucide-react';
 import clsx from 'clsx';
 import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 export default function AdminAnalytics() {
-    const { summary, loading, isAdmin, refresh } = useAdminAnalytics();
+    const { summary, kpis, loading, isAdmin, refresh } = useAdminAnalytics();
     const { trackClick } = useInteractionTracker('admin_refresh');
 
     if (!isAdmin) {
@@ -26,12 +26,16 @@ export default function AdminAnalytics() {
         );
     }
 
+    const d7Rate = kpis?.d7_eligible_users && kpis.d7_eligible_users > 0 
+        ? Math.round((kpis.d7_retained_users / kpis.d7_eligible_users) * 100) 
+        : 0;
+
     return (
         <div className="flex flex-col gap-8 animate-fade-in pb-12">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-neutral-1100 tracking-tight">Analytics do Sistema</h1>
-                    <p className="text-neutral-500 font-medium">Monitoramento de UX, performance e funis de conversão.</p>
+                    <h1 className="text-3xl font-extrabold text-neutral-1100 tracking-tight">Analytics do Produto</h1>
+                    <p className="text-neutral-500 font-medium">Monitoramento de Cohorts, UX e engajamento financeiro.</p>
                 </div>
                 <button 
                     onClick={() => {
@@ -45,36 +49,74 @@ export default function AdminAnalytics() {
                 </button>
             </header>
 
-            {/* Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <MetricCard 
-                    label="Total de Eventos" 
-                    value={summary?.total_events || 0} 
-                    icon={Zap} 
-                    color="text-amber-500" 
-                    bgColor="bg-amber-50"
-                />
-                <MetricCard 
-                    label="Sessões Únicas" 
-                    value={summary?.sessions || 0} 
-                    icon={TrendingUp} 
-                    color="text-emerald-500" 
-                    bgColor="bg-emerald-50"
-                />
-                <MetricCard 
-                    label="Ações de Performance" 
-                    value={summary?.avg_performance.length || 0} 
-                    icon={Timer} 
-                    color="text-blue-500" 
-                    bgColor="bg-blue-50"
-                />
-                <MetricCard 
-                    label="Funis Ativos" 
-                    value={summary?.funnel_stats.length || 0} 
-                    icon={BarChart3} 
-                    color="text-indigo-500" 
-                    bgColor="bg-indigo-50"
-                />
+            {/* Business KPI Cards */}
+            <div>
+                <h2 className="text-lg font-bold text-neutral-800 mb-4 px-2">Engajamento e Retenção (Métricas de Negócio)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <MetricCard 
+                        label="Usuários Diários (DAU)" 
+                        value={kpis?.dau || 0} 
+                        icon={Users} 
+                        color="text-lime-600" 
+                        bgColor="bg-[#DFFE35]/30"
+                    />
+                    <MetricCard 
+                        label="Usuários Semanais (WAU)" 
+                        value={kpis?.wau || 0} 
+                        icon={Activity} 
+                        color="text-emerald-500" 
+                        bgColor="bg-emerald-50"
+                    />
+                    <MetricCard 
+                        label="Retenção (D7 Cohort)" 
+                        value={`${d7Rate}%`} 
+                        icon={Target} 
+                        color="text-blue-500" 
+                        bgColor="bg-blue-50"
+                    />
+                    <MetricCard 
+                        label="Adoção (Média Transações)" 
+                        value={kpis?.avg_tx_first_week || 0} 
+                        icon={TrendingUp} 
+                        color="text-purple-500" 
+                        bgColor="bg-purple-50"
+                    />
+                </div>
+            </div>
+
+            {/* Technical Overview Cards */}
+            <div>
+                <h2 className="text-lg font-bold text-neutral-800 mb-4 px-2">Telemetria Técnica (Eventos Internos)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <MetricCard 
+                        label="Total de Eventos" 
+                        value={summary?.total_events || 0} 
+                        icon={Zap} 
+                        color="text-amber-500" 
+                        bgColor="bg-amber-50"
+                    />
+                    <MetricCard 
+                        label="Ações de Performance" 
+                        value={summary?.avg_performance.length || 0} 
+                        icon={Timer} 
+                        color="text-rose-500" 
+                        bgColor="bg-rose-50"
+                    />
+                    <MetricCard 
+                        label="Funis Ativos" 
+                        value={summary?.funnel_stats.length || 0} 
+                        icon={BarChart3} 
+                        color="text-indigo-500" 
+                        bgColor="bg-indigo-50"
+                    />
+                    <MetricCard 
+                        label="Interações de UI" 
+                        value={summary?.top_clicks.length || 0} 
+                        icon={MousePointer2} 
+                        color="text-cyan-500" 
+                        bgColor="bg-cyan-50"
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -10,6 +10,14 @@ export interface EventSummary {
     avg_performance: { name: string; avg_duration: number; count: number }[];
 }
 
+export interface AdminKPIs {
+    dau: number;
+    wau: number;
+    d7_eligible_users: number;
+    d7_retained_users: number;
+    avg_tx_first_week: number;
+}
+
 const REQUIRED_FUNNELS = [
     'add_account_modal',
     'new_transaction',
@@ -23,6 +31,7 @@ const REQUIRED_FUNNELS = [
 export const useAdminAnalytics = () => {
     const { user } = useAuth();
     const [summary, setSummary] = useState<EventSummary | null>(null);
+    const [kpis, setKpis] = useState<AdminKPIs | null>(null);
     const [loading, setLoading] = useState(true);
 
     const ADMIN_EMAILS = ['admin@teste.com', 'tctulio2009@gmail.com'];
@@ -33,12 +42,19 @@ export const useAdminAnalytics = () => {
         setLoading(true);
 
         try {
-            const { data, error } = await supabase
-                .from('user_events')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Promessas paralelas para maximizar performance no painel admin
+            const [eventsRes, kpisRes] = await Promise.all([
+                supabase.from('user_events').select('*').order('created_at', { ascending: false }),
+                supabase.rpc('get_admin_kpis')
+            ]);
 
-            if (error) throw error;
+            if (eventsRes.error) throw eventsRes.error;
+            
+            if (kpisRes.data && !kpisRes.error) {
+                setKpis(kpisRes.data);
+            }
+
+            const data = eventsRes.data;
 
             if (data) {
                 // Processamento Básico
@@ -96,7 +112,7 @@ export const useAdminAnalytics = () => {
                     starts: stats.starts,
                     submits: stats.submits,
                     rate: stats.starts > 0 ? Math.round((stats.submits / stats.starts) * 100) : 0
-                })).sort((a, b) => b.starts - a.starts); // Show funnels with data first
+                })).sort((a, b) => b.starts - a.starts);
 
                 setSummary({
                     total_events: data.length,
@@ -117,5 +133,5 @@ export const useAdminAnalytics = () => {
         fetchAnalytics();
     }, [isAdmin]);
 
-    return { summary, loading, isAdmin, refresh: fetchAnalytics };
+    return { summary, kpis, loading, isAdmin, refresh: fetchAnalytics };
 };
