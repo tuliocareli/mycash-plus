@@ -8,7 +8,8 @@ import {
     ArrowDownLeft,
     User,
     FileSearch,
-    ArrowUpDown
+    ArrowUpDown,
+    Copy
 } from 'lucide-react';
 import { useFinance } from '../../../contexts/FinanceContext';
 import { format, parseISO } from 'date-fns';
@@ -33,8 +34,9 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
     // Local Filters
     const [localSearch, setLocalSearch] = useState('');
     const [localType, setLocalType] = useState<'all' | TransactionType>('all');
-    // State for editing
+    // State for editing and cloning
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [isCloning, setIsCloning] = useState(false);
 
     // Sort
     const [sortField, setSortField] = useState<'date' | 'amount' | 'description'>('date');
@@ -275,13 +277,28 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                                 {formatCurrency(t.amount, t.type)}
                                             </td>
                                             <td className="px-6 py-5 text-center">
-                                                <button
-                                                    onClick={() => setEditingTransaction(t)}
-                                                    className="size-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
-                                                    title="Editar"
-                                                >
-                                                    <FileSearch size={16} />
-                                                </button>
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingTransaction(t);
+                                                            setIsCloning(false);
+                                                        }}
+                                                        className="size-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+                                                        title="Editar"
+                                                    >
+                                                        <FileSearch size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingTransaction(t);
+                                                            setIsCloning(true);
+                                                        }}
+                                                        className="size-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                                                        title="Clonar transação"
+                                                    >
+                                                        <Copy size={16} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -297,11 +314,29 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                         paginatedTransactions.map((t) => (
                             <div
                                 key={t.id}
-                                onClick={() => setEditingTransaction(t)}
-                                className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-all cursor-pointer relative"
+                                className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-all relative group"
                             >
-                                <div className="absolute top-4 right-4 text-neutral-300">
-                                    <FileSearch size={16} />
+                                <div className="absolute top-4 right-4 flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setEditingTransaction(t);
+                                            setIsCloning(true);
+                                        }}
+                                        className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-blue-500 transition-colors"
+                                        title="Clonar"
+                                    >
+                                        <Copy size={14} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setEditingTransaction(t);
+                                            setIsCloning(false);
+                                        }}
+                                        className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-brand-500 transition-colors"
+                                        title="Editar"
+                                    >
+                                        <FileSearch size={14} />
+                                    </button>
                                 </div>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3">
@@ -426,8 +461,12 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
 
             <NewTransactionModal
                 isOpen={!!editingTransaction}
-                onClose={() => setEditingTransaction(null)}
+                onClose={() => {
+                    setEditingTransaction(null);
+                    setIsCloning(false);
+                }}
                 initialData={editingTransaction || undefined}
+                isCloning={isCloning}
             />
         </div>
     );

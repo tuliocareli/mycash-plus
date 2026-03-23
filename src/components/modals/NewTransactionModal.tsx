@@ -12,9 +12,10 @@ interface NewTransactionModalProps {
     onClose: () => void;
     initialAccountId?: string;
     initialData?: Transaction;
+    isCloning?: boolean;
 }
 
-export function NewTransactionModal({ isOpen, onClose, initialAccountId, initialData }: NewTransactionModalProps) {
+export function NewTransactionModal({ isOpen, onClose, initialAccountId, initialData, isCloning }: NewTransactionModalProps) {
     const { addTransaction, updateTransaction, deleteTransaction, familyMembers, bankAccounts, creditCards, categories, addCategory } = useFinance();
 
     const [type, setType] = useState<TransactionType>('EXPENSE');
@@ -41,7 +42,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     const { startForm, submitForm } = useFormFunnel(initialData ? 'edit_transaction' : 'new_transaction');
     const { measureAction } = usePerformanceMarker();
 
-    const isEditing = !!initialData;
+    const isEditing = !!initialData && !isCloning;
 
     useEffect(() => {
         if (isOpen) {
@@ -53,10 +54,14 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 setCategoryId(initialData.categoryId || '');
                 setMemberId(initialData.memberId || '');
                 setAccountId(initialData.accountId || '');
-                // Safely handle date parsing
-                const rawDate = initialData.date;
-                const safeDate = (rawDate && rawDate.includes('T')) ? rawDate.split('T')[0] : (rawDate || new Date().toISOString().split('T')[0]);
-                setDate(safeDate);
+                // Date handling: if cloning, use today. Otherwise use original date.
+                if (isCloning) {
+                    setDate(new Date().toISOString().split('T')[0]);
+                } else {
+                    const rawDate = initialData.date;
+                    const safeDate = (rawDate && rawDate.includes('T')) ? rawDate.split('T')[0] : (rawDate || new Date().toISOString().split('T')[0]);
+                    setDate(safeDate);
+                }
                 setInstallments(initialData.totalInstallments || 1);
                 setIsRecurring(initialData.isRecurring || false);
             } else {
