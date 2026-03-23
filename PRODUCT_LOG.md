@@ -4,6 +4,18 @@ Este documento registra a jornada de melhoria contínua do MyCash+. Cada entrada
 
 ---
 
+## 🗓️ 23 de Março de 2026
+
+### 1. Refinamento do Fluxo de Login e Magic Link
+- **Mudança:** Unificação do fluxo de cadastro e login. Agora, clicar em "Não possui uma conta?" ativa o modo de cadastro via Magic Link, eliminando a redundância de formulários.
+- **Racional (Dor):** Fricção no onboarding; usuários ficavam em dúvida entre criar conta com senha ou usar Magic Link.
+- **Melhora Esperada:** 
+    - ↑ Conversão de novos usuários (fluxo simplificado).
+    - ↓ Chamados de suporte sobre "como criar conta".
+- **Status:** ✅ Implementado (v1.1.2).
+
+---
+
 ## 🗓️ 15 de Março de 2026
 
 ### 1. Implementação de Login via Google (OAuth)
