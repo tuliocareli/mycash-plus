@@ -37,42 +37,55 @@ export const SplashScreen: React.FC = () => {
                 ${phase === 'exit' ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}
             `}
         >
-            <div className="relative flex items-center justify-center w-40 h-40">
-                {/* Efeito de Brilho Dinâmico (Sparkle pseudo-3D glow) */}
-                <div 
-                    className={`
-                        absolute inset-0 flex items-center justify-center z-0
-                        transition-all duration-500 ease-out
-                        ${phase === 'coin' ? 'opacity-100 scale-150 rotate-45' : 'opacity-0 scale-50 rotate-0'}
-                    `}
-                >
-                    <div className="w-[120%] h-[120%] bg-white/50 blur-[20px] rounded-full" />
+            <div className="relative flex flex-col items-center justify-center">
+                <div className="relative flex items-center justify-center w-40 h-40">
+                    {/* Efeito de Brilho Dinâmico (Sparkle pseudo-3D glow) */}
+                    <div 
+                        className={`
+                            absolute inset-0 flex items-center justify-center z-0
+                            transition-all duration-500 ease-out
+                            ${phase === 'coin' ? 'opacity-100 scale-150 rotate-45' : 'opacity-0 scale-50 rotate-0'}
+                        `}
+                    >
+                        <div className="w-[120%] h-[120%] bg-white/50 blur-[20px] rounded-full" />
+                    </div>
+
+                    {/* Porco 1 (Intro) */}
+                    <img 
+                        src="/porco%201.svg" 
+                        alt="Porco Base" 
+                        className={`
+                            absolute w-full h-full object-contain z-10
+                            transition-all duration-300 ease-in-out origin-center
+                            ${phase === 'intro' ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
+                            ${phase === 'intro' ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''}
+                        `}
+                    />
+
+                    {/* Porco 2 (Moeda) */}
+                    <img 
+                        src="/porco%202.svg" 
+                        alt="Porco Moeda" 
+                        className={`
+                            absolute w-full h-full object-contain z-20
+                            transition-all duration-500 origin-center
+                            ${phase === 'coin' || phase === 'exit' 
+                                ? 'opacity-100 scale-100 rotate-0 ease-[cubic-bezier(0.34,1.56,0.64,1)]' 
+                                : 'opacity-0 scale-50 -rotate-12 ease-in'}
+                        `}
+                    />
                 </div>
 
-                {/* Porco 1 (Intro) */}
-                <img 
-                    src="/porco%201.svg" 
-                    alt="Porco Base" 
-                    className={`
-                        absolute w-full h-full object-contain z-10
-                        transition-all duration-300 ease-in-out origin-center
-                        ${phase === 'intro' ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}
-                        ${phase === 'intro' ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''}
-                    `}
-                />
-
-                {/* Porco 2 (Moeda) */}
-                <img 
-                    src="/porco%202.svg" 
-                    alt="Porco Moeda" 
-                    className={`
-                        absolute w-full h-full object-contain z-20
-                        transition-all duration-500 origin-center
-                        ${phase === 'coin' || phase === 'exit' 
-                            ? 'opacity-100 scale-100 rotate-0 ease-[cubic-bezier(0.34,1.56,0.64,1)]' 
-                            : 'opacity-0 scale-50 -rotate-12 ease-in'}
-                    `}
-                />
+                {/* Texto Purso.svg */}
+                <div className={`
+                    absolute -bottom-12 w-28 flex justify-center
+                    transition-all duration-700 delay-100 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                    ${phase === 'coin' || phase === 'exit' 
+                        ? 'opacity-100 translate-y-0 scale-100' 
+                        : 'opacity-0 -translate-y-4 scale-95'}
+                `}>
+                    <img src="/purso-text.svg?v=3" alt="Purso" className="w-full h-auto brightness-0 contrast-100 opacity-90 drop-shadow-sm" />
+                </div>
             </div>
 
             {/* Texto base ". " substituto do PURSO */}
