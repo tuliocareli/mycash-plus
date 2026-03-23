@@ -22,7 +22,7 @@ export default function Login() {
 
     // Analytics
     const { startForm: startLogin, submitForm: submitLogin } = useFormFunnel('login');
-    const { startForm: startRegister, submitForm: submitRegister } = useFormFunnel('register');
+    const { startForm: startRegister } = useFormFunnel('register');
 
     const from = location.state?.from?.pathname || "/";
 
