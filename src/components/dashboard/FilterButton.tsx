@@ -3,11 +3,14 @@ import { Settings2, X } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { TransactionType } from '../../types';
+import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 export function FilterButton({ onOpenFilters }: { onOpenFilters?: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const { transactionTypeFilter, setTransactionTypeFilter } = useFinance();
     const popoverRef = useRef<HTMLDivElement>(null);
+    const { trackClick: trackFilterOpen } = useInteractionTracker('filter_button');
+    const { trackClick: trackFilterSelect } = useInteractionTracker('filter_select');
 
     // Close when clicking outside
     useEffect(() => {
@@ -21,6 +24,7 @@ export function FilterButton({ onOpenFilters }: { onOpenFilters?: () => void }) 
     }, []);
 
     const handleSelect = (type: 'all' | TransactionType) => {
+        trackFilterSelect({ filter_value: type });
         setTransactionTypeFilter(type);
         setIsOpen(false);
     };
@@ -29,6 +33,7 @@ export function FilterButton({ onOpenFilters }: { onOpenFilters?: () => void }) 
         if (window.matchMedia('(max-width: 1024px)').matches && onOpenFilters) {
             onOpenFilters();
         } else {
+            if (!isOpen) trackFilterOpen();
             setIsOpen(!isOpen);
         }
     };

@@ -19,6 +19,7 @@ import {
 import { ptBR } from 'date-fns/locale';
 import { useFinance } from '../../contexts/FinanceContext';
 import { DateRange } from '../../types';
+import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 type ShortcutType = 'thisMonth' | 'lastMonth' | 'last3Months' | 'thisYear';
 
@@ -26,6 +27,8 @@ export function DateSelector() {
     const { dateRange, setDateRange } = useFinance();
     const [isOpen, setIsOpen] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const { trackClick: trackDateSelector } = useInteractionTracker('date_selector');
+    const { trackClick: trackDateShortcut } = useInteractionTracker('date_shortcut');
 
     // Selection State
     const [tempRange, setTempRange] = useState<DateRange>(dateRange);
@@ -88,12 +91,13 @@ export function DateSelector() {
                 break;
             }
             case 'last3Months':
-                newRange = { startDate: subMonths(now, 3), endDate: now }; // A bit loose, usually start of 3 months ago to now
+                newRange = { startDate: subMonths(now, 3), endDate: now };
                 break;
             case 'thisYear':
                 newRange = { startDate: startOfYear(now), endDate: endOfYear(now) };
                 break;
         }
+        trackDateShortcut({ shortcut });
         setDateRange(newRange);
         setIsOpen(false);
     };
@@ -154,7 +158,10 @@ export function DateSelector() {
     return (
         <div className="relative" ref={popoverRef}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    setIsOpen(!isOpen);
+                    if (!isOpen) trackDateSelector();
+                }}
                 className={clsx(
                     "h-11 pl-6 pr-4 bg-white rounded-full flex items-center gap-3 shadow-sm border border-transparent hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 w-full",
                     isOpen && "bg-neutral-100 ring-2 ring-brand-500/20"

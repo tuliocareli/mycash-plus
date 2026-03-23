@@ -42,8 +42,12 @@ export function SummaryCards() {
     }, [totalBalance, transactions]);
 
     const balanceGrowth = useMemo(() => {
-        if (balance30DaysAgo === 0) return 0;
-        return ((totalBalance - balance30DaysAgo) / Math.abs(balance30DaysAgo)) * 100;
+        // Threshold mínimo de R$0,01 evita divisão por valores próximos de zero
+        // gerados por aritmética de ponto flutuante (ex: -0.000000001)
+        if (Math.abs(balance30DaysAgo) < 0.01) return 0;
+        const raw = ((totalBalance - balance30DaysAgo) / Math.abs(balance30DaysAgo)) * 100;
+        // Cap em ±999% como segunda linha de defesa contra overflow de exibição
+        return Math.max(-999, Math.min(999, raw));
     }, [totalBalance, balance30DaysAgo]);
 
 

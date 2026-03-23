@@ -1,15 +1,20 @@
 import clsx from 'clsx';
 import { User, Plus, Check } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
+import { useInteractionTracker } from '../../hooks/useAnalytics';
 
 export function FamilyMembersWidget({ onOpenAddMember }: { onOpenAddMember?: () => void }) {
     const { familyMembers, selectedMemberId, setSelectedMemberId } = useFinance();
+    const { trackClick: trackMemberClick } = useInteractionTracker('family_member_filter');
+    const { trackClick: trackAddMember } = useInteractionTracker('add_member_button');
 
-    const handleMemberClick = (id: string) => {
-        if (selectedMemberId === id) {
-            setSelectedMemberId(null); // Deselect
+    const handleMemberClick = (id: string, name: string) => {
+        const isDeselecting = selectedMemberId === id;
+        trackMemberClick({ member_name: name, action: isDeselecting ? 'deselect' : 'select' });
+        if (isDeselecting) {
+            setSelectedMemberId(null);
         } else {
-            setSelectedMemberId(id); // Select
+            setSelectedMemberId(id);
         }
     };
 
@@ -21,7 +26,7 @@ export function FamilyMembersWidget({ onOpenAddMember }: { onOpenAddMember?: () 
                 return (
                     <button
                         key={member.id}
-                        onClick={() => handleMemberClick(member.id)}
+                        onClick={() => handleMemberClick(member.id, member.name)}
                         className={clsx(
                             "relative size-9 lg:size-11 rounded-full border-2 transition-all duration-300 ease-out overflow-visible group",
                             isSelected
@@ -59,7 +64,10 @@ export function FamilyMembersWidget({ onOpenAddMember }: { onOpenAddMember?: () 
             <button
                 className="relative size-9 lg:size-11 rounded-full bg-neutral-100 hover:bg-neutral-200 border-2 border-white flex items-center justify-center text-neutral-500 transition-colors z-0"
                 title="Adicionar Membro"
-                onClick={onOpenAddMember}
+                onClick={() => {
+                    trackAddMember();
+                    onOpenAddMember?.();
+                }}
             >
                 <Plus size={20} />
             </button>

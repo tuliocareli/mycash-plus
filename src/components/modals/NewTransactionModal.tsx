@@ -70,6 +70,8 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 setInstallments(1);
                 setIsRecurring(false);
                 setType('EXPENSE');
+                // Dispara _start imediatamente ao abrir — garante consistência com _submit
+                startForm();
             }
         }
     }, [isOpen, initialAccountId, initialData]);
@@ -186,6 +188,12 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
         try {
             await measureAction('delete_transaction', async () => {
                 await deleteTransaction(initialData.id);
+            });
+            // Registra evento de FUNNEL separado com contexto da transação deletada
+            submitForm({
+                transaction_type: initialData.type,
+                is_recurring: initialData.isRecurring || false,
+                total_installments: initialData.totalInstallments || 1,
             });
             setView('SUCCESS_DELETE');
         } catch (error: any) {
