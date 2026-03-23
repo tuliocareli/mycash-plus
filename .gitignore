@@ -14,3 +14,5 @@ package-lock.json
 *.log
 lint*.txt
 tsc_output.txt
+
+vapid.json
