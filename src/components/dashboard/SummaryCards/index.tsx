@@ -59,9 +59,15 @@ export function SummaryCards() {
     const animatedIncome = useCountUp(totalIncome, 1000);
     const animatedExpenses = useCountUp(totalExpenses, 1000);
 
+    // Comparação com mês anterior (último ciclo fechado)
+    const { monthlyClosings } = useFinance();
+    const lastMonth = monthlyClosings.length > 0 ? monthlyClosings[0] : null;
+
+    const incomeDiff = lastMonth ? totalIncome - lastMonth.totalIncome : null;
+    const expenseDiff = lastMonth ? totalExpenses - lastMonth.totalExpense : null;
 
     return (
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full mb-8">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-8">
 
             {/* 1. Balance Card (Dark Theme) */}
             <div className="relative overflow-hidden bg-neutral-1100 text-white rounded-[2.5rem] p-8 flex flex-col justify-between min-h-[200px] shadow-lg group hover:shadow-xl transition-all duration-300">
@@ -105,6 +111,15 @@ export function SummaryCards() {
                         Total Receitas
                     </span>
                 </div>
+
+                {lastMonth && (
+                    <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-neutral-400">vs. Mês anterior</span>
+                        <span className={`text-xs font-black px-2 py-1 rounded bg-neutral-50 ${incomeDiff! >= 0 ? 'text-green-600' : 'text-neutral-500'}`}>
+                            {incomeDiff! >= 0 ? '+' : ''}{formatCurrency(incomeDiff!)}
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* 3. Expense Card (Light Theme) */}
@@ -124,6 +139,15 @@ export function SummaryCards() {
                         Total Despesas
                     </span>
                 </div>
+
+                {lastMonth && (
+                    <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-neutral-400">vs. Mês anterior</span>
+                        <span className={`text-xs font-black px-2 py-1 rounded bg-neutral-50 ${expenseDiff! <= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                            {expenseDiff! > 0 ? '+' : ''}{formatCurrency(expenseDiff!)}
+                        </span>
+                    </div>
+                )}
             </div>
 
         </section>
