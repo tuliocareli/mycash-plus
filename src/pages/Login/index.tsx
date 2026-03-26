@@ -76,12 +76,12 @@ export default function Login() {
                     className="absolute inset-0 w-full h-full object-cover object-center"
                 />
 
-                {/* Dark gradient overlay para legibilidade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
+                {/* Gradient: concentrado apenas na base para legibilidade do texto */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
 
                 {/* Logo topo esquerdo */}
                 <div className="absolute top-8 left-8 flex items-center gap-2 z-10">
-                    <img src="/purso-icon.svg" alt="Purso Icon" className="h-9 w-auto brightness-0 invert" />
+                    <img src="/purso-icon.svg" alt="Purso Icon" className="h-9 w-auto" />
                     <img src="/purso-text.svg" alt="Purso" className="h-6 w-auto brightness-0 invert" />
                 </div>
 
