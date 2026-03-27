@@ -45,13 +45,8 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
 
     const isEditing = !!initialData && !isCloning;
 
-    // Modal de criação de conta (inline, sem sair do contexto)
-    const [showAddAccountModal, setShowAddAccountModal] = useState(false);
-
-    // Detecta se não há contas disponíveis para o tipo selecionado
-    const hasNoAccounts = type === 'INCOME'
-        ? bankAccounts.length === 0
-        : bankAccounts.length === 0 && creditCards.length === 0;
+    // Modal de criação de conta inline — null = fechado
+    const [addAccountModalType, setAddAccountModalType] = useState<'bank' | 'creditCard' | null>(null);
 
     // Ref para detectar quando uma nova conta é criada
     const prevAccountsTotalRef = useRef(bankAccounts.length + creditCards.length);
@@ -483,62 +478,60 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                                 </div>
                                             </div>
 
-                                            {/* Conta / Cartão */}
+                                            {/* Conta / Cartão — sempre com opção de criação inline */}
                                             <div className="flex flex-col gap-2">
                                                 <label className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
                                                     {type === 'INCOME' ? 'Contas' : 'Conta / cartão'}
                                                 </label>
 
-                                                {hasNoAccounts ? (
-                                                    // Empty state inline — usuário cria a conta sem sair do modal
-                                                    <div className={clsx(
-                                                        "flex items-center justify-between h-[52px] px-4 bg-neutral-50 border rounded-xl",
-                                                        errors.accountId ? "border-red-500" : "border-neutral-300"
-                                                    )}>
-                                                        <span className="text-sm text-neutral-400 font-medium">Nenhuma conta cadastrada</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowAddAccountModal(true)}
-                                                            className="flex items-center gap-1 text-xs font-black text-brand-700 bg-brand-500/10 px-2 py-1 rounded hover:bg-brand-500/20 transition-colors uppercase"
-                                                        >
-                                                            <Plus size={12} />
-                                                            Criar agora
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className={clsx(
-                                                        "relative flex items-center h-[52px] bg-white border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all",
-                                                        errors.accountId ? "border-red-500" : "border-neutral-300"
-                                                    )}>
-                                                        <select
-                                                            value={accountId}
-                                                            onChange={(e) => setAccountId(e.target.value)}
-                                                            className="w-full h-full px-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none cursor-pointer z-10"
-                                                        >
-                                                            <option value="" disabled>Selecione</option>
+                                                <div className={clsx(
+                                                    "relative flex items-center h-[52px] bg-white border rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-transparent transition-all",
+                                                    errors.accountId ? "border-red-500" : "border-neutral-300"
+                                                )}>
+                                                    <select
+                                                        value={accountId}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val === '__create_account__') {
+                                                                setAddAccountModalType('bank');
+                                                                return;
+                                                            }
+                                                            if (val === '__create_card__') {
+                                                                setAddAccountModalType('creditCard');
+                                                                return;
+                                                            }
+                                                            setAccountId(val);
+                                                        }}
+                                                        className="w-full h-full px-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none cursor-pointer z-10"
+                                                    >
+                                                        <option value="" disabled>Selecione</option>
 
-                                                            {type === 'INCOME' ? (
-                                                                bankAccounts.map(acc => (
+                                                        {type === 'INCOME' ? (
+                                                            <>
+                                                                {bankAccounts.map(acc => (
                                                                     <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                                                ))
-                                                            ) : (
-                                                                <>
-                                                                    <optgroup label="Contas">
-                                                                        {bankAccounts.map(acc => (
-                                                                            <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                                                        ))}
-                                                                    </optgroup>
-                                                                    <optgroup label="Cartões">
-                                                                        {creditCards.map(card => (
-                                                                            <option key={card.id} value={card.id}>{card.name}</option>
-                                                                        ))}
-                                                                    </optgroup>
-                                                                </>
-                                                            )}
-                                                        </select>
-                                                        <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
-                                                    </div>
-                                                )}
+                                                                ))}
+                                                                <option value="__create_account__">+ Criar conta</option>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <optgroup label="Contas">
+                                                                    {bankAccounts.map(acc => (
+                                                                        <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                                                    ))}
+                                                                    <option value="__create_account__">+ Criar conta</option>
+                                                                </optgroup>
+                                                                <optgroup label="Cartões">
+                                                                    {creditCards.map(card => (
+                                                                        <option key={card.id} value={card.id}>{card.name}</option>
+                                                                    ))}
+                                                                    <option value="__create_card__">+ Criar cartão</option>
+                                                                </optgroup>
+                                                            </>
+                                                        )}
+                                                    </select>
+                                                    <div className="absolute right-4 text-neutral-400 pointer-events-none">▼</div>
+                                                </div>
 
                                                 {errors.accountId && <span className="text-xs text-red-500 font-medium">{errors.accountId}</span>}
                                             </div>
@@ -632,9 +625,9 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
 
             {/* AddAccountModal — usuário cria conta sem perder o contexto da transação */}
             <AddAccountModal
-                isOpen={showAddAccountModal}
-                onClose={() => setShowAddAccountModal(false)}
-                initialType="bank"
+                isOpen={addAccountModalType !== null}
+                onClose={() => setAddAccountModalType(null)}
+                initialType={addAccountModalType ?? 'bank'}
             />
         </>
     );
