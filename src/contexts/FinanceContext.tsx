@@ -312,7 +312,32 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             // Update other states
             if (txRes.data) setTransactions(txRes.data.map(t => mapTransaction(t, cats)));
             if (goalsRes.data) setGoals(goalsRes.data.map(mapGoal));
-            if (accRes.data) setAccounts(accRes.data.map(mapAccount));
+
+            // Seed conta padrão apenas para novos usuários (nunca viram onboarding)
+            if (accRes.data) {
+                if (accRes.data.length === 0 && members.length > 0 && !profile?.has_seen_onboarding) {
+                    const { data: newAcc, error: accSeedError } = await supabase
+                        .from('accounts')
+                        .insert({
+                            user_id: user.id,
+                            type: 'CHECKING',
+                            name: 'Carteira',
+                            bank: 'Geral',
+                            balance: 0,
+                            holder_id: members[0].id,
+                            color: '#DFFE35',
+                            is_active: true
+                        })
+                        .select();
+                    if (accSeedError) {
+                        console.error('Error seeding default account:', accSeedError);
+                    } else if (newAcc) {
+                        setAccounts(newAcc.map(mapAccount));
+                    }
+                } else {
+                    setAccounts(accRes.data.map(mapAccount));
+                }
+            }
             if (closingRes.data) {
                 setMonthlyClosings(closingRes.data.map(c => ({
                     id: c.id,
