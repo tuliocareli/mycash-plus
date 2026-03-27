@@ -80,7 +80,7 @@ export default function Login() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
 
                 {/* Logo topo esquerdo */}
-                <div className="absolute top-8 left-8 flex items-center gap-2 z-10">
+                <div className="absolute top-8 left-8 flex items-center gap-2 z-10 drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]">
                     <img src="/purso-icon.svg" alt="Purso Icon" className="h-9 w-auto" />
                     <img src="/purso-text.svg" alt="Purso" className="h-6 w-auto brightness-0 invert" />
                 </div>
