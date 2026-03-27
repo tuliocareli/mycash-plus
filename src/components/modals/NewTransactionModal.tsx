@@ -511,7 +511,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                                                 {bankAccounts.map(acc => (
                                                                     <option key={acc.id} value={acc.id}>{acc.name}</option>
                                                                 ))}
-                                                                <option value="__create_account__">+ Criar conta</option>
+                                                                <option value="__create_account__" style={{ color: '#4E7000', fontWeight: 700 }}>+ Criar conta</option>
                                                             </>
                                                         ) : (
                                                             <>
@@ -519,13 +519,13 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                                                     {bankAccounts.map(acc => (
                                                                         <option key={acc.id} value={acc.id}>{acc.name}</option>
                                                                     ))}
-                                                                    <option value="__create_account__">+ Criar conta</option>
+                                                                    <option value="__create_account__" style={{ color: '#4E7000', fontWeight: 700 }}>+ Criar conta</option>
                                                                 </optgroup>
                                                                 <optgroup label="Cartões">
                                                                     {creditCards.map(card => (
                                                                         <option key={card.id} value={card.id}>{card.name}</option>
                                                                     ))}
-                                                                    <option value="__create_card__">+ Criar cartão</option>
+                                                                    <option value="__create_card__" style={{ color: '#4E7000', fontWeight: 700 }}>+ Criar cartão</option>
                                                                 </optgroup>
                                                             </>
                                                         )}
