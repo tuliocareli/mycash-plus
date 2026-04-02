@@ -7,7 +7,7 @@
 /* Animations for SVGs */
 
 /* Card 1: Twinkling / Sparkles and Floating blocks */
-[id*="Brilho"], [id*="bolinha"], [id*="Cifrão"], [id*="cifrão"], [id*="CIFRÃO"] {
+[id*="Brilho"], [id*="brilho"], [id*="bolinha"], [id*="Cifrão"], [id*="cifrão"], [id*="CIFRÃO"] {
   transform-origin: center;
   animation: sparkle 2s infinite alternate ease-in-out;
 }
@@ -51,10 +51,7 @@
 [id*="Cartão"]:nth-child(3) { animation-delay: 2s; }
 [id*="Cartão"]:nth-child(4) { animation-delay: 3s; }
 
-/* Card 5: Piggy blinking and sparkles */
-[id*="Olho"], [id*="olho"] {
-  animation: blink 4s infinite;
-}
+/* Removed Card 5 eye blink to keep the eye completely still */
 
 @keyframes sparkle {
   0% { transform: scale(0.8); opacity: 0.5; }
