@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChevronRight, Check } from 'lucide-react';
-import Svg1 from './svgs/1IlustraçãoInicial';
-import Svg2 from './svgs/2IlustraçãoPorquinhoGuardandoMoedasNaCaixinhaCopia';
-import Svg3 from './svgs/3Ilustração';
-import Svg4 from './svgs/4CartãoDeCred';
-import Svg5 from './svgs/5Final';
+import Svg1 from './svgs/Svg1';
+import Svg2 from './svgs/Svg2';
+import Svg3 from './svgs/Svg3';
+import Svg4 from './svgs/Svg4';
+import Svg5 from './svgs/Svg5';
 import './OnboardingAnimations.css';
 
 const steps = [
