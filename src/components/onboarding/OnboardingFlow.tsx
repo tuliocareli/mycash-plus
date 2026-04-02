@@ -96,12 +96,12 @@ export function OnboardingFlow() {
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       >
         {/* Progress Indicators */}
-        <div className="px-6 pt-6 pb-2 flex gap-2">
+        <div className="px-6 pt-6 pb-2 flex gap-2 w-full max-w-[240px] mx-auto justify-center">
           {steps.map((_, index) => (
             <div 
               key={index} 
               className={`h-1.5 rounded-full flex-1 transition-colors duration-300 ${
-                index <= currentStep ? 'bg-[var(--color-primary)]' : 'bg-gray-200 dark:bg-gray-700'
+                index <= currentStep ? 'bg-[var(--brand-500)]' : 'bg-gray-200 dark:bg-gray-700'
               }`}
             />
           ))}
@@ -119,7 +119,7 @@ export function OnboardingFlow() {
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <div className="w-full max-w-[280px] aspect-square onboarding-svg-wrapper mb-8 flex items-center justify-center relative">
-                <step.Svg className="w-full h-full drop-shadow-xl" />
+                <step.Svg className={`w-full h-full drop-shadow-xl transition-transform duration-500 ${currentStep === 2 ? 'scale-[1.35] translate-y-2' : ''}`} />
               </div>
               
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
@@ -143,8 +143,8 @@ export function OnboardingFlow() {
           
           <button 
             onClick={handleNext}
-            className="flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-6 py-3 rounded-xl font-semibold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/25 focus:outline-none"
-            style={{ backgroundColor: 'var(--color-primary)' }}
+            className="flex items-center justify-center gap-2 bg-[var(--brand-500)] text-gray-900 px-6 py-3 rounded-xl font-semibold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[var(--brand-500)]/25 focus:outline-none"
+            style={{ backgroundColor: 'var(--brand-500)' }}
           >
             {currentStep === steps.length - 1 ? (
               <>Começar <Check className="w-5 h-5" /></>
