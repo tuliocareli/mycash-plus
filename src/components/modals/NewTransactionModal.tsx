@@ -1,12 +1,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2, Trash2 } from 'lucide-react';
+import { X, ArrowDownLeft, ArrowUpRight, Calendar, Repeat, Plus, Loader2, Trash2, Camera, ScanLine } from 'lucide-react';
 import clsx from 'clsx';
 import { useFinance } from '../../contexts/FinanceContext';
 import { Transaction, TransactionType, TransactionStatus } from '../../types';
 import { useFormFunnel, usePerformanceMarker } from '../../hooks/useAnalytics';
 import { AddAccountModal } from './AddAccountModal';
+import { supabase } from '../../services/supabase';
+import { compressImage } from '../../utils/compressImage';
 
 interface NewTransactionModalProps {
     isOpen: boolean;
@@ -38,6 +40,10 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    
+    // Receipt Scanning
+    const [isScanning, setIsScanning] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Analytics
     const { startForm, submitForm } = useFormFunnel(initialData ? 'edit_transaction' : 'new_transaction');
@@ -67,6 +73,43 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
 
         prevAccountsTotalRef.current = currentTotal;
     }, [bankAccounts, creditCards]);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        try {
+            const base64 = await compressImage(file);
+            const { data, error } = await supabase.functions.invoke('scan-receipt', {
+                body: { imageBase64: base64 }
+            });
+
+            if (error) throw error;
+            
+            if (data.title) setDescription(data.title.substring(0, 50));
+            if (data.amount) {
+                // Remove R$ if present, ensure float
+                const num = parseFloat(String(data.amount).replace(/[^0-9.]/g, ''));
+                if (!isNaN(num)) setAmount(String(num));
+            }
+            if (data.date) setDate(data.date);
+            
+            if (data.categoryName) {
+                const search = data.categoryName.toLowerCase();
+                const matched = displayedCategories.find(c => c.name.toLowerCase().includes(search));
+                if (matched) {
+                    setCategoryId(matched.id);
+                }
+            }
+        } catch (error: any) {
+            console.error("Scanner error:", error);
+            alert("Erro ao ler nota: " + (error.message || error));
+        } finally {
+            setIsScanning(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -313,12 +356,35 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                             </p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleClose(); }}
-                                        className="size-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer"
-                                    >
-                                        <X size={20} />
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        {!isEditing && (
+                                            <>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    capture="environment" 
+                                                    className="hidden" 
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileUpload}
+                                                />
+                                                <button
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    disabled={isScanning}
+                                                    title="Escanear Nota Fiscal"
+                                                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-neutral-200 text-brand-700 font-bold hover:bg-neutral-50 transition-colors disabled:opacity-50"
+                                                >
+                                                    {isScanning ? <ScanLine size={18} className="animate-pulse" /> : <Camera size={18} />}
+                                                    <span className="hidden sm:inline text-sm">{isScanning ? 'Lendo...' : 'Escanear'}</span>
+                                                </button>
+                                            </>
+                                        )}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleClose(); }}
+                                            className="size-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Body */}
