@@ -46,17 +46,16 @@ export function OnboardingFlow() {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [show, setShow] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     
     // Check if the user is the special exception
-    if (user.email === 'tctulio2009@gmail.com') {
+    const userEmail = user?.email?.toLowerCase() || '';
+    
+    if (userEmail === 'tctulio2009@gmail.com') {
       setShow(true);
       return;
     }
@@ -83,12 +82,12 @@ export function OnboardingFlow() {
     setShow(false);
   };
 
-  if (!show || !mounted) return null;
+  if (!show) return null;
 
   const step = steps[currentStep];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style={{ zIndex: 99999 }}>
       <motion.div 
         className="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col min-h-[500px]"
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
