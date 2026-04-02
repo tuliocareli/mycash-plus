@@ -1,0 +1,97 @@
+.onboarding-svg-wrapper svg {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+}
+
+/* Animations for SVGs */
+
+/* Card 1: Twinkling / Sparkles and Floating blocks */
+[id*="Brilho"], [id*="bolinha"], [id*="Cifrão"], [id*="cifrão"], [id*="CIFRÃO"] {
+  transform-origin: center;
+  animation: sparkle 2s infinite alternate ease-in-out;
+}
+
+[id*="ICON_TRAVEL"] {
+  animation: floatUp 3s infinite alternate ease-in-out;
+}
+
+[id*="ICON_COMIDA"] {
+  animation: floatDown 3s infinite alternate ease-in-out;
+  animation-delay: 0.5s;
+}
+
+/* Card 2: Piggy Bank and Coins */
+[id*="moeda"], [id*="Moeda"] {
+  animation: dropInBox 2.5s infinite ease-in;
+}
+/* Stagger coins */
+[id*="Moeda"]:nth-of-type(odd) { animation-delay: 0s; }
+[id*="Moeda"]:nth-of-type(even) { animation-delay: 1.25s; }
+
+[id*="Porco"] {
+  animation: breathe 3s infinite alternate ease-in-out;
+}
+
+/* Card 3: Popups floating */
+[id*="popup"], [id*="gasto"], [id*="receita"], [id*="Card"] {
+  animation: floatUp 4s infinite alternate ease-in-out;
+}
+[id*="popup"]:nth-child(even), [id*="Card"]:nth-child(even) {
+  animation-duration: 3.5s;
+  animation-delay: 1s;
+}
+
+/* Card 4: Rain of credit cards */
+[id*="Cartão"], [id*="cartão"] {
+  animation: cardRain 4s infinite linear;
+}
+[id*="Cartão"]:nth-child(1) { animation-delay: 0s; }
+[id*="Cartão"]:nth-child(2) { animation-delay: 1s; }
+[id*="Cartão"]:nth-child(3) { animation-delay: 2s; }
+[id*="Cartão"]:nth-child(4) { animation-delay: 3s; }
+
+/* Card 5: Piggy blinking and sparkles */
+[id*="Olho"], [id*="olho"] {
+  animation: blink 4s infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-15px) rotate(2deg); }
+}
+
+@keyframes floatDown {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(15px) rotate(-2deg); }
+}
+
+@keyframes dropInBox {
+  0% { transform: translateY(-50px); opacity: 0; }
+  20% { transform: translateY(0); opacity: 1; }
+  80% { transform: translateY(20px); opacity: 1; }
+  100% { transform: translateY(40px); opacity: 0; }
+}
+
+@keyframes breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+@keyframes cardRain {
+  0% { transform: translateY(-300px) rotate(-10deg); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(300px) rotate(10deg); opacity: 0; }
+}
+
+@keyframes blink {
+  0%, 90% { transform: scaleY(1); opacity: 1; }
+  95% { transform: scaleY(0.1); opacity: 0.7; }
+  100% { transform: scaleY(1); opacity: 1; }
+}

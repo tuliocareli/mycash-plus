@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purso Piggy Lab - Animação</title>
+    <!-- Carregando React, ReactDOM, Babel e Framer Motion via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #080B12;
+            color: white;
+            font-family: 'Manrope', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .glow {
+            filter: drop-shadow(0 0 15px rgba(223, 254, 53, 0.3));
+        }
+        .piggy-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 60px;
+            padding: 60px;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+        }
+        svg {
+            max-width: 600px;
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { motion, AnimatePresence } = window.Motion;
+
+        const AnimatedPiggy = () => {
+            // Variantes para as Orelhas
+            const earVariants = {
+                animate: {
+                    rotate: [0, -5, 5, 0],
+                    transition: {
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }
+                }
+            };
+
+            // Variantes para as Moedas (Caindo nas caixas)
+            const coinTransition = (delay) => ({
+                duration: 2,
+                repeat: Infinity,
+                delay: delay,
+                ease: "easeInOut"
+            });
+
+            // Variantes para os Brilhos
+            const sparkleVariants = {
+                animate: {
+                    scale: [0.8, 1.2, 0.8],
+                    opacity: [0.3, 1, 0.3],
+                    transition: {
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }
+                }
+            };
+
+            return (
+                <div className="flex flex-col items-center gap-8">
+                    <div className="text-center">
+                        <span className="text-brand-500 font-black tracking-widest uppercase text-xs">Purso Discovery</span>
+                        <h1 className="text-4xl font-black text-white mt-2">Laboratório de Animação</h1>
+                        <p className="text-neutral-400 mt-2">O porquinho que poupa em grande estilo 🐷🔥</p>
+                    </div>
+
+                    <div className="piggy-container glow">
+                        <svg id="Porquin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 552.94 509.02">
+                            <defs>
+                                <style>{`
+                                    .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 { stroke-miterlimit: 10; }
+                                    .cls-1, .cls-10, .cls-7 { fill: #fff; }
+                                    .cls-1, .cls-3, .cls-9 { stroke-width: 7px; }
+                                    .cls-1, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 { stroke: #191919; stroke-linecap: round; }
+                                    .cls-2, .cls-11 { font-family: Manrope-Regular, Manrope; font-size: 28.9px; }
+                                    .cls-2, .cls-11, .cls-12 { isolation: isolate; }
+                                    .cls-2, .cls-3, .cls-4 { stroke: #000; }
+                                    .cls-2, .cls-8, .cls-9 { fill: none; }
+                                    .cls-3 { fill: #e1f79a; }
+                                    .cls-3, .cls-4 { fill-rule: evenodd; }
+                                    .cls-4 { fill: #b1f50c; stroke-width: 5px; }
+                                    .cls-5 { fill: #0a0a0a; }
+                                    .cls-5, .cls-6, .cls-7, .cls-8 { stroke-width: 9px; }
+                                    .cls-13 { fill: #191919; }
+                                `}</style>
+                            </defs>
+
+                            {/* Moedas Animadas */}
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <motion.g
+                                    key={i}
+                                    id={`Moeda_${i}`}
+                                    animate={{ 
+                                        y: [0, 150, 180],
+                                        opacity: [0, 1, 0],
+                                        scale: [0.5, 1, 0.8]
+                                    }}
+                                    transition={{
+                                        duration: 2.5,
+                                        repeat: Infinity,
+                                        delay: i * 0.5,
+                                        ease: "circIn"
+                                    }}
+                                >
+                                    <path className="cls-4" d="M122.3,284.2c0,13.8-11.2,25-25,25s-25-11.2-25-25,11.2-25,25-25,25,11.2,25,25Z" transform={`translate(${i * 60 - 150}, ${-200})`}/>
+                                </motion.g>
+                            ))}
+
+                            <g id="Perna_Direita">
+                                <path className="cls-7" d="M186.5,297.9c-9.9,6.3-19.8,12.5-29.7,18.8,2.4,13,4.7,26.1,7,39.1,58.8,7.9,72.4,5,73.6.8,1.3-4.8-13.7-10.7-31.3-30.5-9.6-10.9-15.8-21.2-19.6-28.2h0Z"/>
+                                <path className="cls-6" d="M133,317.5c.4-1,1.8-1.3,2.6-.6,2.9,2.5,6.8,3.4,10.5,2.4,3.8-1,6.8-4,7.9-7.7.3-1.1,1.7-1.5,2.6-.8,3.2,2.7,7,6.3,10.8,11.2,5.4,7,9.4,12.2,9.8,19.4.6,9.7-5.5,22.3-16.6,25.2-12.3,3.2-22.7-7.5-23.7-8.6-9-9.6-10.4-25.5-4-40.6h0l.1.1Z"/>
+                            </g>
+
+                            <motion.g id="Braço_Direito" animate={{ rotate: [0, -5, 0] }} transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}>
+                                <path className="cls-10" d="M204.1,201.6c-5.1-8.2-38,2-62.2,15.3-5.4,3-43.8,24.4-39.9,39.9.9,3.5,3,2.9,15.3,15.3,10.1,10.3,12,14.1,16.4,14.1,3.3,0,4.5-2,15.3-11.7,8.9-8.1,13.5-12.1,16.4-12.9,10.9-2.9,18.3,7,23.5,3.5,4.5-3.1.4-11.9,1.2-24.6,1.5-23.3,18-32.5,14.1-38.7h0l-.1-.2Z"/>
+                                <g>
+                                    <path className="cls-5" d="M152.5,263.6c-1.7.8-3.2,1.7-4.4,2.6-9.1,6.5-13.9,18.3-20,17.2-4-.7-2-9.8-9.1-17-7.8-7.8-14.1-2.6-15.4-6.5-2.3-6.7,10.2-18.6,19.7-25.6l29.2,29.2v.1Z"/>
+                                    <path className="cls-8" d="M187.2,234.9c-3.1,10.8-3.4,20.3-3.1,26.6-15.2-2.9-25-1-31.6,2.1l-29.2-29.2c4.9-3.6,9.2-6.4,10.7-7.3,26.5-16.7,61.1-29.2,65.7-21.9,2.6,4.2-7,10.7-12.5,29.7h0Z"/>
+                                </g>
+                            </motion.g>
+
+                            <motion.g id="Corpo" animate={{ scale: [1, 1.01, 1], y: [0, -2, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                                <path className="cls-10" d="M168.8,101.5c1.3-22.4,14.3-44.4,32.9-56.3,27.6-17.8,64.4-11.6,87.6,3.1,31.4,19.8,22.6,45.2,57.9,111.1,33.2,61.9,53.3,62.7,59.5,103.3,1.2,8,9,65.4-28.2,98.6-16,14.2-33.6,18.1-43.8,20.4-41.8,9.2-77.5-8.4-108-23.5-18.6-9.2-24.8-15.1-28.2-18.8-19.5-21.2-20.2-49.1-20.4-59.5-.6-47.6,25.2-52.6,23.5-89.4-1.9-41-35.2-49.1-32.9-89h.1Z"/>
+                                <path className="cls-8" d="M164.1,101.8c.6-6.8,3.5-29.1,21.9-47,23.4-22.7,53.6-20.7,59.5-20.3,3.2.2,15.8,1.2,29.7,7.8,36.2,17.1,49,55.8,86.1,131.5,34.8,71,43.9,78.7,42.3,104.9-.6,9.4-4.7,54.1-40.7,81.4-11.6,8.8-23.2,13.3-31.3,15.6"/>
+                                <path className="cls-8" d="M233,360.1c-8-1.8-23.9-6.5-36-20.4-14.7-16.8-15.2-37.1-15.6-54.8-.6-23.2,5.1-42.4,12.5-67.3,3-10,5.8-18.1,7.8-23.5"/>
+                            </motion.g>
+
+                            <motion.g id="Braço_Esquerdo" animate={{ rotate: [0, 5, 0] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}>
+                                <path className="cls-10" d="M369.5,221c6,7.6-14.6,35.2-35.2,53.5-4.6,4.1-37.7,33.1-51,24.3-3-2-1.7-3.8-9.3-19.5-6.3-13-9.3-16-7.8-20.2,1.1-3.1,3.4-3.6,16.2-10.5,10.6-5.7,15.9-8.6,17.7-11.2,6.4-9.3-1.5-14.7,3.6-18.4,4.4-3.2,12.3-1.3,24.6,2.2,22.5,6.4,36.7-6.1,41.2-.3h0v.1Z"/>
+                                <path className="cls-5" d="M267.7,262.5c-1.3,1.3-2.7,2.4-3.9,3.3-9.1,6.5-21.9,7-22.9,13-.7,4,8.6,5.2,12.9,14.3,4.7,9.9-2.2,14.1,1,16.7,5.5,4.4,20.9-3.4,30.7-10l-17.8-37.3h0Z"/>
+                                <path className="cls-9" d="M302.3,226.6s.2,2.1,0,6.8c-.3,7.2-26.6,22.6-29.2,23.7,7.3,15.2,11.7,25.5,19,40.7,8.2-1.9,13.1-1.7,17-3.9,3.1-1.8,5.9-3.9,11.5-8.1,3.1-2.3,6.6-5,11-8.6,8.1-6.8,13.6-12.6,17.2-16.4,5.9-6.3,9-9.5,12.3-14.6,1.9-2.9,1-2.1,5.2-9.1,2.6-4.4,4-6.4,4.4-9.6.4-2.6,0-4.8-.3-6.3"/>
+                            </motion.g>
+
+                            <g id="Cabeça_e_nariz">
+                                <path className="cls-1" d="M353.5,157.9c-6.5-13.3-13.3-30-22.3-48.7-2.1-4.5-8.5-17-22.3-32.9-21.3-24.5-38.6-44.3-66.9-49.3-28.6-5-64,5.8-81,31.7-7.4,11.3-9.1,22-10.6,31.7-1.6,10.1-7.6,49.2,18.8,78.7,16.2,18.1,36.9,23.8,47,25.8"/>
+                                <g>
+                                    <ellipse className="cls-7" cx="164.6" cy="132.4" rx="29.9" ry="28.2"/>
+                                    <ellipse className="cls-13" cx="152.99" cy="129.47" rx="7.6" ry="4.1" transform="translate(8.73 268.6) rotate(-84.2)"/>
+                                    <ellipse className="cls-13" cx="172.23" cy="132.8" rx="7.6" ry="4.3" transform="translate(22.7 290.73) rotate(-84.2)"/>
+                                </g>
+                            </g>
+                            
+                            <motion.path id="Orelha_esquerda" variants={earVariants} animate="animate" className="cls-7" d="M257.3,54.1c4.2-2.8,9.8-7.2,14.1-14.1,9.9-15.7,8.4-22,13.1-23.7,6.8-2.4,27.4,15.6,25.7,46-1.2,21.5-14.9,36.2-20,41.1"/>
+                            <motion.path id="Orelha_direita" variants={earVariants} animate="animate" className="cls-8" d="M206.8,28.5c-1.5-3.6-5.5-11.4-14.1-17.2-8.1-5.5-16.5-6.8-22.4-6.8s-6.7,3.4-6.1,7.1c.6,3.7,1.5,9.8,1.9,15.4.6,8.2.4,15.5,0,21.9"/>
+
+                            <g id="Boca">
+                                <path className="cls-8" d="M165.7,160.6c5.2,2,17.8,6,33.7,3.1s26.3-11.1,30.5-14.9"/>
+                                <path className="cls-8" d="M226,139.4c0,1.1.2,5.7,3.9,9.4,4.7,4.7,11,4,11.7,3.9"/>
+                            </g>
+
+                            <circle id="Olho_esquerdo" className="cls-13" cx="235.1" cy="93.6" r="8.4"/>
+                            <circle id="Olho_Direito" className="cls-13" cx="177.4" cy="85.4" r="8.4"/>
+                            
+                            <motion.path id="Rabo" animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="cls-13" d="M419.2,298.6c-4.4,0-9-.5-13.7-1.5-2.8-.6-4.6-3.3-4-6.1s3.3-4.6,6.1-4c8.3,1.7,15.8,1.6,21.9.2-7.8-7.8-12.3-19.2-8-28.8,3.2-7.1,11.8-13.7,20.2-11.9,4.4.9,8.4,4.2,11.1,9.1,4,7.2,5,16.8,2.5,23.9-1,2.7-2.5,5.1-4.4,7.3,2,.2,4.4,0,6.8-.6,4.7-1.3,7.8-4.1,9.6-6.2,1.9-2.1,5.1-2.4,7.2-.5s2.4,5.1.5,7.2c-2.7,3.2-7.5,7.4-14.6,9.4-8.8,2.5-16.5.2-20.5-1.6-5.9,2.6-13,4-20.7,4h0v.1ZM438.9,256.6c-2.7,0-6.6,2.9-8,6.1-2.8,6.2,2.4,15.2,9.2,20.1,2.7-1.9,4.6-4.2,5.5-6.7,1.5-4.3.8-10.8-1.8-15.4-1.3-2.3-2.8-3.8-4.2-4.1h-.7Z"/>
+
+                            <g id="Perna_esquerda">
+                                <path className="cls-7" d="M302.8,331.7c-12,5.7-24,11.5-36,17.2,1.4,6.9,1.6,12.8,7,24.1,3.1,6.5,3.3,9.6,5,10.7.8.5,1.7.4,2.3.4,54.4-.2,84.1-25.7,84.1-25.7,4.8-4.1,11.3-10.4,17.7-19.4"/>
+                                <path className="cls-6" d="M246.1,345.4c.4-1,1.8-1.3,2.6-.6,2.9,2.5,6.8,3.4,10.5,2.4,3.8-1,6.8-4,7.9-7.7.3-1.1,1.7-1.5,2.6-.8,3.2,2.7,7,6.3,10.8,11.2,5.4,7,9.4,12.2,9.8,19.4.5,9.7-5.5,22.3-16.6,25.2-12.3,3.2-22.7-7.5-23.7-8.6-9-9.6-10.4-25.5-4-40.6h0l.1.1Z"/>
+                            </g>
+
+                            <g id="Caixa1">
+                                <path className="cls-3" d="M253.5,504.3c-2-50.3-4-100.7-6-151-40.7-.7-81.3-1.3-122-2,2.7,51.3,5.3,102.7,8,154,40-.3,80-.7,120-1Z"/>
+                                <path className="cls-3" d="M121.6,351.4c-39.3-1.7-78.7-3.4-118-5.1,1.3,50.6,2.7,101.3,4,151.9,40.3,2.4,80.7,4.7,121,7.1-2.3-51.3-4.7-102.6-7-153.9Z"/>
+                                <path className="cls-3" d="M77.6,356.5v46c0,4.1-3.6,7.2-7.7,6.5-6.2-1-12.4-1.9-18.6-2.9-3.3-.5-5.7-3.4-5.6-6.7.3-14.8.5-29.5.8-44.3,0-3.8,3.3-6.7,7.1-6.5,6,.4,11.9.8,17.9,1.1,3.5.2,6.2,3.1,6.2,6.6h0l-.1.2Z"/>
+                            </g>
+
+                            <g id="Caixa_2">
+                                <path className="cls-3" d="M549.3,441.7c-2-50.3-4-100.7-6-151-40.7-.7-81.3-1.3-122-2,2.7,51.3,5.3,102.7,8,154,40-.3,80-.7,120-1Z"/>
+                                <path className="cls-3" d="M417.4,288.8c-39.3-1.7-78.7-3.4-118-5.1,1.3,50.6,2.7,101.3,4,151.9,40.3,2.4,80.7,4.7,121,7.1-2.3-51.3-4.7-102.6-7-153.9Z"/>
+                                <path className="cls-3" d="M373.4,293.9v46c0,4.1-3.6,7.2-7.7,6.5-6.2-1-12.4-1.9-18.6-2.9-3.3-.5-5.7-3.4-5.6-6.7.3-14.8.5-29.5.8-44.3,0-3.8,3.3-6.7,7.1-6.5,6,.4,11.9.8,17.9,1.1,3.5.2,6.2,3.1,6.2,6.6h0l-.1.2Z"/>
+                            </g>
+
+                            <motion.path id="Brilho_2" variants={sparkleVariants} animate="animate" d="M476.2,69c-41.3,2.8-43.6,5.2-46.5,46.5-2.9-41.3-5.2-43.6-46.5-46.5,41.3-2.8,43.6-5.2,46.5-46.5,2.9,41.3,5.2,43.6,46.5,46.5Z" fill="#DFFE35"/>
+                            <motion.path id="Brilho_1" variants={sparkleVariants} animate="animate" d="M82.7,221.6c-33.8,2.3-35.7,4.2-38,38-2.3-33.8-4.2-35.7-38-38,33.8-2.3,35.7-4.2,38-38,2.3,33.8,4.2,35.7,38,38Z" fill="#DFFE35"/>
+                        </svg>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <button 
+                            className="bg-brand-500 text-neutral-1100 px-8 py-3 rounded-full font-bold hover:bg-white transition-all shadow-lg active:scale-95"
+                            onClick={() => window.location.reload()}
+                        >
+                            Reiniciar Animação
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AnimatedPiggy />);
+    </script>
+</body>
+</html>
