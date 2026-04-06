@@ -43,6 +43,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [touched, setTouched] = useState<Record<string, boolean>>({});
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && initialAccount) {
@@ -74,6 +76,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
 
         if (isOpen) {
             startForm();
+            setTouched({});
+            setSubmitError(null);
         }
     }, [isOpen, initialAccount, initialType, startForm]);
 
@@ -114,7 +118,27 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
         return Object.keys(newErrors).length === 0;
     };
 
+    const validateField = (field: string, value: string) => {
+        setErrors(prev => {
+            const next = { ...prev };
+            if (field === 'name') { if (!value || value.length < 3) next.name = 'Mínimo 3 caracteres'; else delete next.name; }
+            if (field === 'bank') { if (!value) next.bank = 'Informe o banco (ex: Nubank)'; else delete next.bank; }
+            if (field === 'holderId') { if (!value) next.holderId = 'Selecione um titular'; else delete next.holderId; }
+            if (field === 'balance') { if (!value) next.balance = 'Informe o saldo inicial'; else delete next.balance; }
+            if (field === 'closingDay') { if (!value || Number(value) < 1 || Number(value) > 31) next.closingDay = 'Dia inválido (1–31)'; else delete next.closingDay; }
+            if (field === 'dueDay') { if (!value || Number(value) < 1 || Number(value) > 31) next.dueDay = 'Dia inválido (1–31)'; else delete next.dueDay; }
+            if (field === 'limit') { if (!value || Number(value) <= 0) next.limit = 'Informe um limite válido'; else delete next.limit; }
+            return next;
+        });
+    };
+
+    const handleBlur = (field: string, value: string) => {
+        setTouched(prev => ({ ...prev, [field]: true }));
+        validateField(field, value);
+    };
+
     const handleSubmit = async () => {
+        setSubmitError(null);
         if (!validate()) return;
         setSaving(true);
         try {
@@ -182,7 +206,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
             onClose();
         } catch (error) {
             console.error(error);
-            alert('Erro ao salvar. Verifique se todos os campos estão preenchidos corretamente.');
+            setSubmitError('Erro ao salvar. Verifique os campos e tente novamente.');
         } finally {
             setSaving(false);
         }
@@ -219,7 +243,12 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-neutral-100 shrink-0">
-                    <h2 className="text-xl font-bold text-neutral-1100">Adicionar Conta/Cartão</h2>
+                    <h2 className="text-xl font-bold text-neutral-1100">
+                        {initialAccount
+                            ? (type === 'bank' ? 'Editar Conta Bancária' : 'Editar Cartão de Crédito')
+                            : (type === 'bank' ? 'Nova Conta Bancária' : 'Novo Cartão de Crédito')
+                        }
+                    </h2>
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-neutral-50 text-neutral-500 transition-colors">
                         <X size={24} />
                     </button>
@@ -262,7 +291,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => { setName(e.target.value); if (touched.name) validateField('name', e.target.value); }}
+                                onBlur={(e) => handleBlur('name', e.target.value)}
                                 className="w-full h-full p-4 outline-none text-neutral-1100 placeholder:text-neutral-300"
                                 placeholder={type === 'bank' ? "Ex: Nubank Conta" : "Ex: Nubank Mastercard"}
                             />
@@ -281,7 +311,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                             <input
                                 type="text"
                                 value={bank}
-                                onChange={(e) => setBank(e.target.value)}
+                                onChange={(e) => { setBank(e.target.value); if (touched.bank) validateField('bank', e.target.value); }}
+                                onBlur={(e) => handleBlur('bank', e.target.value)}
                                 className="w-full h-full p-4 outline-none text-neutral-1100 placeholder:text-neutral-300"
                                 placeholder="Ex: Nubank, Itaú, Bradesco..."
                             />
@@ -297,7 +328,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                         )}>
                             <select
                                 value={holderId}
-                                onChange={(e) => setHolderId(e.target.value)}
+                                onChange={(e) => { setHolderId(e.target.value); validateField('holderId', e.target.value); }}
+                                onBlur={(e) => handleBlur('holderId', e.target.value)}
                                 className="w-full h-full p-4 outline-none text-neutral-1100 font-medium bg-transparent appearance-none"
                             >
                                 <option value="" disabled>Selecione</option>
@@ -362,7 +394,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                                 <input
                                     type="number"
                                     value={balance}
-                                    onChange={(e) => setBalance(e.target.value)}
+                                    onChange={(e) => { setBalance(e.target.value); if (touched.balance) validateField('balance', e.target.value); }}
+                                    onBlur={(e) => handleBlur('balance', e.target.value)}
                                     className="w-full h-full p-4 pl-1 outline-none text-neutral-1100 placeholder:text-neutral-300"
                                     placeholder="0,00"
                                 />
@@ -379,13 +412,15 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                                     <label className="text-sm font-bold text-neutral-1100 uppercase tracking-wider flex items-center gap-1">
                                         Vencimento <Calendar size={12} className="text-neutral-400" />
                                     </label>
+                                    <p className="text-xs text-neutral-400 -mt-1">Dia do mês em que a fatura precisa ser paga.</p>
                                     <div className={clsx("bg-white border rounded-2xl h-12 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500", errors.dueDay ? "border-red-500" : "border-neutral-200")}>
                                         <input
                                             type="number"
                                             value={dueDay}
-                                            onChange={(e) => setDueDay(e.target.value)}
+                                            onChange={(e) => { setDueDay(e.target.value); if (touched.dueDay) validateField('dueDay', e.target.value); }}
+                                            onBlur={(e) => handleBlur('dueDay', e.target.value)}
                                             className="w-full h-full p-4 outline-none text-neutral-1100"
-                                            placeholder="DD"
+                                            placeholder="Ex: 10"
                                         />
                                     </div>
                                     {errors.dueDay && <span className="text-xs text-red-500 font-medium ml-1">{errors.dueDay}</span>}
@@ -394,13 +429,15 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                                     <label className="text-sm font-bold text-neutral-1100 uppercase tracking-wider flex items-center gap-1">
                                         Fechamento <Calendar size={12} className="text-neutral-400" />
                                     </label>
+                                    <p className="text-xs text-neutral-400 -mt-1">Dia em que a fatura fecha e para de acumular.</p>
                                     <div className={clsx("bg-white border rounded-2xl h-12 overflow-hidden focus-within:ring-2 focus-within:ring-brand-500", errors.closingDay ? "border-red-500" : "border-neutral-200")}>
                                         <input
                                             type="number"
                                             value={closingDay}
-                                            onChange={(e) => setClosingDay(e.target.value)}
+                                            onChange={(e) => { setClosingDay(e.target.value); if (touched.closingDay) validateField('closingDay', e.target.value); }}
+                                            onBlur={(e) => handleBlur('closingDay', e.target.value)}
                                             className="w-full h-full p-4 outline-none text-neutral-1100"
-                                            placeholder="DD"
+                                            placeholder="Ex: 5"
                                         />
                                     </div>
                                     {errors.closingDay && <span className="text-xs text-red-500 font-medium ml-1">{errors.closingDay}</span>}
@@ -414,7 +451,8 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                                     <input
                                         type="number"
                                         value={limit}
-                                        onChange={(e) => setLimit(e.target.value)}
+                                        onChange={(e) => { setLimit(e.target.value); if (touched.limit) validateField('limit', e.target.value); }}
+                                        onBlur={(e) => handleBlur('limit', e.target.value)}
                                         className="w-full h-full p-4 pl-1 outline-none text-neutral-1100"
                                         placeholder="0,00"
                                     />
@@ -445,6 +483,11 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
                 </div>
 
                 {/* Footer */}
+                {submitError && (
+                    <div className="px-6 py-3 bg-red-50 border-t border-red-100">
+                        <p className="text-sm text-red-600 font-medium">⚠️ {submitError}</p>
+                    </div>
+                )}
                 <div className="p-6 border-t border-neutral-100 bg-white flex justify-between gap-3 shrink-0">
                     <div className="flex gap-3">
                         {initialAccount && (
