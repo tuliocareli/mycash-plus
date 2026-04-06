@@ -134,7 +134,7 @@ function CreditCardItem({ card, onClick }: { card: CreditCard; onClick?: () => v
 
             {/* Center: Info */}
             <div className="flex-1 min-w-0 flex flex-col">
-                <p className="text-[10px] font-bold text-neutral-500 truncate uppercase tracking-widest mb-0.5">
+                <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
                     {card.name}
                 </p>
                 <p className="text-[17px] font-extrabold text-neutral-1100 leading-none mb-1">
@@ -145,16 +145,6 @@ function CreditCardItem({ card, onClick }: { card: CreditCard; onClick?: () => v
                 </p>
             </div>
 
-            {/* Right: Numbers Badge */}
-            <div className={clsx(
-                "min-w-10 px-2.5 py-1.5 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110",
-                currentTheme.badgeBg,
-                currentTheme.badgeText
-            )}>
-                <span className="text-[10px] font-black leading-none">
-                    •••• {card.lastDigits || '****'}
-                </span>
-            </div>
         </button>
     );
 }
