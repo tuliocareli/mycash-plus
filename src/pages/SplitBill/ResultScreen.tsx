@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { SplitRole } from './types';
 
 interface ResultScreenProps {

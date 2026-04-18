@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Check, Camera } from 'lucide-react';
+import { Check, Camera } from 'lucide-react';
 import { SplitRole, Expense } from './types';
 
 interface AddExpenseScreenProps {
