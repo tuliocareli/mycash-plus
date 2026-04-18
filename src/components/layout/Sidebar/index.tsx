@@ -73,6 +73,13 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     onClick={() => trackNavClick({ target: 'home' })}
                 />
                 <SidebarItem
+                    icon={Calculator}
+                    label="Dividir Rolê"
+                    path="/split"
+                    isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'split' })}
+                />
+                <SidebarItem
                     icon={CreditCard}
                     label="Cartões"
                     path="/cards"
@@ -102,13 +109,6 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     path="/categories"
                     isCollapsed={isCollapsed}
                     onClick={() => trackNavClick({ target: 'categories' })}
-                />
-                <SidebarItem
-                    icon={Calculator}
-                    label="Dividir Rolê"
-                    path="/split"
-                    isCollapsed={isCollapsed}
-                    onClick={() => trackNavClick({ target: 'split' })}
                 />
                 <SidebarItem
                     icon={History}
