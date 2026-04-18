@@ -9,6 +9,7 @@ import Categories from './pages/Categories';
 import AdminAnalytics from './pages/AdminAnalytics';
 import History from './pages/History';
 import Terms from './pages/Terms';
+import SplitBill from './pages/SplitBill';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -44,6 +45,7 @@ function App() {
                     <Route path="categories" element={<Categories />} />
                     <Route path="admin" element={<AdminAnalytics />} />
                     <Route path="history" element={<History />} />
+                    <Route path="split" element={<SplitBill />} />
                     {/* Default redirect to Dashboard */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>

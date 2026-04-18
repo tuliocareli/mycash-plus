@@ -85,7 +85,17 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 body: { imageBase64: base64 }
             });
 
-            if (error) throw error;
+            if (error) {
+                let errorMsg = error.message;
+                try {
+                    // Tenta extrair a resposta customizada do backend (status 400)
+                    if (error.context instanceof Response) {
+                        const errData = await error.context.json();
+                        if (errData && errData.error) errorMsg = errData.error;
+                    }
+                } catch (e) { }
+                throw new Error(errorMsg);
+            }
             
             if (data.title) setDescription(data.title.substring(0, 50));
             if (data.amount) {

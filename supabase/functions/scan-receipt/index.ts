@@ -23,7 +23,7 @@ serve(async (req) => {
       throw new Error("A chave PURSO_RECEIPT_AI_TOKEN não está configurada nos secrets do Supabase.");
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const base64Data = imageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
 
     const payload = {

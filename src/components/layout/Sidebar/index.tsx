@@ -10,7 +10,8 @@ import {
     LayoutGrid,
     BarChart3,
     History,
-    LifeBuoy
+    LifeBuoy,
+    Calculator
 } from 'lucide-react';
 import clsx from 'clsx';
 import { SidebarItem } from './SidebarItem';
@@ -101,6 +102,13 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
                     path="/categories"
                     isCollapsed={isCollapsed}
                     onClick={() => trackNavClick({ target: 'categories' })}
+                />
+                <SidebarItem
+                    icon={Calculator}
+                    label="Dividir Rolê"
+                    path="/split"
+                    isCollapsed={isCollapsed}
+                    onClick={() => trackNavClick({ target: 'split' })}
                 />
                 <SidebarItem
                     icon={History}

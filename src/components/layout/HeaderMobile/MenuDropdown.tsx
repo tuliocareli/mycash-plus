@@ -8,7 +8,8 @@ import {
     LogOut,
     X,
     LayoutGrid,
-    BarChart3
+    BarChart3,
+    Calculator
 } from 'lucide-react';
 import { MenuItem } from './MenuItem';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -104,6 +105,12 @@ export function MenuDropdown({ isOpen, onClose, user }: MenuDropdownProps) {
                         icon={LayoutGrid}
                         label="Categorias"
                         path="/categories"
+                        onClick={onClose}
+                    />
+                    <MenuItem
+                        icon={Calculator}
+                        label="Dividir Rolê"
+                        path="/split"
                         onClick={onClose}
                     />
                     <MenuItem
