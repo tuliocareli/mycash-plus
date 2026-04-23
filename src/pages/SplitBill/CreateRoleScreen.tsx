@@ -1,7 +1,14 @@
 import { useState } from 'react';
-import { Plus, ArrowLeft, Camera, Minus } from 'lucide-react';
+import { Plus, ArrowLeft, Minus, ChevronDown } from 'lucide-react';
 import { SplitRole, Participant } from './types';
 import { format } from 'date-fns';
+
+const ROLE_EMOJIS = [
+  '🍻', '🍕', '🍔', '🍺', '🎉', '🎸', '🏖️', '🎲',
+  '🎳', '🎯', '⚽', '🎭', '🎪', '🎬', '🎤', '🎵',
+  '🍣', '🍜', '🌮', '☕', '🍷', '🍾', '🥂', '🏕️',
+  '🚗', '✈️', '🏄', '🎿', '🎮', '🛒', '🎁', '🏋️',
+];
 
 interface CreateRoleScreenProps {
   onBack: () => void;
@@ -12,10 +19,15 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [emoji, setEmoji] = useState('🍻');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([
     { id: 'me', name: 'Eu', isMe: true }
   ]);
   const [newPersonName, setNewPersonName] = useState('');
+  const [touched, setTouched] = useState(false);
+
+  const isTitleMissing = !title.trim();
+  const isValid = !isTitleMissing;
 
   const handleAddPerson = () => {
     if (newPersonName.trim()) {
@@ -30,7 +42,8 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
   };
 
   const handleCreate = () => {
-    if (!title.trim()) return;
+    setTouched(true);
+    if (!isValid) return;
     const role: SplitRole = {
       id: Date.now().toString(),
       title,
@@ -44,7 +57,7 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
   };
 
   return (
-    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-md w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100 overflow-y-auto">
+    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-2xl w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100 overflow-y-auto">
       <div className="flex items-center gap-4 mb-10">
         <button onClick={onBack} className="text-neutral-500 font-semibold text-sm hover:text-neutral-800 transition-colors">
           Cancelar
@@ -53,35 +66,60 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
       </div>
 
       <div className="space-y-6 flex-1">
-        {/* Title */}
+        {/* Title + Emoji */}
         <div className="space-y-2">
-          <label className="text-base font-semibold text-neutral-500">Título</label>
-          <div className="flex gap-2 w-full">
-            <div className="w-16 h-14 bg-white border-2 border-neutral-200 rounded-2xl flex items-center justify-center text-2xl relative overflow-hidden shrink-0">
-              <input 
-                type="text" 
-                value={emoji} 
-                onChange={e => setEmoji(e.target.value)}
-                maxLength={2}
-                className="w-full h-full text-center bg-transparent outline-none absolute inset-0 z-10"
-              />
-              <Camera className="absolute opacity-20" size={24} />
+          <label className="text-base font-semibold text-neutral-500">
+            Título <span className="text-red-500">*</span>
+          </label>
+          <div className="flex gap-2 w-full relative">
+            {/* Emoji picker trigger */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(v => !v)}
+                className="w-16 h-14 bg-white border-2 border-neutral-200 rounded-2xl flex items-center justify-center text-2xl hover:border-brand-500 transition-colors relative"
+                title="Escolher ícone"
+              >
+                {emoji}
+                <ChevronDown size={12} className="absolute bottom-1 right-1 text-neutral-400" />
+              </button>
+
+              {showEmojiPicker && (
+                <div className="absolute z-50 top-full mt-2 left-0 bg-white border border-neutral-200 rounded-2xl shadow-xl p-3 grid grid-cols-8 gap-1 w-72">
+                  {ROLE_EMOJIS.map(e => (
+                    <button
+                      key={e}
+                      type="button"
+                      onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
+                      className={`w-8 h-8 text-lg flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors ${emoji === e ? 'bg-brand-100 ring-2 ring-brand-500' : ''}`}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <input 
-              type="text" 
-              placeholder="Ex: Barzinho do Zé"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="flex-1 bg-white border-2 border-neutral-200 rounded-xl px-4 py-3 text-lg text-neutral-800 outline-none focus:border-brand-500 transition-colors"
-            />
+
+            <div className="flex-1 flex flex-col">
+              <input
+                type="text"
+                placeholder="Ex: Barzinho do Zé"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className={`flex-1 bg-white border-2 rounded-xl px-4 py-3 text-lg text-neutral-800 outline-none focus:border-brand-500 transition-colors ${touched && isTitleMissing ? 'border-red-400' : 'border-neutral-200'}`}
+              />
+              {touched && isTitleMissing && (
+                <span className="text-xs text-red-500 font-medium mt-1">Campo obrigatório</span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Date */}
         <div className="space-y-2">
           <label className="text-base font-semibold text-neutral-500">Data do Rolê</label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
             className="w-full bg-white border-2 border-neutral-200 rounded-xl px-4 py-3 text-lg text-neutral-800 outline-none focus:border-brand-500 transition-colors"
@@ -92,7 +130,6 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
         <div className="space-y-2">
           <label className="text-base font-semibold text-neutral-500">Pessoas no rolê</label>
           <div className="bg-white border-2 border-neutral-200 rounded-xl p-4 flex flex-col gap-4">
-            
             {participants.map((p, idx) => (
               <div key={p.id} className="flex flex-col">
                 <div className="flex justify-between items-center py-2">
@@ -106,12 +143,12 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
                 {idx < participants.length - 1 && <hr className="border-neutral-100" />}
               </div>
             ))}
-            
+
             <hr className="border-neutral-100" />
-            
+
             <div className="flex items-center gap-2 pt-2">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Adicionar outra pessoa"
                 value={newPersonName}
                 onChange={e => setNewPersonName(e.target.value)}
@@ -127,16 +164,20 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
       </div>
 
       <div className="mt-10 space-y-3 shrink-0 pb-4">
-        <button 
+        {touched && !isValid && (
+          <p className="text-sm text-red-500 font-medium text-center">
+            Preencha os campos obrigatórios marcados com <span className="text-red-500">*</span>
+          </p>
+        )}
+        <button
           onClick={handleCreate}
-          disabled={!title.trim()}
-          className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-50 text-neutral-1100 font-bold py-4 px-6 rounded-2xl transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-neutral-1100 font-bold py-4 px-6 rounded-2xl transition-colors"
         >
           <Plus size={24} />
           Criar novo rolê
         </button>
-        
-        <button 
+
+        <button
           onClick={onBack}
           className="w-full flex items-center justify-center gap-2 bg-white border-2 border-neutral-200 hover:bg-neutral-50 text-neutral-1100 font-bold py-4 px-6 rounded-2xl transition-colors"
         >

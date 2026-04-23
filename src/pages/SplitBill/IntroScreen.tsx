@@ -7,7 +7,7 @@ interface IntroScreenProps {
 
 export default function IntroScreen({ onCheckRoles, onCreateNew }: IntroScreenProps) {
   return (
-    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-md mx-auto w-full mx-auto md:mt-10 overflow-hidden shadow-sm border border-neutral-100">
+    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-2xl mx-auto w-full md:mt-10 overflow-hidden shadow-sm border border-neutral-100">
       <div className="w-full h-64 bg-neutral-100 relative overflow-hidden">
         <img 
           src="/purso divisao contas.png" 

@@ -7,7 +7,7 @@ interface EmptyScreenProps {
 
 export default function EmptyScreen({ onCreateNew, onBack }: EmptyScreenProps) {
   return (
-    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-md w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100">
+    <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-2xl w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100">
       
       <div className="flex items-center gap-4 mb-10">
         <button onClick={onBack} className="text-neutral-500 font-semibold text-sm hover:text-neutral-800 transition-colors">

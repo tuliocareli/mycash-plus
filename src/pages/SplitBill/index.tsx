@@ -8,13 +8,13 @@ import RoleDetailsScreen from './RoleDetailsScreen';
 import AddExpenseScreen from './AddExpenseScreen';
 import ResultScreen from './ResultScreen';
 
-export type ScreenState = 
-  | 'INTRO' 
-  | 'EMPTY' 
-  | 'LIST' 
-  | 'CREATE' 
-  | 'DETAILS' 
-  | 'ADD_EXPENSE' 
+export type ScreenState =
+  | 'INTRO'
+  | 'EMPTY'
+  | 'LIST'
+  | 'CREATE'
+  | 'DETAILS'
+  | 'ADD_EXPENSE'
   | 'RESULT';
 
 export default function SplitBill() {
@@ -22,7 +22,6 @@ export default function SplitBill() {
   const [roles, setRoles] = useState<SplitRole[]>([]);
   const [activeRole, setActiveRole] = useState<SplitRole | null>(null);
 
-  // For navigating back correctly
   const handleBack = () => {
     switch (screen) {
       case 'EMPTY':
@@ -89,24 +88,30 @@ export default function SplitBill() {
     }
   };
 
+  // Bug 4: after calculating, go to LIST — role is preserved in state
+  const onFinishResult = () => {
+    setScreen('LIST');
+  };
+
   return (
-    <div className="w-full h-full min-h-[calc(100vh-80px)] flex flex-col pt-8 md:pt-0">
+    // Bug 6: wider container on desktop, proper max-w and padding
+    <div className="w-full h-full min-h-[calc(100vh-80px)] flex flex-col pt-8 md:pt-4 px-4 md:px-8">
       {screen === 'INTRO' && (
-        <IntroScreen 
-          onCheckRoles={handleRoleListCheck} 
-          onCreateNew={() => setScreen('CREATE')} 
+        <IntroScreen
+          onCheckRoles={handleRoleListCheck}
+          onCreateNew={() => setScreen('CREATE')}
         />
       )}
-      
+
       {screen === 'EMPTY' && (
-        <EmptyScreen 
-          onCreateNew={() => setScreen('CREATE')} 
-          onBack={handleBack} 
+        <EmptyScreen
+          onCreateNew={() => setScreen('CREATE')}
+          onBack={handleBack}
         />
       )}
 
       {screen === 'LIST' && (
-        <RolesListScreen 
+        <RolesListScreen
           roles={roles}
           onSelectRole={(role) => {
             setActiveRole(role);
@@ -118,14 +123,14 @@ export default function SplitBill() {
       )}
 
       {screen === 'CREATE' && (
-        <CreateRoleScreen 
-          onBack={handleBack} 
-          onCreate={onCreateRole} 
+        <CreateRoleScreen
+          onBack={handleBack}
+          onCreate={onCreateRole}
         />
       )}
 
       {screen === 'DETAILS' && activeRole && (
-        <RoleDetailsScreen 
+        <RoleDetailsScreen
           role={activeRole}
           onBack={handleBack}
           onAddExpense={() => setScreen('ADD_EXPENSE')}
@@ -136,17 +141,18 @@ export default function SplitBill() {
       )}
 
       {screen === 'ADD_EXPENSE' && activeRole && (
-        <AddExpenseScreen 
-          role={activeRole} 
+        <AddExpenseScreen
+          role={activeRole}
           onBack={handleBack}
           onSave={onAddExpense}
         />
       )}
 
       {screen === 'RESULT' && activeRole && (
-        <ResultScreen 
-          role={activeRole} 
-          onBack={handleBack} 
+        <ResultScreen
+          role={activeRole}
+          onBack={handleBack}
+          onFinish={onFinishResult}
         />
       )}
     </div>
