@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ArrowLeft, Minus, ChevronDown } from 'lucide-react';
+import { Plus, ArrowLeft, Minus } from 'lucide-react';
 import { SplitRole, Participant } from './types';
 import { format } from 'date-fns';
 
