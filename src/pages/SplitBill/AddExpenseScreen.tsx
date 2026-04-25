@@ -101,30 +101,29 @@ export default function AddExpenseScreen({ role, onBack, onSave }: AddExpenseScr
               className="flex-1 bg-transparent py-4 text-xl text-neutral-800 outline-none font-semibold w-full pr-14"
             />
             {/* Receipt scan button */}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleScanReceipt}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isScanning}
+            <label
               title="Escanear nota fiscal"
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-neutral-100 rounded-lg group-hover:bg-brand-100 transition-colors disabled:opacity-50 flex items-center justify-center"
+              className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg cursor-pointer flex items-center justify-center transition-colors ${
+                isScanning ? 'opacity-50' : 'bg-neutral-100 hover:bg-brand-100'
+              }`}
             >
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleScanReceipt}
+                disabled={isScanning}
+              />
               {isScanning
                 ? <ScanLine size={20} className="text-brand-600 animate-pulse" />
-                : <Camera size={20} className="text-neutral-600 group-hover:text-brand-700 transition-colors" />}
-            </button>
+                : <Camera size={20} className="text-neutral-600 hover:text-brand-700 transition-colors" />}
+            </label>
           </div>
           {isScanning && (
             <div className="flex items-center gap-2 text-sm text-brand-700 font-medium animate-fade-in">
               <Loader2 size={14} className="animate-spin" />
-              Lendo nota fiscal...
+              Lendo nota da câmera ou galeria...
             </div>
           )}
         </div>

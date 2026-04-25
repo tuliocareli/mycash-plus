@@ -143,8 +143,11 @@ export default function ResultScreen({ role, onBack, onFinish }: ResultScreenPro
     }
   };
 
-  const handleFinish = () => {
-    // Bug 4: go to LIST, not clear the role
+  const handleFinish = async () => {
+    // Automatically save to Purso if not saved
+    if (!saved && (settlement.myBalance < -0.01 || settlement.myBalance > 0.01)) {
+        await handleSaveToWallet();
+    }
     onFinish();
   };
 

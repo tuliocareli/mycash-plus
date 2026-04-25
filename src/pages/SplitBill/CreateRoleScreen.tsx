@@ -3,11 +3,12 @@ import { Plus, ArrowLeft, Minus, ChevronDown } from 'lucide-react';
 import { SplitRole, Participant } from './types';
 import { format } from 'date-fns';
 
-const ROLE_EMOJIS = [
-  '🍻', '🍕', '🍔', '🍺', '🎉', '🎸', '🏖️', '🎲',
-  '🎳', '🎯', '⚽', '🎭', '🎪', '🎬', '🎤', '🎵',
-  '🍣', '🍜', '🌮', '☕', '🍷', '🍾', '🥂', '🏕️',
-  '🚗', '✈️', '🏄', '🎿', '🎮', '🛒', '🎁', '🏋️',
+const COMMON_ICONS = [
+    '🍔', '🍕', '🍎', '🏥', '💊', '🚗', '🚌', '✈️',
+    '🎮', '🎬', '📚', '🎓', '🏠', '⚡', '🛍️', '🛒',
+    '💼', '🖥️', '💰', '💵', '📈', '🏦', '📦', '🏷️',
+    '❤️', '🎁', '🐶', '⚽', '💅', '👔', '🧹', '🔧',
+    '🍻', '🍹', '🍷', '🥂', '🎉', '🏖️', '🎤', '🎪'
 ];
 
 interface CreateRoleScreenProps {
@@ -18,8 +19,7 @@ interface CreateRoleScreenProps {
 export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenProps) {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [emoji, setEmoji] = useState('🍻');
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emoji, setEmoji] = useState('🍔');
   const [participants, setParticipants] = useState<Participant[]>([
     { id: 'me', name: 'Eu', isMe: true }
   ]);
@@ -66,52 +66,43 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
       </div>
 
       <div className="space-y-6 flex-1">
-        {/* Title + Emoji */}
+        {/* Title */}
         <div className="space-y-2">
           <label className="text-base font-semibold text-neutral-500">
             Título <span className="text-red-500">*</span>
           </label>
-          <div className="flex gap-2 w-full relative">
-            {/* Emoji picker trigger */}
-            <div className="relative shrink-0">
+          <div className="flex-1 flex flex-col w-full">
+            <input
+              type="text"
+              placeholder="Ex: Barzinho do Zé"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className={`flex-1 bg-white border-2 rounded-xl px-4 py-3 text-lg text-neutral-800 outline-none focus:border-brand-500 transition-colors ${touched && isTitleMissing ? 'border-red-400' : 'border-neutral-200'}`}
+            />
+            {touched && isTitleMissing && (
+              <span className="text-xs text-red-500 font-medium mt-1">Campo obrigatório</span>
+            )}
+          </div>
+        </div>
+
+        {/* Icon Picker */}
+        <div className="space-y-2 pt-2">
+          <label className="text-base font-semibold text-neutral-500">
+            Ícone do Rolê
+          </label>
+          <div className="grid grid-cols-8 gap-2 border-2 border-neutral-100 p-3 rounded-2xl overflow-y-auto max-h-40 bg-neutral-50">
+            {COMMON_ICONS.map(i => (
               <button
+                key={i}
                 type="button"
-                onClick={() => setShowEmojiPicker(v => !v)}
-                className="w-16 h-14 bg-white border-2 border-neutral-200 rounded-2xl flex items-center justify-center text-2xl hover:border-brand-500 transition-colors relative"
-                title="Escolher ícone"
+                onClick={() => setEmoji(i)}
+                className={`w-10 h-10 flex items-center justify-center text-xl rounded-xl transition-all ${
+                  emoji === i ? "bg-neutral-1100 scale-110 text-white shadow-md z-10" : "hover:bg-neutral-200 bg-white"
+                }`}
               >
-                {emoji}
-                <ChevronDown size={12} className="absolute bottom-1 right-1 text-neutral-400" />
+                {i}
               </button>
-
-              {showEmojiPicker && (
-                <div className="absolute z-50 top-full mt-2 left-0 bg-white border border-neutral-200 rounded-2xl shadow-xl p-3 grid grid-cols-8 gap-1 w-72">
-                  {ROLE_EMOJIS.map(e => (
-                    <button
-                      key={e}
-                      type="button"
-                      onClick={() => { setEmoji(e); setShowEmojiPicker(false); }}
-                      className={`w-8 h-8 text-lg flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors ${emoji === e ? 'bg-brand-100 ring-2 ring-brand-500' : ''}`}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 flex flex-col">
-              <input
-                type="text"
-                placeholder="Ex: Barzinho do Zé"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                className={`flex-1 bg-white border-2 rounded-xl px-4 py-3 text-lg text-neutral-800 outline-none focus:border-brand-500 transition-colors ${touched && isTitleMissing ? 'border-red-400' : 'border-neutral-200'}`}
-              />
-              {touched && isTitleMissing && (
-                <span className="text-xs text-red-500 font-medium mt-1">Campo obrigatório</span>
-              )}
-            </div>
+            ))}
           </div>
         </div>
 
