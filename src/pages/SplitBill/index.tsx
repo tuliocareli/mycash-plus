@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SplitRole, Expense } from './types';
 import IntroScreen from './IntroScreen';
 import RolesListScreen from './RolesListScreen';
@@ -13,6 +13,7 @@ export type ScreenState =
   | 'EMPTY'
   | 'LIST'
   | 'CREATE'
+  | 'EDIT'
   | 'DETAILS'
   | 'ADD_EXPENSE'
   | 'RESULT';
@@ -22,12 +23,35 @@ export default function SplitBill() {
   const [roles, setRoles] = useState<SplitRole[]>([]);
   const [activeRole, setActiveRole] = useState<SplitRole | null>(null);
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('@purso-split-roles');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRoles(parsed);
+        }
+      } catch (e) {
+        console.error('Error parsing roles', e);
+      }
+    }
+  }, []);
+
+  // Save to localStorage when roles change
+  useEffect(() => {
+    localStorage.setItem('@purso-split-roles', JSON.stringify(roles));
+  }, [roles]);
+
   const handleBack = () => {
     switch (screen) {
       case 'EMPTY':
       case 'LIST':
       case 'CREATE':
         setScreen('INTRO');
+        break;
+      case 'EDIT':
+        setScreen('LIST');
         break;
       case 'DETAILS':
         setScreen(roles.length > 0 ? 'LIST' : 'EMPTY');
@@ -53,6 +77,12 @@ export default function SplitBill() {
     setRoles([...roles, newRole]);
     setActiveRole(newRole);
     setScreen('DETAILS');
+  };
+
+  const onUpdateRole = (updatedRole: SplitRole) => {
+    setRoles(roles.map(r => r.id === updatedRole.id ? updatedRole : r));
+    setActiveRole(updatedRole);
+    setScreen('LIST');
   };
 
   const onAddExpense = (expense: Expense) => {
@@ -88,13 +118,11 @@ export default function SplitBill() {
     }
   };
 
-  // Bug 4: after calculating, go to LIST — role is preserved in state
   const onFinishResult = () => {
     setScreen('LIST');
   };
 
   return (
-    // Bug 6: wider container on desktop, proper max-w and padding
     <div className="w-full h-full min-h-[calc(100vh-80px)] flex flex-col pt-8 md:pt-4 px-4 md:px-8">
       {screen === 'INTRO' && (
         <IntroScreen
@@ -117,6 +145,10 @@ export default function SplitBill() {
             setActiveRole(role);
             setScreen('DETAILS');
           }}
+          onEditRole={(role) => {
+            setActiveRole(role);
+            setScreen('EDIT');
+          }}
           onCreateNew={() => setScreen('CREATE')}
           onBack={handleBack}
         />
@@ -126,6 +158,14 @@ export default function SplitBill() {
         <CreateRoleScreen
           onBack={handleBack}
           onCreate={onCreateRole}
+        />
+      )}
+
+      {screen === 'EDIT' && activeRole && (
+        <CreateRoleScreen
+          roleToEdit={activeRole}
+          onBack={handleBack}
+          onCreate={onUpdateRole}
         />
       )}
 

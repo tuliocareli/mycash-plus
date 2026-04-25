@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Plus, ArrowLeft, Minus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, ArrowLeft, Minus, Save } from 'lucide-react';
 import { SplitRole, Participant } from './types';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 const COMMON_ICONS = [
     '🍔', '🍕', '🍎', '🏥', '💊', '🚗', '🚌', '✈️',
@@ -12,11 +12,12 @@ const COMMON_ICONS = [
 ];
 
 interface CreateRoleScreenProps {
+  roleToEdit?: SplitRole;
   onBack: () => void;
   onCreate: (role: SplitRole) => void;
 }
 
-export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenProps) {
+export default function CreateRoleScreen({ roleToEdit, onBack, onCreate }: CreateRoleScreenProps) {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [emoji, setEmoji] = useState('🍔');
@@ -25,6 +26,21 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
   ]);
   const [newPersonName, setNewPersonName] = useState('');
   const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (roleToEdit) {
+      setTitle(roleToEdit.title);
+      setEmoji(roleToEdit.emoji);
+      setParticipants(roleToEdit.participants);
+      try {
+        const parsedDate = parse(roleToEdit.date, 'dd/MM/yyyy', new Date());
+        setDate(format(parsedDate, 'yyyy-MM-dd'));
+      } catch (e) {
+        // Fallback if date is malformed
+        setDate(format(new Date(), 'yyyy-MM-dd'));
+      }
+    }
+  }, [roleToEdit]);
 
   const isTitleMissing = !title.trim();
   const isValid = !isTitleMissing;
@@ -45,16 +61,18 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
     setTouched(true);
     if (!isValid) return;
     const role: SplitRole = {
-      id: Date.now().toString(),
+      id: roleToEdit ? roleToEdit.id : Date.now().toString(),
       title,
       date: format(new Date(date), 'dd/MM/yyyy'),
       emoji,
       participants,
-      expenses: [],
-      createdAt: new Date().toISOString()
+      expenses: roleToEdit ? roleToEdit.expenses : [],
+      createdAt: roleToEdit ? roleToEdit.createdAt : new Date().toISOString()
     };
     onCreate(role);
   };
+
+  const isEditing = !!roleToEdit;
 
   return (
     <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-2xl w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100 overflow-y-auto">
@@ -62,7 +80,9 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
         <button onClick={onBack} className="text-neutral-500 font-semibold text-sm hover:text-neutral-800 transition-colors">
           Cancelar
         </button>
-        <h2 className="text-xl font-bold text-neutral-1100">Novo Rolê</h2>
+        <h2 className="text-xl font-bold text-neutral-1100">
+          {isEditing ? 'Editar Rolê' : 'Novo Rolê'}
+        </h2>
       </div>
 
       <div className="space-y-6 flex-1">
@@ -164,8 +184,8 @@ export default function CreateRoleScreen({ onBack, onCreate }: CreateRoleScreenP
           onClick={handleCreate}
           className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-neutral-1100 font-bold py-4 px-6 rounded-2xl transition-colors"
         >
-          <Plus size={24} />
-          Criar novo rolê
+          {isEditing ? <Save size={24} /> : <Plus size={24} />}
+          {isEditing ? 'Salvar Alterações' : 'Criar novo rolê'}
         </button>
 
         <button

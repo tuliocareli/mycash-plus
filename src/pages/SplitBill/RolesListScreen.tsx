@@ -4,11 +4,12 @@ import { SplitRole } from './types';
 interface RolesListScreenProps {
   roles: SplitRole[];
   onSelectRole: (role: SplitRole) => void;
+  onEditRole: (role: SplitRole) => void;
   onCreateNew: () => void;
   onBack: () => void;
 }
 
-export default function RolesListScreen({ roles, onSelectRole, onCreateNew, onBack }: RolesListScreenProps) {
+export default function RolesListScreen({ roles, onSelectRole, onEditRole, onCreateNew, onBack }: RolesListScreenProps) {
   
   const calculateTotal = (role: SplitRole) => {
     return role.expenses.reduce((acc, curr) => acc + curr.amount, 0);
@@ -39,7 +40,15 @@ export default function RolesListScreen({ roles, onSelectRole, onCreateNew, onBa
                 <p className="text-xl font-bold text-neutral-800">{role.title}</p>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="text-sm font-semibold text-neutral-500">Editar</span>
+                <span 
+                  className="text-sm font-semibold text-brand-500 hover:text-brand-600 px-2 py-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditRole(role);
+                  }}
+                >
+                  Editar
+                </span>
                 <span className="text-lg font-bold text-brand-700">{formatCurrency(calculateTotal(role))}</span>
               </div>
             </div>
