@@ -7,6 +7,8 @@ import CreateRoleScreen from './CreateRoleScreen';
 import RoleDetailsScreen from './RoleDetailsScreen';
 import AddExpenseScreen from './AddExpenseScreen';
 import ResultScreen from './ResultScreen';
+import { supabase } from '../../services/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export type ScreenState =
   | 'INTRO'
@@ -19,29 +21,78 @@ export type ScreenState =
   | 'RESULT';
 
 export default function SplitBill() {
+  const { user } = useAuth();
   const [screen, setScreen] = useState<ScreenState>('INTRO');
   const [roles, setRoles] = useState<SplitRole[]>([]);
   const [activeRole, setActiveRole] = useState<SplitRole | null>(null);
 
-  // Load from localStorage on mount
+  // Sync with Supabase on mount or user change
   useEffect(() => {
-    const saved = localStorage.getItem('@purso-split-roles');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRoles(parsed);
-        }
-      } catch (e) {
-        console.error('Error parsing roles', e);
+    const fetchRoles = async () => {
+      // Offline fallback
+      const saved = localStorage.getItem('@purso-split-roles');
+      let localRoles: SplitRole[] = [];
+      if (saved) {
+        try { localRoles = JSON.parse(saved); } catch (e) { }
       }
-    }
-  }, []);
+      
+      if (!user) {
+        setRoles(localRoles);
+        return;
+      }
 
-  // Save to localStorage when roles change
-  useEffect(() => {
-    localStorage.setItem('@purso-split-roles', JSON.stringify(roles));
-  }, [roles]);
+      // Fetch from Supabase
+      const { data, error } = await supabase
+        .from('split_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        setRoles(localRoles);
+      } else {
+        // Map from DB format back to UI format
+        const dbRoles = data.map(dbRow => ({
+          ...dbRow,
+          participants: dbRow.participants || [],
+          expenses: dbRow.expenses || [],
+        })) as SplitRole[];
+        
+        setRoles(dbRoles);
+        localStorage.setItem('@purso-split-roles', JSON.stringify(dbRoles));
+      }
+    };
+    
+    fetchRoles();
+  }, [user]);
+
+  // Sync a single role mutation up to DB
+  const upsertToDatabase = async (role: SplitRole) => {
+    if (!user) return;
+    try {
+        await supabase.from('split_roles').upsert({
+            id: role.id,
+            user_id: user.id,
+            title: role.title,
+            date: role.date,
+            emoji: role.emoji,
+            participants: role.participants,
+            expenses: role.expenses,
+            created_at: role.createdAt
+        });
+    } catch (e) {}
+  };
+
+  const deleteFromDatabase = async (id: string) => {
+    if (!user) return;
+    try {
+        await supabase.from('split_roles').delete().eq('id', id);
+    } catch(e) {}
+  };
+
+  const updateRolesStateAndLocal = (newRoles: SplitRole[]) => {
+    setRoles(newRoles);
+    localStorage.setItem('@purso-split-roles', JSON.stringify(newRoles));
+  };
 
   const handleBack = () => {
     switch (screen) {
@@ -73,48 +124,53 @@ export default function SplitBill() {
     }
   };
 
-  const onCreateRole = (newRole: SplitRole) => {
-    setRoles([...roles, newRole]);
+  const onCreateRole = async (newRole: SplitRole) => {
+    updateRolesStateAndLocal([...roles, newRole]);
     setActiveRole(newRole);
     setScreen('DETAILS');
+    await upsertToDatabase(newRole);
   };
 
-  const onUpdateRole = (updatedRole: SplitRole) => {
-    setRoles(roles.map(r => r.id === updatedRole.id ? updatedRole : r));
+  const onUpdateRole = async (updatedRole: SplitRole) => {
+    updateRolesStateAndLocal(roles.map(r => r.id === updatedRole.id ? updatedRole : r));
     setActiveRole(updatedRole);
     setScreen('LIST');
+    await upsertToDatabase(updatedRole);
   };
 
-  const onAddExpense = (expense: Expense) => {
+  const onAddExpense = async (expense: Expense) => {
     if (activeRole) {
       const updated = {
         ...activeRole,
         expenses: [...activeRole.expenses, expense]
       };
       setActiveRole(updated);
-      setRoles(roles.map(r => r.id === updated.id ? updated : r));
+      updateRolesStateAndLocal(roles.map(r => r.id === updated.id ? updated : r));
+      setScreen('DETAILS');
+      await upsertToDatabase(updated);
     }
-    setScreen('DETAILS');
   };
 
-  const onDeleteRole = (id: string) => {
+  const onDeleteRole = async (id: string) => {
     const fresh = roles.filter(r => r.id !== id);
-    setRoles(fresh);
+    updateRolesStateAndLocal(fresh);
     if (fresh.length > 0) {
       setScreen('LIST');
     } else {
       setScreen('EMPTY');
     }
+    await deleteFromDatabase(id);
   };
 
-  const onDeleteExpense = (expId: string) => {
+  const onDeleteExpense = async (expId: string) => {
     if (activeRole) {
       const updated = {
         ...activeRole,
         expenses: activeRole.expenses.filter(e => e.id !== expId)
       };
       setActiveRole(updated);
-      setRoles(roles.map(r => r.id === updated.id ? updated : r));
+      updateRolesStateAndLocal(roles.map(r => r.id === updated.id ? updated : r));
+      await upsertToDatabase(updated);
     }
   };
 
