@@ -316,30 +316,8 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                 key={t.id}
                                 className="bg-white border border-neutral-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-all relative group"
                             >
-                                <div className="absolute top-4 right-4 flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setEditingTransaction(t);
-                                            setIsCloning(true);
-                                        }}
-                                        className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-blue-500 transition-colors"
-                                        title="Clonar"
-                                    >
-                                        <Copy size={14} />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setEditingTransaction(t);
-                                            setIsCloning(false);
-                                        }}
-                                        className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-brand-500 transition-colors"
-                                        title="Editar"
-                                    >
-                                        <FileSearch size={14} />
-                                    </button>
-                                </div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
+                                <div className="flex items-start justify-between mb-4 gap-4">
+                                    <div className="flex items-center gap-3 min-w-0">
                                         <div className={clsx(
                                             "size-10 rounded-full flex items-center justify-center shrink-0",
                                             t.type === 'INCOME' ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
@@ -350,30 +328,54 @@ export function TransactionsTable({ mode = 'dashboard', hideHeader = false }: Tr
                                                 <ArrowUpRight size={20} strokeWidth={2.5} />
                                             )}
                                         </div>
-                                        <div className="flex flex-col text-neutral-1100">
-                                            <span className="text-sm font-extrabold">{t.description}</span>
+                                        <div className="flex flex-col text-neutral-1100 min-w-0">
+                                            <span className="text-sm font-extrabold truncate">{t.description}</span>
                                             <span className="text-xs text-neutral-400 font-bold">{format(parseISO(t.date), 'dd MMM yyyy')}</span>
                                         </div>
                                     </div>
                                     <span className={clsx(
-                                        "text-sm font-black",
+                                        "text-sm font-black shrink-0",
                                         t.type === 'INCOME' ? "text-green-600" : "text-neutral-1100"
                                     )}>
                                         {formatCurrency(t.amount, t.type)}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-between pt-4 border-t border-neutral-50">
-                                    <div className="flex items-center gap-2">
-                                        <div className="size-5 rounded-full bg-neutral-50 flex items-center justify-center border border-neutral-100">
+                                <div className="flex items-center justify-between pt-4 border-t border-neutral-50 gap-4">
+                                    <div className="flex items-center flex-wrap gap-2 min-w-0">
+                                        <div className="size-5 rounded-full bg-neutral-50 flex items-center justify-center border border-neutral-100 shrink-0">
                                             {getMemberAvatar(t.memberId) ? (
                                                 <img src={getMemberAvatar(t.memberId)!} className="size-full object-cover rounded-full" />
                                             ) : <User size={10} className="text-neutral-300" />}
                                         </div>
-                                        <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest bg-neutral-50 px-2 py-1 rounded">
+                                        <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest bg-neutral-50 px-2 py-1 rounded truncate max-w-[100px]">
                                             {t.category || 'Outros'}
                                         </span>
+                                        <span className="text-[10px] font-bold text-neutral-400 uppercase bg-neutral-50 px-2 py-1 rounded truncate max-w-[100px]">
+                                            {getAccountName(t.accountId)}
+                                        </span>
                                     </div>
-                                    <span className="text-[11px] font-bold text-neutral-400 uppercase">{getAccountName(t.accountId)}</span>
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <button
+                                            onClick={() => {
+                                                setEditingTransaction(t);
+                                                setIsCloning(true);
+                                            }}
+                                            className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                                            title="Clonar"
+                                        >
+                                            <Copy size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setEditingTransaction(t);
+                                                setIsCloning(false);
+                                            }}
+                                            className="size-8 flex items-center justify-center rounded-full bg-neutral-50 text-neutral-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+                                            title="Editar"
+                                        >
+                                            <FileSearch size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))
