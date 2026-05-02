@@ -235,8 +235,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
                 const forcedKey = `onboarding_v1_seen_${user.id}`;
                 const hasSeenLocally = localStorage.getItem(forcedKey) === 'true';
                 
-                // CRITICAL: We determine if we should show NOW from DB/LocalStorage
-                const shouldShowNow = !hasSeenLocally || !profile.has_seen_onboarding;
+                // Show onboarding only if DB says not seen AND localStorage doesn't override
+                // DB flag is the source of truth; localStorage is a secondary check for V1 migration
+                const shouldShowNow = !profile.has_seen_onboarding && !hasSeenLocally;
                 
                 setHasSeenOnboardingState(!shouldShowNow);
                 setShowWelcomeCard(shouldShowNow);
