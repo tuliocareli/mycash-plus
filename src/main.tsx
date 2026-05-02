@@ -4,6 +4,11 @@ import App from './App.tsx'
 import './index.css'
 import { FinanceProvider } from './contexts/FinanceContext.tsx'
 
+// Detect if app is running inside an iframe (portfolio embed)
+if (window.self !== window.top) {
+    document.body.classList.add('in-iframe');
+}
+
 // Check if root exists
 const rootElement = document.getElementById('root');
 if (!rootElement) {

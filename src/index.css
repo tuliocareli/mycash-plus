@@ -36,6 +36,17 @@
     @apply bg-neutral-200 text-neutral-1100 font-sans antialiased;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* When embedded in an iframe, hide scrollbar to prevent white strip */
+  body.in-iframe {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  body.in-iframe::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 }
 
