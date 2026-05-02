@@ -10,6 +10,7 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import History from './pages/History';
 import Terms from './pages/Terms';
 import SplitBill from './pages/SplitBill';
+import Demo from './pages/Demo';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -27,6 +28,7 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/demo" element={<Demo />} />
 
                 {/* Private Routes Wrapper */}
                 <Route
