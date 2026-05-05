@@ -11,6 +11,7 @@ import History from './pages/History';
 import Terms from './pages/Terms';
 import SplitBill from './pages/SplitBill';
 import Demo from './pages/Demo';
+import LegacyCaseTransaction from './pages/LegacyCaseTransaction';
 
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -29,6 +30,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/demo" element={<Demo />} />
+                <Route path="/legacy-case-transaction" element={<LegacyCaseTransaction />} />
 
                 {/* Private Routes Wrapper */}
                 <Route

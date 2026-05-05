@@ -1,0 +1,164 @@
+import { useState, useEffect } from 'react';
+import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
+import { SummaryCards } from '../../components/dashboard/SummaryCards';
+import { CategoryCarousel } from '../../components/dashboard/CategoryCarousel';
+import { FinancialFlowChart } from '../../components/dashboard/FinancialFlowChart';
+import { CreditCardsWidget } from '../../components/dashboard/CreditCardsWidget';
+import { UpcomingExpensesWidget } from '../../components/dashboard/UpcomingExpensesWidget';
+import { TransactionsTable } from '../../components/dashboard/TransactionsTable';
+import { WelcomeCard } from '../../components/onboarding/WelcomeCard';
+import { useFinance } from '../../contexts/FinanceContext';
+import { useAuth } from '../../contexts/AuthContext';
+
+import { LegacyTransactionModal } from '../../components/modals/LegacyTransactionModal';
+import { AddMemberModal } from '../../components/modals/AddMemberModal';
+import { AddAccountModal } from '../../components/modals/AddAccountModal';
+import { CardDetailsModal } from '../../components/modals/CardDetailsModal';
+import { FiltersMobileModal } from '../../components/modals/FiltersMobileModal';
+import { CreditCard } from '../../types';
+
+export default function LegacyDashboard() {
+    const { user } = useAuth();
+    const { 
+        accounts, 
+        goals, 
+        transactions, 
+        showWelcomeCard, 
+        setHasSeenOnboarding 
+    } = useFinance();
+
+    // Modals State
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [transactionModalConfig, setTransactionModalConfig] = useState<{
+        initialTypeParam?: 'INCOME' | 'EXPENSE';
+        defaultDate?: string;
+    } | null>(null);
+    const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+    const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+
+    // Card Details logic
+    const [selectedCard, setSelectedCard] = useState<CreditCard | null>(null);
+    const [isCardDetailsModalOpen, setIsCardDetailsModalOpen] = useState(false);
+
+    const handleOpenCardDetails = (card: CreditCard) => {
+        setSelectedCard(card);
+        setIsCardDetailsModalOpen(true);
+    };
+
+    const handleOpenTransaction = (config?: { initialTypeParam?: 'INCOME' | 'EXPENSE', defaultDate?: string } | CustomEvent) => {
+        if (config instanceof CustomEvent) {
+             setTransactionModalConfig(config.detail || null);
+        } else if (config) {
+             setTransactionModalConfig(config);
+        } else {
+             setTransactionModalConfig(null);
+        }
+        setIsTransactionModalOpen(true);
+    };
+
+    useEffect(() => {
+        window.addEventListener('open-transaction-modal', handleOpenTransaction as any);
+        return () => window.removeEventListener('open-transaction-modal', handleOpenTransaction as any);
+    }, []);
+
+    const onboardingTasks = [
+        { id: 'acc', label: 'Cadastrar minha primeira conta', completed: accounts.length > 0 },
+        { id: 'goal', label: 'Definir um objetivo de economia', completed: goals.length > 0 },
+        { id: 'tx', label: 'Registrar uma despesa de teste', completed: transactions.length > 0 },
+    ];
+
+    return (
+        <div className="w-full flex flex-col gap-8 pb-20 animate-fade-in">
+            {showWelcomeCard && (
+                <WelcomeCard 
+                    userName={user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuário'}
+                    tasks={onboardingTasks}
+                    onClose={() => setHasSeenOnboarding(true)}
+                />
+            )}
+
+            {/* Header Component */}
+            <DashboardHeader
+                onOpenTransaction={() => handleOpenTransaction()}
+                onOpenAddMember={() => setIsMemberModalOpen(true)}
+                onOpenFilters={() => setIsFiltersModalOpen(true)}
+            />
+
+            {/* Row 1: Categories */}
+            <CategoryCarousel />
+
+            {/* Row 2: Summary Cards */}
+            <SummaryCards />
+
+            {/* Row 3: Flow & Credit Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full items-stretch">
+                <div className="lg:col-span-2 h-full">
+                    <FinancialFlowChart />
+                </div>
+                <div className="lg:col-span-1 h-full">
+                    <CreditCardsWidget
+                        onOpenAddCard={() => { setSelectedCard(null); setIsAccountModalOpen(true); }}
+                        onOpenCardDetails={handleOpenCardDetails}
+                    />
+                </div>
+            </div>
+
+            {/* Row 4: Transactions & Upcoming */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full items-stretch">
+                <div className="lg:col-span-2 h-full">
+                    <TransactionsTable />
+                </div>
+                <div className="lg:col-span-1 h-full">
+                    <UpcomingExpensesWidget onOpenTransaction={() => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        handleOpenTransaction({ initialTypeParam: 'EXPENSE', defaultDate: tomorrow.toISOString().split('T')[0] });
+                    }} />
+                </div>
+            </div>
+
+            {/* --- Modals --- */}
+
+            <LegacyTransactionModal
+                isOpen={isTransactionModalOpen}
+                onClose={() => {
+                    setIsTransactionModalOpen(false);
+                    setTransactionModalConfig(null);
+                }}
+                initialTypeParam={transactionModalConfig?.initialTypeParam}
+                defaultDate={transactionModalConfig?.defaultDate}
+            />
+
+            <AddMemberModal
+                isOpen={isMemberModalOpen}
+                onClose={() => setIsMemberModalOpen(false)}
+            />
+
+            <AddAccountModal
+                isOpen={isAccountModalOpen}
+                onClose={() => setIsAccountModalOpen(false)}
+                initialAccount={selectedCard}
+                initialType="creditCard"
+            />
+
+            <FiltersMobileModal
+                isOpen={isFiltersModalOpen}
+                onClose={() => setIsFiltersModalOpen(false)}
+            />
+
+            {selectedCard && (
+                <CardDetailsModal
+                    isOpen={isCardDetailsModalOpen}
+                    onClose={() => setIsCardDetailsModalOpen(false)}
+                    card={selectedCard}
+                    onEdit={() => {
+                        setIsCardDetailsModalOpen(false);
+                        setIsAccountModalOpen(true);
+                    }}
+                />
+            )}
+
+        </div>
+    );
+}

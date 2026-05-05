@@ -7,7 +7,7 @@ import { HeaderMobile } from './HeaderMobile';
 import { useFinance } from '../../contexts/FinanceContext';
 import { Loader2 } from 'lucide-react';
 
-export function Layout() {
+export function Layout({ children }: { children?: React.ReactNode }) {
     const { loading } = useFinance();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1280 : true);
@@ -54,7 +54,7 @@ export function Layout() {
                     "container mx-auto px-4 py-8 lg:px-10 max-w-[1600px]",
                     "pt-[96px] lg:pt-8 pb-20 lg:pb-8"
                 )}>
-                    <Outlet />
+                    {children || <Outlet />}
                 </div>
             </main>
         </div>
