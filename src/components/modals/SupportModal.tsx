@@ -63,7 +63,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
                 onClick={onClose}
             />
             
-            <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="p-8 lg:p-10">
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-4">

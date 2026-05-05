@@ -96,7 +96,7 @@ export default function Dashboard() {
                     <TransactionsTable />
                 </div>
                 <div className="lg:col-span-1 h-full">
-                    <UpcomingExpensesWidget />
+                    <UpcomingExpensesWidget onOpenTransaction={() => setIsTransactionModalOpen(true)} />
                 </div>
             </div>
 

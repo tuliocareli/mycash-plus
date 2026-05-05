@@ -109,7 +109,7 @@ export function EditProfileModal({ isOpen, onClose, member }: EditProfileModalPr
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-neutral-1100/40 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="relative w-full max-w-[600px] bg-white rounded-[3rem] shadow-2xl border border-neutral-100 overflow-hidden animate-fade-in mx-auto flex flex-col max-h-[90vh]">
+            <div className="relative w-full max-w-[600px] bg-white rounded-3xl shadow-2xl border border-neutral-100 overflow-hidden animate-fade-in mx-auto flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="px-10 py-8 border-b border-neutral-50 flex items-center justify-between bg-white shrink-0">
                     <div>

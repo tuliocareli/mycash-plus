@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Wallet, Plus, Check, CircleCheck } from 'lucide-react';
 import { useFinance } from '../../../contexts/FinanceContext';
@@ -6,8 +5,11 @@ import { Transaction } from '../../../types';
 import { format, parseISO, addMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import clsx from 'clsx';
+interface UpcomingExpensesWidgetProps {
+    onOpenTransaction?: () => void;
+}
 
-export function UpcomingExpensesWidget() {
+export function UpcomingExpensesWidget({ onOpenTransaction }: UpcomingExpensesWidgetProps) {
     const {
         transactions,
         bankAccounts,
@@ -98,7 +100,7 @@ export function UpcomingExpensesWidget() {
     };
 
     return (
-        <section className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 flex flex-col h-full bg-white shadow-sm">
+        <section className="bg-white border border-neutral-200 rounded-3xl p-8 lg:p-10 flex flex-col h-full shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-2">
@@ -106,7 +108,7 @@ export function UpcomingExpensesWidget() {
                     <h2 className="text-lg font-medium text-neutral-1100">Próximas despesas</h2>
                 </div>
                 <button
-                    onClick={() => console.log('Open New Transaction Modal')}
+                    onClick={onOpenTransaction}
                     className="size-10 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-1100 hover:bg-neutral-50 transition-colors duration-200 shadow-sm"
                 >
                     <Plus size={20} />
@@ -180,6 +182,7 @@ export function UpcomingExpensesWidget() {
                     <span className="text-sm font-bold">{successMessage}</span>
                 </div>
             )}
+
         </section>
     );
 }

@@ -347,7 +347,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                     style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}
                 >
                     {/* Modal Card */}
-                    <div className="bg-white w-full h-full md:h-auto md:max-h-[90vh] md:max-w-3xl md:rounded-[32px] shadow-2xl flex flex-col overflow-hidden relative my-auto animate-scale-in">
+                    <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden relative my-auto animate-scale-in max-h-[90vh]">
 
                         {view === 'FORM' ? (
                             <>

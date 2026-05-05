@@ -145,35 +145,37 @@ export function CardDetailsModal({ isOpen, onClose, card, onEdit }: CardDetailsM
                             </div>
                         ) : (
                             <div className="bg-white rounded-3xl border border-neutral-200 overflow-hidden shadow-sm">
-                                <table className="w-full text-left">
-                                    <thead className="bg-neutral-50 border-b border-neutral-100">
-                                        <tr>
-                                            <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider">Data</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider">Descrição</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider text-right">Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-neutral-100">
-                                        {paginatedTransactions.map(t => (
-                                            <tr key={t.id} className="hover:bg-neutral-50/50 transition-colors">
-                                                <td className="px-6 py-4 text-sm font-medium text-neutral-500 whitespace-nowrap">
-                                                    {new Date(t.date).toLocaleDateString('pt-BR')}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-neutral-1100">
-                                                    {t.description}
-                                                    {t.totalInstallments > 1 && (
-                                                        <span className="ml-2 px-2 py-0.5 bg-neutral-100 text-[10px] rounded text-neutral-500">
-                                                            {t.installmentNumber}/{t.totalInstallments}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-neutral-1100 text-right">
-                                                    {formatCurrency(t.amount)}
-                                                </td>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-neutral-50 border-b border-neutral-100">
+                                            <tr>
+                                                <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider whitespace-nowrap">Data</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider whitespace-nowrap">Descrição</th>
+                                                <th className="px-6 py-4 text-xs font-bold text-neutral-400 uppercase tracking-wider text-right whitespace-nowrap">Valor</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-neutral-100">
+                                            {paginatedTransactions.map(t => (
+                                                <tr key={t.id} className="hover:bg-neutral-50/50 transition-colors">
+                                                    <td className="px-6 py-4 text-sm font-medium text-neutral-500 whitespace-nowrap">
+                                                        {new Date(t.date).toLocaleDateString('pt-BR')}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-bold text-neutral-1100 min-w-[200px]">
+                                                        {t.description}
+                                                        {t.totalInstallments > 1 && (
+                                                            <span className="ml-2 px-2 py-0.5 bg-neutral-100 text-[10px] rounded text-neutral-500 whitespace-nowrap">
+                                                                {t.installmentNumber}/{t.totalInstallments}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-bold text-neutral-1100 text-right whitespace-nowrap">
+                                                        {formatCurrency(t.amount)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (

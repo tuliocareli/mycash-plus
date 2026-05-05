@@ -43,7 +43,7 @@ export function DeleteAccountModal({ isOpen, onClose, onSuccess }: DeleteAccount
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-neutral-1100/40 backdrop-blur-sm" onClick={onClose} />
 
-            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-slide-up border border-red-100 p-8">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-slide-up border border-red-100 p-8">
                 <button
                     onClick={onClose}
                     className="absolute top-6 right-6 p-2 bg-neutral-50 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
