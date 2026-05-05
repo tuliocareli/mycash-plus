@@ -13,7 +13,7 @@ import LegacyDashboard from './LegacyDashboard';
  */
 
 const DEMO_EMAIL = 'demo2@purso.app';
-const DEMO_PASSWORD = 'PursoDemo2026!';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || '';
 
 export default function LegacyCaseTransaction() {
     const { signIn, user } = useAuth();

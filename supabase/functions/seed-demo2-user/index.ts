@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const DEMO2_EMAIL = 'demo2@purso.app';
-const DEMO2_PASSWORD = 'PursoDemo2026!';
+const DEMO2_PASSWORD = Deno.env.get('DEMO_PASSWORD') || '';
 
 serve(async (req) => {
   try {

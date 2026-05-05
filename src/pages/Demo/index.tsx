@@ -12,7 +12,7 @@ import { Loader2 } from 'lucide-react';
  */
 
 const DEMO_EMAIL = 'demo@purso.app';
-const DEMO_PASSWORD = 'PursoDemo2026!';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || '';
 
 export default function Demo() {
     const { signIn, user } = useAuth();
