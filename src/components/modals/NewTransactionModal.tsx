@@ -16,9 +16,11 @@ interface NewTransactionModalProps {
     initialAccountId?: string;
     initialData?: Transaction;
     isCloning?: boolean;
+    initialTypeParam?: TransactionType;
+    defaultDate?: string;
 }
 
-export function NewTransactionModal({ isOpen, onClose, initialAccountId, initialData, isCloning }: NewTransactionModalProps) {
+export function NewTransactionModal({ isOpen, onClose, initialAccountId, initialData, isCloning, initialTypeParam, defaultDate }: NewTransactionModalProps) {
     const { addTransaction, updateTransaction, deleteTransaction, familyMembers, bankAccounts, creditCards, categories, addCategory } = useFinance();
 
     const [type, setType] = useState<TransactionType>('EXPENSE');
@@ -139,20 +141,22 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 }
                 setInstallments(initialData.totalInstallments || 1);
                 setIsRecurring(initialData.isRecurring || false);
+                setErrors({});
             } else {
+                setType(initialTypeParam || 'EXPENSE');
                 setAccountId(initialAccountId || '');
                 setAmount('');
                 setDescription('');
                 setCategoryId('');
                 setMemberId('');
-                setDate(new Date().toISOString().split('T')[0]);
+                setDate(defaultDate || new Date().toISOString().split('T')[0]);
                 setInstallments(1);
                 setIsRecurring(false);
-                setType('EXPENSE');
-                startForm();
+                setErrors({});
             }
+            startForm();
         }
-    }, [isOpen, initialAccountId, initialData]);
+    }, [isOpen, initialAccountId, initialData, isCloning, initialTypeParam, defaultDate]);
 
     useEffect(() => {
         if (!initialData && !isEditing) {
@@ -217,7 +221,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 accountId,
                 totalInstallments: type === 'EXPENSE' && creditCards.find(c => c.id === accountId) ? installments : 1,
                 isRecurring: type === 'EXPENSE' ? isRecurring : false,
-                status: 'COMPLETED' as TransactionStatus,
+                status: (type === 'EXPENSE' && date > new Date().toISOString().split('T')[0]) ? 'PENDING' : 'COMPLETED' as TransactionStatus,
             };
 
             if (isEditing && initialData) {

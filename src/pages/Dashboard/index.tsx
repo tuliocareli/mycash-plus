@@ -29,6 +29,10 @@ export default function Dashboard() {
 
     // Modals State
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+    const [transactionModalConfig, setTransactionModalConfig] = useState<{
+        initialTypeParam?: 'INCOME' | 'EXPENSE';
+        defaultDate?: string;
+    } | null>(null);
     const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
     const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
@@ -42,10 +46,20 @@ export default function Dashboard() {
         setIsCardDetailsModalOpen(true);
     };
 
+    const handleOpenTransaction = (config?: { initialTypeParam?: 'INCOME' | 'EXPENSE', defaultDate?: string } | CustomEvent) => {
+        if (config instanceof CustomEvent) {
+             setTransactionModalConfig(config.detail || null);
+        } else if (config) {
+             setTransactionModalConfig(config);
+        } else {
+             setTransactionModalConfig(null);
+        }
+        setIsTransactionModalOpen(true);
+    };
+
     useEffect(() => {
-        const handleOpenTransaction = () => setIsTransactionModalOpen(true);
-        window.addEventListener('open-transaction-modal', handleOpenTransaction);
-        return () => window.removeEventListener('open-transaction-modal', handleOpenTransaction);
+        window.addEventListener('open-transaction-modal', handleOpenTransaction as any);
+        return () => window.removeEventListener('open-transaction-modal', handleOpenTransaction as any);
     }, []);
 
     const onboardingTasks = [
@@ -66,7 +80,7 @@ export default function Dashboard() {
 
             {/* Header Component */}
             <DashboardHeader
-                onOpenTransaction={() => setIsTransactionModalOpen(true)}
+                onOpenTransaction={() => handleOpenTransaction()}
                 onOpenAddMember={() => setIsMemberModalOpen(true)}
                 onOpenFilters={() => setIsFiltersModalOpen(true)}
             />
@@ -96,7 +110,11 @@ export default function Dashboard() {
                     <TransactionsTable />
                 </div>
                 <div className="lg:col-span-1 h-full">
-                    <UpcomingExpensesWidget onOpenTransaction={() => setIsTransactionModalOpen(true)} />
+                    <UpcomingExpensesWidget onOpenTransaction={() => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        handleOpenTransaction({ initialTypeParam: 'EXPENSE', defaultDate: tomorrow.toISOString().split('T')[0] });
+                    }} />
                 </div>
             </div>
 
@@ -104,7 +122,12 @@ export default function Dashboard() {
 
             <NewTransactionModal
                 isOpen={isTransactionModalOpen}
-                onClose={() => setIsTransactionModalOpen(false)}
+                onClose={() => {
+                    setIsTransactionModalOpen(false);
+                    setTransactionModalConfig(null);
+                }}
+                initialTypeParam={transactionModalConfig?.initialTypeParam}
+                defaultDate={transactionModalConfig?.defaultDate}
             />
 
             <AddMemberModal
