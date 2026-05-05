@@ -12,7 +12,7 @@ import LegacyDashboard from './LegacyDashboard';
  * of the transaction modal without inline account/card creation.
  */
 
-const DEMO_EMAIL = 'demo@purso.app';
+const DEMO_EMAIL = 'demo2@purso.app';
 const DEMO_PASSWORD = 'PursoDemo2026!';
 
 export default function LegacyCaseTransaction() {
