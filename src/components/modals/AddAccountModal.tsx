@@ -238,7 +238,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto pt-10 md:pt-24">
+        <div className="fixed inset-0 z-[100000] flex items-start justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto pt-10 md:pt-24">
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-in my-auto max-h-[90vh] flex flex-col">
 
                 {/* Header */}
