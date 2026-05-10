@@ -9,6 +9,7 @@ import { useFormFunnel, usePerformanceMarker } from '../../hooks/useAnalytics';
 import { AddAccountModal } from './AddAccountModal';
 import { supabase } from '../../services/supabase';
 import { compressImage } from '../../utils/compressImage';
+import { Toast } from '../ui/Toast';
 
 interface NewTransactionModalProps {
     isOpen: boolean;
@@ -42,6 +43,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
     
     // Receipt Scanning
     const [isScanning, setIsScanning] = useState(false);
@@ -229,7 +231,12 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
             } else {
                 await addTransaction(payload);
             }
-            handleClose();
+
+            setShowSuccessToast(true);
+            setTimeout(() => {
+                setShowSuccessToast(false);
+                handleClose();
+            }, 2800);
         } catch (error: any) {
             console.error(error);
             alert('Erro ao salvar transação: ' + (error.message || 'Erro desconhecido'));
@@ -250,6 +257,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
     useEffect(() => {
         if (isOpen) {
             setView('FORM');
+            setShowSuccessToast(false);
         }
     }, [isOpen]);
 
@@ -352,6 +360,49 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                 >
                     {/* Modal Card */}
                     <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col overflow-hidden relative my-auto animate-scale-in max-h-[90vh]">
+
+                        {/* Scanning overlay — cobre o modal inteiro enquanto lê a nota */}
+                        {isScanning && (
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-white/95 backdrop-blur-sm rounded-3xl animate-fade-in">
+                                {/* Ícone animado */}
+                                <div className="relative flex items-center justify-center">
+                                    {/* Anel pulsante externo */}
+                                    <div
+                                        className="absolute size-28 rounded-full animate-ping opacity-20"
+                                        style={{ backgroundColor: 'var(--status-success)' }}
+                                    />
+                                    {/* Anel médio */}
+                                    <div
+                                        className="absolute size-20 rounded-full opacity-30"
+                                        style={{ backgroundColor: 'var(--status-success)', animation: 'ping 1.4s cubic-bezier(0,0,0.2,1) infinite 0.2s' }}
+                                    />
+                                    {/* Círculo central */}
+                                    <div
+                                        className="size-16 rounded-full flex items-center justify-center shadow-lg"
+                                        style={{ backgroundColor: 'var(--status-success)' }}
+                                    >
+                                        <ScanLine size={28} className="text-white" style={{ animation: 'scanMove 1.5s ease-in-out infinite' }} />
+                                    </div>
+                                </div>
+
+                                {/* Textos */}
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <p className="text-base font-bold text-neutral-1100">Lendo nota fiscal...</p>
+                                    <p className="text-sm text-neutral-400">Nossa IA está extraindo os dados automaticamente</p>
+                                </div>
+
+                                {/* Barra de progresso indeterminada */}
+                                <div className="w-48 h-1 bg-neutral-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full"
+                                        style={{
+                                            backgroundColor: 'var(--status-success)',
+                                            animation: 'scanProgress 1.6s ease-in-out infinite'
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {view === 'FORM' ? (
                             <>
@@ -666,33 +717,45 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
                                 </div>
 
                                 {/* Footer */}
-                                <div className="flex items-center justify-end gap-3 p-6 border-t border-neutral-100 bg-white z-10">
-                                    <button
-                                        onClick={handleClose}
-                                        className="px-6 py-3.5 rounded-full border border-neutral-300 text-neutral-700 font-bold hover:bg-neutral-50 transition-colors"
-                                    >
-                                        Cancelar
-                                    </button>
+                                <div className="flex items-center justify-between gap-3 p-6 border-t border-neutral-100 bg-white z-10">
+                                    {/* Toast de sucesso — aparece no lugar dos botões de ação */}
+                                    <Toast
+                                        message={isEditing ? 'Transação atualizada com sucesso!' : 'Transação salva com sucesso!'}
+                                        visible={showSuccessToast}
+                                        onHide={() => setShowSuccessToast(false)}
+                                    />
 
-                                    {isEditing && (
-                                        <button
-                                            onClick={handleDeleteClick}
-                                            disabled={deleting}
-                                            className="size-12 rounded-full border border-red-100 bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-200 transition-colors"
-                                            title="Excluir Transação"
-                                        >
-                                            {deleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
-                                        </button>
+                                    {/* Botões ficam ocultos durante o toast */}
+                                    {!showSuccessToast && (
+                                        <div className="flex items-center gap-3 ml-auto">
+                                            <button
+                                                onClick={handleClose}
+                                                className="px-6 py-3.5 rounded-full border border-neutral-300 text-neutral-700 font-bold hover:bg-neutral-50 transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+
+                                            {isEditing && (
+                                                <button
+                                                    onClick={handleDeleteClick}
+                                                    disabled={deleting}
+                                                    className="size-12 rounded-full border border-red-100 bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-200 transition-colors"
+                                                    title="Excluir Transação"
+                                                >
+                                                    {deleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
+                                                </button>
+                                            )}
+
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={saving}
+                                                className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {saving && <Loader2 size={18} className="animate-spin" />}
+                                                {saving ? 'Salvando...' : (isEditing ? 'Atualizar' : 'Salvar')}
+                                            </button>
+                                        </div>
                                     )}
-
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={saving}
-                                        className="px-8 py-3.5 rounded-full bg-neutral-1100 text-white font-bold hover:bg-neutral-900 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {saving && <Loader2 size={18} className="animate-spin" />}
-                                        {saving ? 'Salvando...' : (isEditing ? 'Atualizar' : 'Salvar')}
-                                    </button>
                                 </div>
                             </>
                         ) : (

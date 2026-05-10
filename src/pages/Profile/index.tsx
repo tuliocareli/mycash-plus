@@ -30,6 +30,7 @@ import { AddMemberModal } from '../../components/modals/AddMemberModal';
 import { LogoutModal } from '../../components/modals/LogoutModal';
 import { SupportModal } from '../../components/modals/SupportModal';
 import { DeleteAccountModal } from '../../components/modals/DeleteAccountModal';
+import { ConfirmDangerModal } from '../../components/modals/ConfirmDangerModal';
 
 export default function Profile() {
     const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
@@ -41,6 +42,8 @@ export default function Profile() {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+    const [isClearingData, setIsClearingData] = useState(false);
 
     useEffect(() => {
         trackEvent({ category: 'FUNNEL', name: 'view_profile' });
@@ -141,18 +144,20 @@ export default function Profile() {
         navigate('/login');
     };
 
-    const handleDeleteAllData = async () => {
-        const confirmed = window.confirm(
-            'ATENÇÃO: Isso apagará permanentemente todas as suas transações, contas e configurações. Esta ação não pode ser desfeita. Deseja continuar?'
-        );
+    const handleDeleteAllData = () => {
+        setIsConfirmClearOpen(true);
+    };
 
-        if (confirmed) {
-            try {
-                await clearAllData();
-                alert('Todos os seus dados foram apagados com sucesso.');
-            } catch (error) {
-                alert('Erro ao apagar dados. Tente novamente mais tarde.');
-            }
+    const executeDeleteAllData = async () => {
+        setIsClearingData(true);
+        try {
+            await clearAllData();
+            setIsConfirmClearOpen(false);
+            alert('Todos os seus dados foram apagados com sucesso.');
+        } catch (error) {
+            alert('Erro ao apagar dados. Tente novamente mais tarde.');
+        } finally {
+            setIsClearingData(false);
         }
     };
 
@@ -586,6 +591,16 @@ export default function Profile() {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onSuccess={confirmLogout}
+            />
+
+            <ConfirmDangerModal
+                isOpen={isConfirmClearOpen}
+                onClose={() => setIsConfirmClearOpen(false)}
+                onConfirm={executeDeleteAllData}
+                isLoading={isClearingData}
+                title="Apagar todos os dados?"
+                description="Esta ação é irreversível. Todas as suas transações, contas, categorias e configurações serão permanentemente removidas."
+                confirmLabel="Sim, apagar tudo"
             />
         </div>
     );

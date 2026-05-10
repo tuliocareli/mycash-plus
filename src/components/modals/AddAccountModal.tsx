@@ -8,6 +8,7 @@ import { useFormFunnel } from '../../hooks/useAnalytics';
 // import { AccountType } from '../../types';
 
 import { Account } from '../../types';
+import { ConfirmDangerModal } from './ConfirmDangerModal';
 
 interface AddAccountModalProps {
     isOpen: boolean;
@@ -45,6 +46,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
     const [deleting, setDeleting] = useState(false);
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
     useEffect(() => {
         if (isOpen && initialAccount) {
@@ -214,11 +216,11 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
 
     const handleDelete = async () => {
         if (!initialAccount) return;
+        setConfirmDeleteOpen(true);
+    };
 
-        if (!confirm(`Deseja realmente excluir ${initialAccount.type === 'CREDIT_CARD' ? 'este cartão' : 'esta conta'}? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
-
+    const executeDelete = async () => {
+        if (!initialAccount) return;
         setDeleting(true);
         try {
             if (initialAccount.type === 'CREDIT_CARD') {
@@ -226,6 +228,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
             } else {
                 await deleteBankAccount(initialAccount.id);
             }
+            setConfirmDeleteOpen(false);
             onClose();
         } catch (error) {
             console.error(error);
@@ -237,7 +240,7 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
 
     if (!isOpen) return null;
 
-    return createPortal(
+    const portal = createPortal(
         <div className="fixed inset-0 z-[100000] flex items-start justify-center bg-neutral-1100/40 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto pt-10 md:pt-24">
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-scale-in my-auto max-h-[90vh] flex flex-col">
 
@@ -524,5 +527,22 @@ export function AddAccountModal({ isOpen, onClose, initialAccount, initialType }
             </div>
         </div>,
         document.body
+    );
+
+    return (
+        <>
+            {portal}
+            {initialAccount && (
+                <ConfirmDangerModal
+                    isOpen={confirmDeleteOpen}
+                    onClose={() => setConfirmDeleteOpen(false)}
+                    onConfirm={executeDelete}
+                    isLoading={deleting}
+                    title={initialAccount.type === 'CREDIT_CARD' ? 'Excluir cartão?' : 'Excluir conta?'}
+                    description={`Esta ação é irreversível. Todas as transações vinculadas a "${initialAccount.name}" serão mantidas, mas a conta será removida.`}
+                    confirmLabel="Sim, excluir"
+                />
+            )}
+        </>
     );
 }
