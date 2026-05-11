@@ -154,12 +154,12 @@ export default function ResultScreen({ role, onBack, onFinish }: ResultScreenPro
   return (
     <div className="flex flex-col h-full bg-white md:rounded-3xl max-w-2xl w-full mx-auto md:mt-10 p-6 shadow-sm border border-neutral-100 overflow-y-auto">
 
-      <div className="flex items-center gap-4 mb-8 pt-2">
-        <button onClick={onBack} className="text-neutral-500 font-semibold text-sm hover:text-neutral-800 transition-colors">
+      <div className="grid grid-cols-3 items-center mb-8 pt-2">
+        <button onClick={onBack} className="text-neutral-500 font-semibold text-sm hover:text-neutral-800 transition-colors justify-self-start">
           Voltar
         </button>
-        <h2 className="text-xl font-bold text-neutral-1100">Resultado</h2>
-        <div className="ml-auto text-2xl">{role.emoji || '🍻'}</div>
+        <h2 className="text-xl font-bold text-neutral-1100 text-center">Resultado</h2>
+        <div className="text-2xl justify-self-end">{role.emoji || '🍻'}</div>
       </div>
 
       <div className="flex-1 flex flex-col pt-4">
@@ -193,10 +193,10 @@ export default function ResultScreen({ role, onBack, onFinish }: ResultScreenPro
           <button
             onClick={handleSaveToWallet}
             disabled={isSaving || saved}
-            className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold transition-colors mb-6 ${
+            className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold transition-all mb-6 ${
               saved
                 ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300'
-                : 'bg-white border-2 border-brand-300 text-brand-700 hover:bg-brand-50'
+                : 'bg-brand-500 hover:bg-brand-400 text-neutral-1100 active:scale-95 shadow-sm'
             }`}
           >
             {isSaving ? (
