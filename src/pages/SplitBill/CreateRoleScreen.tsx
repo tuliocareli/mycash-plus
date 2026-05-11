@@ -157,7 +157,7 @@ export default function CreateRoleScreen({ roleToEdit, onBack, onCreate }: Creat
 
             <hr className="border-neutral-100" />
 
-            <div className="flex items-center gap-2 pt-2 pr-1">
+            <div className="flex items-center gap-2 pt-2">
               <input
                 type="text"
                 placeholder="Adicionar outra pessoa"
@@ -166,8 +166,8 @@ export default function CreateRoleScreen({ roleToEdit, onBack, onCreate }: Creat
                 onKeyDown={e => e.key === 'Enter' && handleAddPerson()}
                 className="flex-1 text-base text-neutral-700 outline-none placeholder:text-neutral-400 bg-transparent font-medium"
               />
-              <button onClick={handleAddPerson} className="text-neutral-700 hover:text-neutral-900 p-2 -mr-1 rounded-lg hover:bg-neutral-100 transition-colors flex-shrink-0">
-                <Plus size={22} />
+              <button onClick={handleAddPerson} className="text-neutral-700 hover:text-neutral-900 p-2 rounded-lg hover:bg-neutral-100 transition-colors flex-shrink-0">
+                <Plus size={20} />
               </button>
             </div>
           </div>
