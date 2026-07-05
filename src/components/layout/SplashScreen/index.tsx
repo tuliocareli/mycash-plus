@@ -18,7 +18,7 @@ export const SplashScreen: React.FC = () => {
         // Fase 3: Desmonta do DOM
         const t3 = setTimeout(() => {
             setShouldRender(false);
-        }, 2800);
+        }, 1500);
 
         return () => {
             clearTimeout(t1);
@@ -34,7 +34,7 @@ export const SplashScreen: React.FC = () => {
             className={`
                 fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#DFFE35]
                 transition-all duration-700 ease-[cubic-bezier(0.87,0,0.13,1)]
-                ${phase === 'exit' ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100'}
+                ${phase === 'exit' ? 'opacity-0 scale-105 pointer-events-none' : 'opacity-100 scale-100 pointer-events-none'}
             `}
         >
             <div className="relative flex flex-col items-center justify-center">
