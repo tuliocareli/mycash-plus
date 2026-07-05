@@ -147,7 +147,7 @@ interface FinanceContextData {
     updateFamilyMember: (id: string, member: Partial<FamilyMember>) => Promise<void>;
     deleteFamilyMember: (id: string) => Promise<void>;
 
-    addCategory: (data: Partial<Category>) => Promise<void>;
+    addCategory: (data: Partial<Category>) => Promise<string | void>;
     updateCategory: (id: string, data: Partial<Category>) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
     uploadImage: (bucket: 'avatars' | 'account-logos', file: File) => Promise<string | null>;
@@ -848,6 +848,20 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     const addCategory = async (data: Partial<Category>) => {
         if (!user) return;
+        
+        const tempId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+        const newCategory: Category = {
+            id: tempId,
+            userId: user.id,
+            name: data.name!,
+            icon: data.icon || '📦',
+            type: data.type || 'EXPENSE',
+            color: data.color || '#6B7280',
+            isActive: true
+        };
+        
+        setCategories(prev => [...prev, newCategory]);
+        
         const payload = {
             user_id: user.id,
             name: data.name!,
@@ -855,12 +869,26 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             type: data.type || 'EXPENSE',
             color: data.color || '#6B7280'
         };
-        const { error } = await supabase.from('categories').insert(payload);
-        if (error) throw error;
-        fetchData(true);
+        
+        try {
+            const { data: insertedData, error } = await supabase.from('categories').insert(payload).select();
+            if (error) throw error;
+            
+            const inserted = insertedData && insertedData.length > 0 ? insertedData[0] : null;
+            const realId = inserted ? inserted.id : tempId;
+            
+            setCategories(prev => prev.map(c => c.id === tempId ? { ...newCategory, id: realId } : c));
+            await fetchData(true);
+            return realId;
+        } catch (error) {
+            setCategories(prev => prev.filter(c => c.id !== tempId));
+            throw error;
+        }
     };
 
     const updateCategory = async (id: string, data: Partial<Category>) => {
+        setCategories(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+        
         const payload: any = {};
         if (data.name) payload.name = data.name;
         if (data.icon) payload.icon = data.icon;
@@ -868,14 +896,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         if (data.color) payload.color = data.color;
 
         const { error } = await supabase.from('categories').update(payload).eq('id', id);
-        if (error) throw error;
-        fetchData(true);
+        if (error) {
+            await fetchData(true);
+            throw error;
+        }
+        await fetchData(true);
     };
 
     const deleteCategory = async (id: string) => {
+        setCategories(prev => prev.filter(c => c.id !== id));
         const { error } = await supabase.from('categories').delete().eq('id', id);
-        if (error) throw error;
-        fetchData(true);
+        if (error) {
+            await fetchData(true);
+            throw error;
+        }
+        await fetchData(true);
     };
 
     const clearAllData = async () => {

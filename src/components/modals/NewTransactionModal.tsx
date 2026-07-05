@@ -184,7 +184,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
         const newErrors: { [key: string]: string } = {};
         if (!amount || Number(amount) <= 0) newErrors.amount = 'Valor inválido';
         if (!description || description.length < 3) newErrors.description = 'Min. 3 caracteres';
-        if (!categoryId && !isAddingCategory) newErrors.category = 'Obrigatório';
+        if (!categoryId) newErrors.category = 'Obrigatório';
         if (!accountId) newErrors.accountId = 'Obrigatório';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -194,7 +194,7 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
         if (!newCategoryName || newCategoryName.length < 2) return;
         setIsSavingCategory(true);
         try {
-            await addCategory({
+            const newCatId = await addCategory({
                 name: newCategoryName,
                 type,
                 icon: type === 'INCOME' ? '💰' : '📦',
@@ -202,8 +202,10 @@ export function NewTransactionModal({ isOpen, onClose, initialAccountId, initial
             });
             setIsAddingCategory(false);
             setNewCategoryName('');
-        } catch (error) {
+            if (newCatId) setCategoryId(newCatId);
+        } catch (error: any) {
             console.error(error);
+            alert('Erro ao criar categoria: ' + (error.message || 'Erro desconhecido'));
         } finally {
             setIsSavingCategory(false);
         }

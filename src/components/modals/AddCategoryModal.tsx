@@ -108,6 +108,8 @@ export function AddCategoryModal({ isOpen, onClose, initialCategory }: AddCatego
         }
     };
 
+    if (!isOpen) return null;
+
     return (
         <>
             {createPortal(
